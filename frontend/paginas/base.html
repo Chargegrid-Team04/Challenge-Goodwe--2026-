@@ -1,15 +1,21 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block Titulo %}{% endblock %}</title>
-    <link type="stylesheet" href="/frontend/CSS/site.css">
+    <link rel="stylesheet" href="/frontend/CSS/site.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <script src="/frontend/script/site.js"></script> <!-- JS Principal-->
 </head>
-<body>
-    {% header %}
-    <header>
 
+<body>
+    {% block Header %}
+    <header>
+        <!-- Header padrão aqui-->
     </header>
     {% endblock %}
 
@@ -17,12 +23,14 @@
         {% block Conteudo %}{% endblock %}
     </main>
 
-    {% Footer %}
+    {% block Footer %}
     <footer>
-
+        <!-- Footer padrão aqui-->
     </footer>
     {% endblock %}
 
-    <script src="/frontend/script/site.js"></script>
+    {% block Scripts %}
+
+    {% endblock %}
 </body>
 </html>
