@@ -1,1 +1,0 @@
-Não sei o que precisa fazer para configurar o chatbot no site. Provavelmente, vamos precisar configurar a API do chatgpt e definir os agentes caso necessário
