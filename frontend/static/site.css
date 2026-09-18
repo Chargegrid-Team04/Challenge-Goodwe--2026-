@@ -6,7 +6,7 @@
     /* Backgrounds | Cores Secundárias */
     --l-surface: #f8fafc;
     --l-surface-2: #e2e8f0;
-    --l-surface-3 : #94a3b8;
+    --l-surface-3: #94a3b8;
     --green-surface: #2a463d;
     --green-surface-2: #09403c;
     --blue-surface: #09403c;
@@ -26,9 +26,9 @@
     --blue-soft: #e0f2fe;
 
     /* Textos */
-    --l-text : #000000;
-    --d-text : #FFFFFF;
-    --l-text-2: #0f172a;
+    --l-text: #000000;
+    --d-text: #FFFFFF;
+    --l-text-2: #475569;
     --green-text: #0b2b20;
 
     /* Cores de Estado */
@@ -38,17 +38,17 @@
 
     /* Tipografia */
     --font-main: 'Inter', system-ui, -apple-system, sans-serif;
-    
+
     --font-weight-regular: 400;
-    --font-weight-medium: 500;
+    --font-weight-medium: 550;
     --font-weight-bold: 700;
     --font-weight-extra: 900;
 
     /* Tamanhos de Fonte */
-    --text-sm: 0.85rem;
-    --text-md: 1.5rem;
-    --text-lg: 1.85rem;
-    --text-xl: 2.2rem;
+    --text-sm: 0.8rem;
+    --text-md: 0.95rem;
+    --text-lg: 1.1rem;
+    --text-xl: 1.35rem;
 
     /* Espaçamento */
     --space-1: 0.25rem;
@@ -83,38 +83,55 @@
     /* Transições */
 
     --transition-fast: 150ms ease-in-out;
+    --transition-medium: 235ms ease;
     --transition-base: 300ms ease;
+    --transition-ease : cubic-bezier(.2, .7, .2, 1);
 }
 
-header,
-footer {
-    width: fit-content;
-    height: fit-content;
+html {
+    scroll-behavior: smooth;
 }
 
 body {
-    background : var(--l-surface);
+    -webkit-font-smoothing: antialiased;
+    background: var(--l-surface);
     font-family: var(--font-main);
     text-rendering: optimizeLegibility;
     line-height: 24px;
-    font-size: var(--text-avg);
-    color : var(--l-text);
+    font-size: var(--text-sm);
+    color: var(--l-text);
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow-x: hidden;
 }
 
-    body * {
-        box-sizing: border-box;
-    }
+body * {
+    box-sizing: border-box;
+}
 
 main {
     display: block;
-    height:  auto;
+    width: 100%;
+    min-height: 100dvh;
 }
 
-html,
-body {
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
     width: 100%;
-    min-height: 100vh;
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
+}
+
+.container .company-section,
+.container .login-section {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    align-items: center;
+}
+
+p,
+span {
+    font-weight: 500;
 }
