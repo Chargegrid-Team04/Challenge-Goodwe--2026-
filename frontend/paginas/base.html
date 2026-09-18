@@ -5,32 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block Titulo %}{% endblock %}</title>
-    <link rel="stylesheet" href="/frontend/CSS/site.css">
+    <link rel="stylesheet" href="/frontend/static/site.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <script src="/frontend/script/site.js"></script> <!-- JS Principal-->
+    <script src="/frontend/script/site.js"></script>
+    {% block Head %}{% endblock %}
 </head>
 
 <body>
-    {% block Header %}
     <header>
-        <!-- Header padrão aqui-->
+        {% block Header %}{% endblock %}
     </header>
-    {% endblock %}
-
     <main>
         {% block Conteudo %}{% endblock %}
     </main>
 
-    {% block Footer %}
     <footer>
         <!-- Footer padrão aqui-->
+        {% block Footer %}{% endblock %}
     </footer>
-    {% endblock %}
 
-    {% block Scripts %}
-
-    {% endblock %}
+    {% block Scripts %}{% endblock %}
 </body>
 </html>

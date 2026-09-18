@@ -1,0 +1,102 @@
+body {
+    background-color : var(--primary)
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    height: auto;
+    width : 100%;
+}
+
+.container .company-section,
+.container .login-section {
+    display:  flex;
+    flex-direction: column;
+    min-height: 50vh;
+    align-items: center;
+}
+
+.container .company-section {
+    padding-top: var(--s-6);
+    text-align: center;
+    gap : var(--s-5)
+}
+
+    .container .company-section div {
+        display: flex;
+        flex-direction: column;
+        gap : var(--space-1)
+    }
+    
+        .container .company-section div * {
+            margin :0px
+        }
+
+    .container .company-section h1 {
+        color : var(--d-text);
+        font-size: var(--text-md);
+    }
+
+    .container .company-section p {
+        color : var(--secondary);
+        font-size: 13px
+    }
+
+    .container .company-section img {
+        height: 125px;
+        width: 125px;
+    }
+
+.container .login-section {
+    background-color: white;
+    border-top-right-radius: var(--radius-md);
+    padding : var(--s-3) var(--s-5);
+    border-top-left-radius: var(--radius-md);
+    align-items:  flex-start;
+}
+
+    .container .login-section h2 {
+        font-size : 18px;
+        font-weight: bold;
+    }
+
+    .container .login-section .input-grid {
+        display: flex;
+        width: 100%;
+        gap : var(--s-4);
+        flex-direction: column;
+    }
+
+    .container .login-section .input-grid .input-section {
+        display: flex;
+        flex-direction: column;
+        gap : var(--s-1)
+    }
+
+    .container .login-section .input-grid .input-section .input-wrap {
+        display: flex;
+        flex-direction:  row;
+        justify-content:  space-between;
+        align-items:  center;
+        font-size : var(--text-sm);
+        color : var(--l-text-2);
+        border: 1px solid var(--l-surface-2);
+        background: var(--l-surface);
+        border-radius: var(--radius-md);
+        padding: var(--s-2);
+    }
+
+        .container .login-section .input-grid .input-section .input-wrap input {
+            background : none;
+            outline: none;
+            border : none;
+        }
+
+        .container .login-section .input-grid .input-section .input-wrap svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--l-surface-3);
+            stroke: none
+        }
