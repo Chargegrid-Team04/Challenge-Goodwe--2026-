@@ -12,10 +12,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_DIR = BASE_DIR / "frontend"
 BACKEND_DIR = BASE_DIR / "backend"
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
     engine.dispose()
+
 
 app = FastAPI(
     title="GoodWe API",
@@ -32,5 +34,5 @@ app.include_router(
 
 app.include_router(
     views.router,
-    tags=["Páginas Web"]
+    tags=["Páginas Web"],
 )
