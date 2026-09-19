@@ -25,3 +25,43 @@ def index(request: Request):
         name="mapa.html", 
         context={}
     )
+
+@router.get("/carregando", response_class=HTMLResponse)
+def index(request: Request):
+    return templates.TemplateResponse(
+        request=request, 
+        name="carregando.html", 
+        context={}
+    )
+
+@router.get("/pagamento", response_class=HTMLResponse)
+def index(request: Request):
+    return templates.TemplateResponse(
+        request=request, 
+        name="pagamento.html", 
+        context={}
+    )
+
+@router.get("/posto", response_class=HTMLResponse)
+def index(request: Request):
+    return templates.TemplateResponse(
+        request=request, 
+        name="posto.html", 
+        context={}
+    )
+
+@router.get("/perfil", response_class=HTMLResponse)
+def index(request: Request):
+    return templates.TemplateResponse(
+        request=request, 
+        name="perfil.html", 
+        context={}
+    )
+
+@router.get("/recarga", response_class=HTMLResponse)
+def index(request: Request):
+    return templates.TemplateResponse(
+        request=request, 
+        name="recarga.html", 
+        context={}
+    )
