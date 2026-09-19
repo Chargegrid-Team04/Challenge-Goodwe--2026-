@@ -16,3 +16,4 @@ api_router.include_router(
     prefix="/usuarios",
     tags=["Usuários"],
 )
+

@@ -1,12 +1,11 @@
 import re
 from typing import List, Optional
 from fastapi import Depends, FastAPI, HTTPException, status
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from werkzeug.security import check_password_hash, generate_password_hash
-
+from app.core.security import gerar_hash_senha, verificar_senha
 from app.models.usuario import Usuario 
-from main import SessionLocal
+from app.db.session import SessionLocal
 
 # ==========================================
 # SCHEMAS DE VALIDAÇÃO (Pydantic)
@@ -23,7 +22,7 @@ class VeiculoSchema(BaseModel):
 
 class RegistroUsuarioSchema(BaseModel):
     nome_completo: str
-    email: EmailStr
+    email: str
     cpf: str
     telefone: str
     senha: str
@@ -110,7 +109,7 @@ def registrar_usuario(
         email=email,
         cpf=cpf,
         telefone=telefone,
-        senha_hash=generate_password_hash(dados.senha),
+        senha_hash=gerar_hash_senha(dados.senha),
         cep_endereco=dados.cep_endereco,
     )
 
@@ -138,7 +137,7 @@ def login(dados: LoginSchema, db: Session = Depends(get_db)):
         .first()
     )
 
-    if not usuario or not check_password_hash(usuario.senha_hash, dados.senha):
+    if not usuario or not verificar_senha(dados.senha, usuario.senha_hash):
         raise HTTPException(
             status_code=401, detail="Credenciais inválidas."
         )
