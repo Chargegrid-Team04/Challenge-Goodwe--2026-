@@ -10,58 +10,74 @@ TEMPLATES_DIR = BASE_DIR / "frontend" / "paginas"
 
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
+
 @router.get("/", response_class=HTMLResponse)
-def index(request: Request):
+def view_index(request: Request):
     return templates.TemplateResponse(
         request=request, 
         name="index.html", 
-        context={}
+        context={},
     )
 
+
 @router.get("/mapa", response_class=HTMLResponse)
-def index(request: Request):
+def view_mapa(request: Request):
     return templates.TemplateResponse(
         request=request, 
         name="mapa.html", 
-        context={}
+        context={},
     )
 
+
 @router.get("/carregando", response_class=HTMLResponse)
-def index(request: Request):
+def view_carregando(request: Request):
     return templates.TemplateResponse(
         request=request, 
         name="carregando.html", 
-        context={}
+        context={},
     )
 
+
 @router.get("/pagamento", response_class=HTMLResponse)
-def index(request: Request):
+def view_pagamento(request: Request):
     return templates.TemplateResponse(
         request=request, 
         name="pagamento.html", 
-        context={}
+        context={},
     )
 
+
 @router.get("/posto", response_class=HTMLResponse)
-def index(request: Request):
+def view_posto(request: Request):
     return templates.TemplateResponse(
         request=request, 
         name="posto.html", 
-        context={}
+        context={},
     )
 
+
 @router.get("/perfil", response_class=HTMLResponse)
-def index(request: Request):
+def view_perfil(request: Request):
     return templates.TemplateResponse(
         request=request, 
         name="perfil.html", 
-        context={}
+        context={},
     )
 
+
 @router.get("/recarga", response_class=HTMLResponse)
-def index(request: Request):
+def view_recarga(request: Request):
     return templates.TemplateResponse(
         request=request, 
         name="recarga.html", 
-        context={}
+        context={},
+    )
+
+
+@router.get("/historicos", response_class=HTMLResponse)
+def view_historicos(request: Request):
+    return templates.TemplateResponse(
+        request=request, 
+        name="historicos.html", 
+        context={},
     )
