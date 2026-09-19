@@ -1,1 +1,0 @@
-Site.js = Css principal do site. Colocar um :root com cores, valores fixos, animações e etc para padronizar

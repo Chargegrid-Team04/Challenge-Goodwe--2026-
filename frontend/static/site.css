@@ -1,0 +1,86 @@
+:root {
+    /* Cores Principais */
+    --primary: #0b2b20;
+    --secundary: #00b4d8;
+
+    /* Backgrounds | Cores Secundárias */
+    --l-surface: #f8fafc;
+    --l-surface-2: #e2e8f0;
+    --green-surface: #2a463d;
+    --green-surface-2: #09403c;
+    --blue-surface: #09403c;
+
+    /* Cores Gerais */
+
+    --white: #FFFFFF;
+    --black: #000000;
+    --red: #ef4444;
+    --yellow: #ffd700;
+    --red-soft: #fee2e2;
+    --orange: #f97316;
+    --orange-soft: #ffedd5;
+    --green: #10b981;
+    --green-soft: #d1fae5;
+    --blue: #0284c7;
+    --blue-soft: #e0f2fe;
+
+    /* Textos */
+
+    --l-text: #0f172a;
+    --l-text-2: #475569;
+    --green-text: #0b2b20;
+
+    /* Cores de Estado */
+    --success: #2563eb;
+    --error: #2563eb;
+    --warning: #2563eb;
+
+    /* Tipografia */
+    --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+    
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-bold: 700;
+    --font-weight-black: 800;
+
+    /* Tamanhos de Fonte */
+    --text-sm: 10px;
+    --text-base: 12px;
+    --text-avg: 16px;
+    --text-lg: 20px;
+
+    /* Espaçamento */
+    --space-1: 0.25rem;
+    /*4px*/
+    --space-2: 0.5rem;
+    /*8px*/
+    --space-3: 0.75rem;
+    /*12px*/
+    --space-4: 1rem;
+    /*16px*/
+    --space-6: 1.5rem;
+    /*24px*/
+    --space-8: 2rem;
+    /*32px*/
+
+    --s-1: 4px;
+    --s-2: 8px;
+    --s-3: 12px;
+    --s-4: 16px;
+    --s-5: 24px;
+    --s-6: 32px;
+    --s-7: 64px;
+    --s-8: 84px;
+
+    /* Arredondamento de Bordas*/
+
+    --radius-sm: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-full: 9999px;
+
+    /* Transições */
+
+    --transition-fast: 150ms ease-in-out;
+    --transition-base: 300ms ease;
+}
