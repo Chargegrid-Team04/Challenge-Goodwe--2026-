@@ -16,13 +16,17 @@ class AuthLoginRequest(BaseModel):
 
 
 class RefreshTokenRequest(BaseModel):
-    refresh_token: str
+    usuario_id: int | None = 1
+    email: str | None = None
 
 
-class TokenResponse(BaseModel):
-    access_token: str
-    refresh_token: str
-    token_type: str = "bearer"
+class AuthResponse(BaseModel):
+    mensagem: str
     usuario: UsuarioResponse
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class RefreshResponse(BaseModel):
+    mensagem: str
+    status: str = "ativo"

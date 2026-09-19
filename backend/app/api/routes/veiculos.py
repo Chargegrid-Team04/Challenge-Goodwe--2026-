@@ -1,10 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
-from app.api.deps import obter_usuario_logado
 from app.db.session import get_db
-from app.models.usuario import Usuario
 from app.models.veiculo import Veiculo
 from app.schemas.veiculo import VeiculoCreate, VeiculoResponse, VeiculoUpdate
 
@@ -13,31 +11,32 @@ router = APIRouter()
 
 @router.get("", response_model=list[VeiculoResponse])
 def listar_veiculos(
-    usuario_atual: Usuario = Depends(obter_usuario_logado),
+    usuario_id: int | None = Query(None, description="Filtrar por ID do usuário"),
     db: Session = Depends(get_db),
 ):
-    stmt = select(Veiculo).where(
-        Veiculo.usuario_id == usuario_atual.id,
-        Veiculo.ativo == True,
-    ).order_by(Veiculo.principal.desc(), Veiculo.id.asc())
+    stmt = select(Veiculo).where(Veiculo.ativo == True)
+    if usuario_id is not None:
+        stmt = stmt.where(Veiculo.usuario_id == usuario_id)
+    stmt = stmt.order_by(Veiculo.principal.desc(), Veiculo.id.asc())
     return db.scalars(stmt).all()
 
 
 @router.post("", response_model=VeiculoResponse, status_code=status.HTTP_201_CREATED)
 def criar_veiculo(
     dados: VeiculoCreate,
-    usuario_atual: Usuario = Depends(obter_usuario_logado),
     db: Session = Depends(get_db),
 ):
+    user_id = dados.usuario_id or 1
+
     if dados.principal:
         db.execute(
             update(Veiculo)
-            .where(Veiculo.usuario_id == usuario_atual.id)
+            .where(Veiculo.usuario_id == user_id)
             .values(principal=False)
         )
 
     novo_veiculo = Veiculo(
-        usuario_id=usuario_atual.id,
+        usuario_id=user_id,
         marca=dados.marca,
         modelo=dados.modelo,
         versao=dados.versao,
@@ -56,13 +55,11 @@ def criar_veiculo(
 def atualizar_veiculo(
     veiculo_id: int,
     dados: VeiculoUpdate,
-    usuario_atual: Usuario = Depends(obter_usuario_logado),
     db: Session = Depends(get_db),
 ):
     veiculo = db.scalar(
         select(Veiculo).where(
             Veiculo.id == veiculo_id,
-            Veiculo.usuario_id == usuario_atual.id,
             Veiculo.ativo == True,
         )
     )
@@ -72,7 +69,7 @@ def atualizar_veiculo(
     if dados.principal:
         db.execute(
             update(Veiculo)
-            .where(Veiculo.usuario_id == usuario_atual.id)
+            .where(Veiculo.usuario_id == veiculo.usuario_id)
             .values(principal=False)
         )
 
@@ -87,13 +84,11 @@ def atualizar_veiculo(
 @router.delete("/{veiculo_id}", status_code=status.HTTP_200_OK)
 def deletar_veiculo(
     veiculo_id: int,
-    usuario_atual: Usuario = Depends(obter_usuario_logado),
     db: Session = Depends(get_db),
 ):
     veiculo = db.scalar(
         select(Veiculo).where(
             Veiculo.id == veiculo_id,
-            Veiculo.usuario_id == usuario_atual.id,
             Veiculo.ativo == True,
         )
     )
@@ -108,13 +103,11 @@ def deletar_veiculo(
 @router.patch("/{veiculo_id}/principal", response_model=VeiculoResponse)
 def definir_veiculo_principal(
     veiculo_id: int,
-    usuario_atual: Usuario = Depends(obter_usuario_logado),
     db: Session = Depends(get_db),
 ):
     veiculo = db.scalar(
         select(Veiculo).where(
             Veiculo.id == veiculo_id,
-            Veiculo.usuario_id == usuario_atual.id,
             Veiculo.ativo == True,
         )
     )
@@ -123,7 +116,7 @@ def definir_veiculo_principal(
 
     db.execute(
         update(Veiculo)
-        .where(Veiculo.usuario_id == usuario_atual.id)
+        .where(Veiculo.usuario_id == veiculo.usuario_id)
         .values(principal=False)
     )
     veiculo.principal = True

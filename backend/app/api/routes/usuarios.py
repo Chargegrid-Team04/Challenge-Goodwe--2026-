@@ -1,8 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.api.deps import obter_usuario_logado
 from app.core.security import gerar_hash_senha, verificar_senha
 from app.db.session import get_db
 from app.models.usuario import Usuario
@@ -17,27 +16,41 @@ from app.schemas.usuario import (
 router = APIRouter()
 
 
+def _obter_usuario_referencia(db: Session, usuario_id: int = 1) -> Usuario:
+    usuario = db.get(Usuario, usuario_id)
+    if not usuario:
+        usuario = db.scalar(select(Usuario).order_by(Usuario.id.asc()))
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Nenhum usuário cadastrado.")
+    return usuario
+
+
 @router.get("/me", response_model=UsuarioResponse)
-def obter_meu_usuario(usuario_atual: Usuario = Depends(obter_usuario_logado)):
-    return usuario_atual
+def obter_meu_usuario(
+    usuario_id: int = Query(1, description="ID do usuário para consulta"),
+    db: Session = Depends(get_db),
+):
+    return _obter_usuario_referencia(db, usuario_id)
 
 
 @router.put("/me", response_model=UsuarioResponse)
 def atualizar_meu_usuario(
     dados: UsuarioUpdate,
-    usuario_atual: Usuario = Depends(obter_usuario_logado),
+    usuario_id: int = Query(1, description="ID do usuário a atualizar"),
     db: Session = Depends(get_db),
 ):
+    usuario = _obter_usuario_referencia(db, usuario_id)
+
     if dados.nome is not None:
-        usuario_atual.nome = dados.nome
+        usuario.nome = dados.nome
     if dados.telefone is not None:
-        usuario_atual.telefone = dados.telefone
+        usuario.telefone = dados.telefone
     if dados.url_foto is not None:
-        usuario_atual.url_foto = dados.url_foto
+        usuario.url_foto = dados.url_foto
 
     db.commit()
-    db.refresh(usuario_atual)
-    return usuario_atual
+    db.refresh(usuario)
+    return usuario
 
 
 @router.get("/{usuario_id}", response_model=UsuarioResponse)

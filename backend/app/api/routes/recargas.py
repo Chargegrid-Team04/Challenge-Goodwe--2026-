@@ -1,16 +1,14 @@
 from datetime import datetime, timezone
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import func, select
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.api.deps import obter_usuario_logado
 from app.db.session import get_db
 from app.models.conector import Conector
 from app.models.estacao import Estacao
 from app.models.recarga import Recarga
-from app.models.usuario import Usuario
 from app.models.veiculo import Veiculo
 from app.schemas.recarga import (
     EstimativaRecargaRequest,
@@ -81,28 +79,26 @@ def estimar_recarga(
 
 @router.get("/resumo", response_model=ResumoRecargasResponse)
 def obter_resumo_recargas(
-    usuario_atual: Usuario = Depends(obter_usuario_logado),
+    usuario_id: int | None = Query(None, description="Filtrar por ID do usuário"),
     db: Session = Depends(get_db),
 ):
-    recargas_usuario = db.scalars(
-        select(Recarga).where(Recarga.usuario_id == usuario_atual.id)
-    ).all()
+    stmt = select(Recarga)
+    if usuario_id is not None:
+        stmt = stmt.where(Recarga.usuario_id == usuario_id)
 
-    total_recargas = len(recargas_usuario)
-    total_kwh = sum((Decimal(r.energia_entregue_kwh) for r in recargas_usuario), Decimal("0"))
+    recargas = db.scalars(stmt).all()
+
+    total_recargas = len(recargas)
+    total_kwh = sum((Decimal(r.energia_entregue_kwh) for r in recargas), Decimal("0"))
     total_gasto = sum(
-        (Decimal(r.valor_final or r.valor_estimado or 0) for r in recargas_usuario if r.status in ("CONCLUIDA", "PAGA")),
+        (Decimal(r.valor_final or r.valor_estimado or 0) for r in recargas if r.status in ("CONCLUIDA", "PAGA")),
         Decimal("0"),
     )
 
-    recarga_ativa = db.scalar(
-        select(Recarga)
-        .where(
-            Recarga.usuario_id == usuario_atual.id,
-            Recarga.status == "CARREGANDO",
-        )
-        .order_by(Recarga.id.desc())
-    )
+    stmt_ativa = select(Recarga).where(Recarga.status == "CARREGANDO")
+    if usuario_id is not None:
+        stmt_ativa = stmt_ativa.where(Recarga.usuario_id == usuario_id)
+    recarga_ativa = db.scalar(stmt_ativa.order_by(Recarga.id.desc()))
 
     return ResumoRecargasResponse(
         total_recargas=total_recargas,
@@ -114,23 +110,23 @@ def obter_resumo_recargas(
 
 @router.get("", response_model=list[RecargaResponse])
 def listar_recargas(
-    usuario_atual: Usuario = Depends(obter_usuario_logado),
+    usuario_id: int | None = Query(None, description="Filtrar por ID do usuário"),
     db: Session = Depends(get_db),
 ):
-    stmt = (
-        select(Recarga)
-        .where(Recarga.usuario_id == usuario_atual.id)
-        .order_by(Recarga.data_criacao.desc())
-    )
+    stmt = select(Recarga)
+    if usuario_id is not None:
+        stmt = stmt.where(Recarga.usuario_id == usuario_id)
+    stmt = stmt.order_by(Recarga.data_criacao.desc())
     return db.scalars(stmt).all()
 
 
 @router.post("", response_model=RecargaResponse, status_code=status.HTTP_201_CREATED)
 def criar_recarga(
     dados: RecargaCreate,
-    usuario_atual: Usuario = Depends(obter_usuario_logado),
     db: Session = Depends(get_db),
 ):
+    user_id = dados.usuario_id or 1
+
     estacao = db.get(Estacao, dados.estacao_id)
     if not estacao:
         raise HTTPException(status_code=404, detail="Estação não encontrada.")
@@ -150,7 +146,7 @@ def criar_recarga(
     valor_estimado = (quantidade * preco_kwh) + taxa_servico
 
     nova_recarga = Recarga(
-        usuario_id=usuario_atual.id,
+        usuario_id=user_id,
         veiculo_id=dados.veiculo_id,
         estacao_id=dados.estacao_id,
         conector_id=dados.conector_id,
@@ -176,15 +172,9 @@ def criar_recarga(
 @router.get("/{recarga_id}", response_model=RecargaResponse)
 def obter_recarga(
     recarga_id: int,
-    usuario_atual: Usuario = Depends(obter_usuario_logado),
     db: Session = Depends(get_db),
 ):
-    recarga = db.scalar(
-        select(Recarga).where(
-            Recarga.id == recarga_id,
-            Recarga.usuario_id == usuario_atual.id,
-        )
-    )
+    recarga = db.get(Recarga, recarga_id)
     if not recarga:
         raise HTTPException(status_code=404, detail="Recarga não encontrada.")
     return recarga
@@ -193,15 +183,9 @@ def obter_recarga(
 @router.post("/{recarga_id}/iniciar", response_model=RecargaResponse)
 def iniciar_recarga(
     recarga_id: int,
-    usuario_atual: Usuario = Depends(obter_usuario_logado),
     db: Session = Depends(get_db),
 ):
-    recarga = db.scalar(
-        select(Recarga).where(
-            Recarga.id == recarga_id,
-            Recarga.usuario_id == usuario_atual.id,
-        )
-    )
+    recarga = db.get(Recarga, recarga_id)
     if not recarga:
         raise HTTPException(status_code=404, detail="Recarga não encontrada.")
 
@@ -222,15 +206,9 @@ def iniciar_recarga(
 @router.post("/{recarga_id}/finalizar", response_model=RecargaResponse)
 def finalizar_recarga(
     recarga_id: int,
-    usuario_atual: Usuario = Depends(obter_usuario_logado),
     db: Session = Depends(get_db),
 ):
-    recarga = db.scalar(
-        select(Recarga).where(
-            Recarga.id == recarga_id,
-            Recarga.usuario_id == usuario_atual.id,
-        )
-    )
+    recarga = db.get(Recarga, recarga_id)
     if not recarga:
         raise HTTPException(status_code=404, detail="Recarga não encontrada.")
 
@@ -254,15 +232,9 @@ def finalizar_recarga(
 @router.post("/{recarga_id}/cancelar", response_model=RecargaResponse)
 def cancelar_recarga(
     recarga_id: int,
-    usuario_atual: Usuario = Depends(obter_usuario_logado),
     db: Session = Depends(get_db),
 ):
-    recarga = db.scalar(
-        select(Recarga).where(
-            Recarga.id == recarga_id,
-            Recarga.usuario_id == usuario_atual.id,
-        )
-    )
+    recarga = db.get(Recarga, recarga_id)
     if not recarga:
         raise HTTPException(status_code=404, detail="Recarga não encontrada.")
 
