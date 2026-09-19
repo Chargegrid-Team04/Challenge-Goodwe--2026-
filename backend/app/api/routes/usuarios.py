@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.api.deps import obter_usuario_logado
 from app.core.security import gerar_hash_senha, verificar_senha
 from app.db.session import get_db
 from app.models.usuario import Usuario
@@ -10,10 +11,33 @@ from app.schemas.usuario import (
     LoginResponse,
     UsuarioCreate,
     UsuarioResponse,
+    UsuarioUpdate,
 )
 
-
 router = APIRouter()
+
+
+@router.get("/me", response_model=UsuarioResponse)
+def obter_meu_usuario(usuario_atual: Usuario = Depends(obter_usuario_logado)):
+    return usuario_atual
+
+
+@router.put("/me", response_model=UsuarioResponse)
+def atualizar_meu_usuario(
+    dados: UsuarioUpdate,
+    usuario_atual: Usuario = Depends(obter_usuario_logado),
+    db: Session = Depends(get_db),
+):
+    if dados.nome is not None:
+        usuario_atual.nome = dados.nome
+    if dados.telefone is not None:
+        usuario_atual.telefone = dados.telefone
+    if dados.url_foto is not None:
+        usuario_atual.url_foto = dados.url_foto
+
+    db.commit()
+    db.refresh(usuario_atual)
+    return usuario_atual
 
 
 @router.get("/{usuario_id}", response_model=UsuarioResponse)
@@ -30,6 +54,7 @@ def buscar_usuario(
         )
 
     return usuario
+
 
 @router.get("/email/{email}", response_model=UsuarioResponse)
 def buscar_usuario_por_email(
