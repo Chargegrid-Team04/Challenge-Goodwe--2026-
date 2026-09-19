@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block Head %}
+    <style>
+        main {
+            min-height: 90dvh;
+        }
+    </style>
+{% endblock %}
+
+{% block Conteudo %}
+    <div class="container">
+        <div class="map-section">
+            <img src="/frontend/static/images/Map.png">
+            <div class="map-header">
+                <div>
+                    <svg></svg> <!-- Lupa-->
+                    <input> <!-- Busca -->
+                    <button></button> <!-- Filtros -->
+                </div>
+                <div>
+                    <button>Disponível</button>
+                    <button>Ocupado</button>
+                    <button>Rápido (CCS)</button>
+                </div>
+            </div>
+        </div>
+        <div class="hidden-section">
+            <div></div> <!-- Icone de mapa para criar anotação-->
+            <div></div> <!-- Barra centralizada no ínicio-->
+            <div>
+                <h2>Postos Próximos</h2>
+                <button>Ver no Mapa</button>
+            </div>
+            <div> <!-- Lista de postos -->
+                <div> <!-- Exemplo de posto-->
+                    <img> <!-- Logo -->
+                    <div>
+                        <div>
+                            <p>Nome do posto</p>
+                            <span>Livre</span>
+                        </div>
+                        <p>distância | endereço</p>
+                        <div>
+                            <h3>$ 24.00 /kWh</h3> <!-- Tarifa -->
+                            <span>Rápido 150kW</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
