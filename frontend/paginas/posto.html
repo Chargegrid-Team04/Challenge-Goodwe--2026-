@@ -1,9 +1,108 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block Head %}
+<link rel="stylesheet" href="/frontend/static/posto.css" />
+{% endblock %} {% block Conteudo %}
+<div class="station-details-page" id="posto"></div>
+{% endblock %} {% block Scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    document.getElementById("footer-mapa")?.classList.add("active");
 
-{% block Titulo %} {% endblock %}
+    const id = new URLSearchParams(location.search).get("estacao_id") || 1;
+    const res = await fetch(`/api/estacoes/${id}`);
+    if (!res.ok) return;
 
-{% block Head %} {% endblock %}
+    const e = await res.json();
+    const conectores = e.conectores || [];
+    const livres = conectores.filter((c) => c.status === "DISPONIVEL").length;
+    const pico =
+      e.horario_pico_inicio && e.horario_pico_fim
+        ? `${e.horario_pico_inicio.slice(0, 5)}-${e.horario_pico_fim.slice(0, 5)}`
+        : "18:00-21:00";
+    const econ =
+      e.horario_economico_inicio && e.horario_economico_fim
+        ? `${e.horario_economico_inicio.slice(0, 5)}-${e.horario_economico_fim.slice(0, 5)}`
+        : "22:00-06:00";
 
-{% block Conteudo %}
+    document.getElementById("posto").innerHTML = `
+      <header class="details-header">
+        <button class="back-button" type="button" onclick="history.back()">
+          <i data-lucide="arrow-left"></i>
+        </button>
+        <h1>Detalhes do Posto</h1>
+        <div class="header-spacer"></div>
+      </header>
 
+      <main class="details-content">
+        <section class="station-hero">
+          <img src="${e.url_imagem || "/frontend/static/images/amper/Logo.png"}" alt="${e.nome}" class="station-hero-image" />
+          <div class="hero-badges">
+            <span class="hero-badge availability">Disponível (${livres}/${conectores.length})</span>
+            <span class="hero-badge rating">
+              <i data-lucide="star"></i>
+              ${Number(e.avaliacao || 4.8).toFixed(1)}
+            </span>
+          </div>
+        </section>
+
+        <section class="station-main-info">
+          <h2>${e.nome}</h2>
+          <p>${e.endereco}</p>
+        </section>
+
+        <section class="cheap-hours-section">
+          <h3>Horários mais baratos (Econômico)</h3>
+          <div class="cheap-hours-box">
+            <div class="cheap-hours-item peak"><span>Pico (${pico})</span></div>
+            <div class="cheap-hours-item economic"><span>Barato (${econ})</span></div>
+          </div>
+        </section>
+
+        <section class="price-box">
+          <div>
+            <span class="price-label">Preço da Recarga</span>
+            <div class="price-value">R$ ${Number(e.preco_base_kwh || 0)
+              .toFixed(2)
+              .replace(".", ",")} <small>/ kWh</small></div>
+          </div>
+          <div class="idle-fee">
+            <span>Taxa de Ociosidade</span>
+            <strong>R$ ${Number(e.taxa_ociosidade_minuto || 0)
+              .toFixed(2)
+              .replace(
+                ".",
+                ",",
+              )} / min após ${e.tolerancia_ociosidade_minutos || 15}min</strong>
+          </div>
+        </section>
+
+        <section class="connectors-section">
+          <h3>Conectores Disponíveis</h3>
+          <div class="connectors-grid">
+            ${conectores
+              .map(
+                (c) => `
+              <article class="connector-card">
+                <div class="connector-card-top">
+                  <div class="connector-icon"><i data-lucide="zap"></i></div>
+                  <span class="connector-status ${c.status === "DISPONIVEL" ? "available" : "busy"}">${c.status === "DISPONIVEL" ? "LIVRE" : c.status}</span>
+                </div>
+                <h4>${c.codigo}</h4>
+                <p>${c.tipo} • ${parseInt(c.potencia_kw, 10) || 0} kW</p>
+                ${
+                  c.status === "DISPONIVEL"
+                    ? `<a href="/recarga?estacao_id=${e.id}&conector_id=${c.id}" class="connector-action">Selecionar</a>`
+                    : `<span class="connector-action" style="color: #94a3b8; cursor: not-allowed;">Indisponível</span>`
+                }
+              </article>
+            `,
+              )
+              .join("")}
+          </div>
+        </section>
+      </main>
+    `;
+
+    if (window.lucide) lucide.createIcons();
+  });
+</script>
 {% endblock %}

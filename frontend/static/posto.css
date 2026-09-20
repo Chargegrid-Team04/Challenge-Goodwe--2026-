@@ -1,0 +1,286 @@
+.station-details-page {
+  height: 100%;
+  overflow-y: auto;
+  background: #f5f7f8;
+  padding: 16px 16px 80px;
+  box-sizing: border-box;
+}
+
+.details-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.details-header h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #18212b;
+}
+
+.back-button,
+.header-spacer {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #1f2937;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+}
+
+.details-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.station-hero {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.station-hero-image {
+  display: block;
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.hero-badges {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.92);
+  color: #18212b;
+}
+
+.hero-badge.availability {
+  color: #0b8a48;
+}
+
+.hero-badge.rating {
+  color: #18212b;
+}
+
+.hero-badge.rating svg {
+  width: 14px;
+  height: 14px;
+  color: #f5b301;
+}
+
+.station-main-info h2 {
+  margin: 0 0 4px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #17202d;
+}
+
+.station-main-info p {
+  margin: 0;
+  color: #71839a;
+  font-size: 14px;
+}
+
+.cheap-hours-section h3,
+.connectors-section h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #17202d;
+}
+
+.cheap-hours-box {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e5e9ec;
+}
+
+.cheap-hours-item {
+  padding: 12px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cheap-hours-item.peak {
+  background: #fde8e8;
+  color: #d24f4f;
+}
+
+.cheap-hours-item.economic {
+  background: #e7f7ed;
+  color: #159447;
+}
+
+.price-box {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #e5e9ec;
+  border-radius: 16px;
+}
+
+.price-label {
+  display: block;
+  margin-bottom: 6px;
+  color: #71839a;
+  font-size: 12px;
+}
+
+.price-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: #17202d;
+}
+
+.price-value small {
+  font-size: 14px;
+  font-weight: 600;
+  color: #71839a;
+}
+
+.idle-fee {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.idle-fee span {
+  color: #d24f4f;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.idle-fee strong {
+  color: #71839a;
+  font-size: 12px;
+  font-weight: 600;
+  max-width: 160px;
+}
+
+.connectors-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.connector-card {
+  padding: 14px;
+  background: #ffffff;
+  border: 1px solid #e5e9ec;
+  border-radius: 16px;
+}
+
+.connector-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.connector-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #eef4f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2176ae;
+}
+
+.connector-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.connector-status {
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.connector-status.available {
+  color: #12a150;
+}
+
+.connector-status.busy {
+  color: #d24f4f;
+}
+
+.connector-card h4 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #17202d;
+}
+
+.connector-card p {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: #71839a;
+}
+
+.connector-action {
+  display: inline-block;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 700;
+  color: #00a0c6;
+}
+
+@media (max-width: 420px) {
+  .price-box {
+    flex-direction: column;
+  }
+
+  .idle-fee {
+    text-align: left;
+  }
+
+  .connectors-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .station-main-info h2 {
+    font-size: 22px;
+  }
+
+  .price-value {
+    font-size: 22px;
+  }
+}
