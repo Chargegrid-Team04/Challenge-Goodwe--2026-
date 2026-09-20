@@ -29,6 +29,7 @@
     --l-text: #000000;
     --d-text: #FFFFFF;
     --l-text-2: #475569;
+    --l-text-3 : #1a2030;
     --green-text: #0b2b20;
 
     /* Cores de Estado */
@@ -116,19 +117,8 @@ main {
     min-height: 100dvh;
 }
 
-.container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100dvh;
-    width: 100%;
-}
-
-.container .company-section,
-.container .login-section {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    align-items: center;
+.wrapper {
+  padding : var(--space-4)
 }
 
 p,
@@ -155,6 +145,7 @@ footer {
 }
 
 .footer-option {
+    text-decoration: none;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -183,3 +174,42 @@ footer {
         margin-block:  auto;
         color : var(--l-text-2)
     }
+
+.footer-option.active svg {
+    fill : var(--secondary);
+    stroke : var(--secondary);
+}
+
+.footer-option.active span {
+    color : var(--secondary)
+}
+
+.main-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: var(--space-6);
+    padding-top: var(--space-2);
+}
+
+.main-header h1 {
+    font-size: var(--text-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--l-text);
+    margin-left : auto;
+    margin-block : 0;
+}
+
+.main-header .options {
+    background: var(--white);
+    border: 1px solid var(--l-surface-2);
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--l-text);
+    cursor: pointer;
+    margin-left : auto;
+}

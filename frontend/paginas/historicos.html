@@ -1,9 +1,113 @@
 {% extends "base.html" %}
 
+{% block Head %}
+    <link rel="stylesheet" href="/frontend/static/historicos.css">
+{% endblock %}
+
 {% block Titulo %} {% endblock %}
 
-{% block Head %} {% endblock %}
-
 {% block Conteudo %}
+<div class="wrapper">
+<header class="main-header">
+    <h1 class="page-title">Histórico de Carga</h1>
+    <button class="options" aria-label="Opções">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+        <circle cx="5" cy="12" r="2"/>
+        <circle cx="12" cy="12" r="2"/>
+        <circle cx="19" cy="12" r="2"/>
+    </svg>
+    </button>
+</header>
 
+<!-- Card de Resumo Mensal -->
+<section class="summary-card">
+    <div class="summary-col">
+    <span class="summary-label">Total de kWh este mês</span>
+    <div class="summary-value">184 kWh</div>
+    <span class="summary-subtext">~ 1,120 km rodados</span>
+    </div>
+    
+    <div class="summary-divider"></div>
+
+    <div class="summary-col">
+    <span class="summary-label">Total gasto (R$)</span>
+    <div class="summary-value highlight">R$ 352,40</div>
+    <span class="summary-subtext">5 recargas completas</span>
+    </div>
+</section>
+
+<!-- Lista de Recargas -->
+<section class="history-section">
+    <div class="history-section-header">
+    <h2>Recargas Anteriores</h2>
+    <button class="filter-dropdown">
+        Últimos 30 dias
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 9l6 6 6-6"/>
+        </svg>
+    </button>
+    </div>
+
+    <!-- Item de Recarga 1 -->
+    <article class="charge-card">
+    <div class="charge-card-header">
+        <div>
+        <h3 class="charge-location">E-Volt Pinheiros</h3>
+        <p class="charge-date">18 Jan 2026 • 14:32</p>
+        </div>
+        <span class="badge badge-success">Concluída</span>
+    </div>
+    <div class="charge-card-details">
+        <div class="detail-item">
+        <span class="detail-label">Consumido</span>
+        <span class="detail-value">45.2 kWh</span>
+        </div>
+        <div class="detail-item">
+        <span class="detail-label">Duração</span>
+        <span class="detail-value">32 min</span>
+        </div>
+        <div class="detail-item">
+        <span class="detail-label">Valor Pago</span>
+        <span class="detail-value">R$ 88,00</span>
+        </div>
+    </div>
+    </article>
+
+    <!-- Item de Recarga 2 -->
+    <article class="charge-card">
+    <div class="charge-card-header">
+        <div>
+        <h3 class="charge-location">E-Volt Jardins</h3>
+        <p class="charge-date">10 Jan 2026 • 09:15</p>
+        </div>
+        <span class="badge badge-success">Concluída</span>
+    </div>
+    <div class="charge-card-details">
+        <div class="detail-item">
+        <span class="detail-label">Consumido</span>
+        <span class="detail-value">22.8 kWh</span>
+        </div>
+        <div class="detail-item">
+        <span class="detail-label">Duração</span>
+        <span class="detail-value">18 min</span>
+        </div>
+        <div class="detail-item">
+        <span class="detail-label">Valor Pago</span>
+        <span class="detail-value">R$ 45,82</span>
+        </div>
+    </div>
+    </article>
+</section>
+</div>
+
+{% endblock %}
+
+{% block Scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const footerOptions = document.querySelectorAll(".footer-option");
+        const currentFooterOption = document.getElementById("footer-historicos");
+        currentFooterOption.classList.add("active");
+    });
+</script>
 {% endblock %}
