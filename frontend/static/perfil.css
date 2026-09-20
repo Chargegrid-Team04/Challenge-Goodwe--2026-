@@ -1,0 +1,210 @@
+/* Card do Utilizador */
+.user-card {
+  display: flex;
+  align-items: center;
+  background-color: var(--white);
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--l-surface-2);
+  margin-bottom: var(--space-6);
+}
+
+.user-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+}
+
+.user-info {
+  flex: 1;
+  margin-left: var(--space-4);
+}
+
+.user-name {
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
+  margin: 0 0 var(--space-1) 0;
+}
+
+.user-email {
+  font-size: var(--text-sm);
+  color: var(--l-text-2);
+  margin: 0;
+}
+
+/* Botão de Ícone Arredondado */
+.btn-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background-color: var(--l-surface);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--l-text);
+  cursor: pointer;
+}
+
+.btn-icon-simple {
+  background: none;
+  border: none;
+  color: var(--l-text);
+  cursor: pointer;
+  padding: var(--space-1);
+}
+
+/* Bloco de Secção (Cards) */
+.card-section {
+  background-color: var(--white);
+  border: 1px solid var(--l-surface-2);
+  border-radius: var(--s-4);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+
+.card-header h2 {
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--l-text-3);
+  margin: 0;
+}
+
+/* Secção do Veículo */
+.vehicle-item {
+  display: flex;
+  align-items: center;
+}
+
+.vehicle-icon-box {
+  width: 48px;
+  height: 48px;
+  background-color: var(--l-surface);
+  border-radius: var(--s-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  margin-right: var(--space-3);
+}
+
+.vehicle-name {
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 var(--space-1) 0;
+  color: var(--l-text);
+}
+
+.vehicle-sub {
+  font-size: var(--text-sm);
+  color: var(--l-text-2);
+  margin: 0;
+}
+
+/* Métodos de Pagamento */
+.payment-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.payment-item {
+  display: flex;
+  align-items: center;
+  font-size: var(--text-md);
+  color: var(--l-text-2);
+}
+
+.payment-icon {
+  margin-right: var(--space-3);
+  color: var(--l-text-2);
+}
+
+/* Configurações */
+.settings-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--l-surface-2);
+  font-size: var(--text-md);
+  color: var(--l-text-2);
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.setting-item:first-child {
+  padding-top: 0;
+}
+
+.setting-value {
+  font-weight: var(--font-weight-regular);
+  color: var(--l-text-2);
+}
+
+    .setting-value b {
+        color : var(--primary);
+        font-weight: 475
+    }
+
+/* Toggle Switch (Notificações) */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--l-surface-3);
+  transition: var(--transition-fast);
+  border-radius: var(--radius-full);
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: var(--white);
+  transition: var(--transition-fast);
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--primary);
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}

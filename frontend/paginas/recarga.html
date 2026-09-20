@@ -7,3 +7,13 @@
 {% block Conteudo %}
 
 {% endblock %}
+
+{% block Scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const footerOptions = document.querySelectorAll(".footer-option");
+        const currentFooterOption = document.getElementById("footer-recarga");
+        currentFooterOption.classList.add("active");
+    });
+</script>
+{% endblock %}

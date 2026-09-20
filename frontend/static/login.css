@@ -16,7 +16,6 @@ body {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    /* Trava o container no tamanho exato da tela */
     width: 100%;
 }
 
@@ -68,8 +67,8 @@ body {
 ========================================= */
 .container .login-section {
     background-color: white;
-    border-top-right-radius: var(--radius-md);
-    border-top-left-radius: var(--radius-md);
+    border-top-right-radius: 10%;
+    border-top-left-radius: 10%;
     padding: var(--s-3) var(--s-5);
     align-items: flex-start;
 }
