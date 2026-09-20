@@ -5,3 +5,4 @@ psycopg[binary]>=3.2
 alembic
 pydantic-settings
 jinja2
+ocpp

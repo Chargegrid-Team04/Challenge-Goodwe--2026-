@@ -10,6 +10,7 @@ from app.api.routes import (
     recargas,
     usuarios,
     veiculos,
+    ocpp_ws,
 )
 
 api_router = APIRouter()
@@ -66,4 +67,9 @@ api_router.include_router(
     dois_fatores.router,
     prefix="/2fa",
     tags=["2FA"],
+)
+
+api_router.include_router(
+    ocpp_ws.router, 
+    tags=["OCPP"]
 )
