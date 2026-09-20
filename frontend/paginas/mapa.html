@@ -1,44 +1,27 @@
-{% extends "base.html" %} {% block Head %}
+{% extends "base.html" %}
+{% block Head %}
 <link rel="stylesheet" href="/frontend/static/mapa.css" />
-{% endblock %} {% block Conteudo %}
+{% endblock %}
 
+{% block Conteudo %}
 <div class="container">
   <div class="map-section">
-    <!-- futuramente substituir pela API de mapas -->
     <img src="/frontend/static/images/Map.png" alt="Mapa" class="map-image" />
 
     <div class="map-header">
       <div class="search-container">
         <i data-lucide="search" class="search-icon"></i>
-
-        <input
-          id="search"
-          type="text"
-          placeholder="Buscar postos de recarga..."
-          autocomplete="off"
-        />
-
+        <input id="search" type="text" placeholder="Buscar postos de recarga..." autocomplete="off" />
         <button class="filter-main-button" type="button" aria-label="Filtros">
           <i data-lucide="sliders-horizontal"></i>
         </button>
       </div>
 
       <div class="filters">
-        <button
-          class="filter-button active"
-          data-filter="DISPONIVEL"
-          type="button"
-        >
-          Disponível
-        </button>
-
-        <button class="filter-button" data-filter="OCUPADO" type="button">
-          Ocupado
-        </button>
-
-        <button class="filter-button" data-filter="CCS" type="button">
-          Rápido (CCS)
-        </button>
+        <button class="filter-button" data-filter="DISPONIVEL" type="button">Disponível agora</button>
+        <button class="filter-button" data-filter="COMPATIVEL" type="button">Compatível</button>
+        <button class="filter-button" data-sort="PRECO" type="button">Mais barato</button>
+        <button class="filter-button" data-sort="POTENCIA" type="button">Maior potência</button>
       </div>
     </div>
   </div>
@@ -46,14 +29,11 @@
   <section class="hidden-section" id="station-section">
     <div class="sheet-handle-area">
       <div class="drag-bar"></div>
-
       <div class="nearby-header">
         <div class="nearby-title-wrap">
           <h2>Postos Próximos</h2>
-
-          <span class="station-count-pill" id="station-count"> 3 </span>
+          <span class="station-count-pill" id="station-count">0</span>
         </div>
-
         <button id="view-map" class="toggle-sheet-btn" type="button">
           <span>Ver no mapa</span>
           <i data-lucide="chevron-down"></i>
@@ -61,193 +41,142 @@
       </div>
     </div>
 
-    <div class="station-list" id="station-list">
-      <div class="station-card" data-status="DISPONIVEL" data-type="CCS">
-        <img
-          src="/frontend/static/images/amper/Logo.png"
-          class="station-logo"
-          alt="E-Volt Pinheiros"
-        />
-
-        <div class="station-info">
-          <div class="station-title">
-            <p>E-Volt Pinheiros</p>
-
-            <span class="station-status available"> Livre </span>
-          </div>
-
-          <p class="station-address">0,8 km • Av. Nações Unidas, 12901</p>
-
-          <div class="station-footer">
-            <h3>R$ 1,90 / kWh</h3>
-            <span class="station-power">RÁPIDO 150 kW</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="station-card" data-status="OCUPADO" data-type="CCS">
-        <img
-          src="/frontend/static/images/amper/Logo.png"
-          class="station-logo"
-          alt="E-Volt Jardins"
-        />
-
-        <div class="station-info">
-          <div class="station-title">
-            <p>E-Volt Jardins</p>
-
-            <span class="station-status busy"> Ocupado </span>
-          </div>
-
-          <p class="station-address">1,3 km • Alameda Santos, 1400</p>
-
-          <div class="station-footer">
-            <h3>R$ 2,15 / kWh</h3>
-            <span class="station-power">RÁPIDO 120 kW</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="station-card" data-status="DISPONIVEL" data-type="TYPE2">
-        <img
-          src="/frontend/static/images/amper/Logo.png"
-          class="station-logo"
-          alt="E-Volt Paulista"
-        />
-
-        <div class="station-info">
-          <div class="station-title">
-            <p>E-Volt Paulista</p>
-
-            <span class="station-status available"> Livre </span>
-          </div>
-
-          <p class="station-address">2,1 km • Av. Paulista, 1578</p>
-
-          <div class="station-footer">
-            <h3>R$ 1,69 / kWh</h3>
-            <span class="station-power">TYPE 2 22 kW</span>
-          </div>
-        </div>
-      </div>
-    </div>
+    <div class="station-list" id="station-list"></div>
   </section>
 </div>
+{% endblock %}
 
-{% endblock %} {% block Scripts %}
+{% block Scripts %}
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const sheet = document.getElementById("station-section");
     const toggleButton = document.getElementById("view-map");
     const toggleText = toggleButton.querySelector("span");
     const toggleIcon = toggleButton.querySelector("i");
-
     const handle = document.querySelector(".sheet-handle-area");
-
     const search = document.getElementById("search");
     const count = document.getElementById("station-count");
-
+    const stationList = document.getElementById("station-list");
     const filters = [...document.querySelectorAll(".filter-button")];
-    const cards = [...document.querySelectorAll(".station-card")];
-
     let touchStartY = 0;
+
+    async function carregarEstacoes() {
+      try {
+        const busca = search.value.trim();
+        const ativosFiltro = filters
+          .filter((b) => b.classList.contains("active") && b.dataset.filter)
+          .map((b) => b.dataset.filter);
+        const botaoSort = filters.find(
+          (b) => b.classList.contains("active") && b.dataset.sort
+        );
+
+        const params = new URLSearchParams();
+        if (busca) params.append("busca", busca);
+        if (ativosFiltro.includes("DISPONIVEL")) params.append("disponivel", "true");
+        if (ativosFiltro.includes("COMPATIVEL")) params.append("compativel", "true");
+        if (botaoSort) params.append("ordenar_por", botaoSort.dataset.sort);
+
+        const query = params.toString() ? `?${params.toString()}` : "";
+        const resposta = await fetch(`/api/estacoes${query}`);
+        if (!resposta.ok) return;
+
+        const estacoes = await resposta.json();
+        if (!Array.isArray(estacoes)) return;
+
+        count.textContent = estacoes.length;
+
+        stationList.innerHTML = estacoes.map((estacao) => {
+          const conectores = estacao.conectores || [];
+          const temDisponivel = conectores.some((c) => c.status === "DISPONIVEL");
+          const statusClass = temDisponivel ? "available" : "busy";
+          const statusTexto = temDisponivel ? "Livre" : "Ocupado";
+
+          const potenciaMaxima = conectores.length > 0
+            ? Math.max(...conectores.map((c) => Number(c.potencia_kw) || 0))
+            : 0;
+
+          const preco = estacao.preco_base_kwh != null
+            ? `R$ ${Number(estacao.preco_base_kwh).toFixed(2).replace(".", ",")} / kWh`
+            : "Preço indisponível";
+
+          const distancia = estacao.distancia_km != null
+            ? `${Number(estacao.distancia_km).toFixed(1).replace(".", ",")} km • `
+            : "";
+
+          const imagem = estacao.url_imagem || "/frontend/static/images/amper/Logo.png";
+          const potenciaTexto = potenciaMaxima > 0 ? `${potenciaMaxima} kW` : "Potência indisponível";
+
+          return `
+            <div class="station-card" onclick="window.location.href='/posto?estacao_id=${estacao.id}'" style="cursor: pointer;">
+              <img src="${imagem}" class="station-logo" alt="${estacao.nome}" />
+              <div class="station-info">
+                <div class="station-title">
+                  <p>${estacao.nome}</p>
+                  <span class="station-status ${statusClass}">${statusTexto}</span>
+                </div>
+                <p class="station-address">${distancia}${estacao.endereco}</p>
+                <div class="station-footer">
+                  <h3>${preco}</h3>
+                  <span class="station-power">${potenciaTexto}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("");
+      } catch (erro) {
+        console.error(erro);
+      }
+    }
 
     function atualizarSheet(fechado) {
       sheet.classList.toggle("closed", fechado);
-
       toggleText.textContent = fechado ? "Ver postos" : "Ver no mapa";
-
-      toggleIcon.setAttribute(
-        "data-lucide",
-        fechado ? "chevron-up" : "chevron-down",
-      );
-
-      lucide.createIcons();
+      toggleIcon.setAttribute("data-lucide", fechado ? "chevron-up" : "chevron-down");
+      if (window.lucide) lucide.createIcons();
     }
 
-    function alternarSheet() {
+    toggleButton.addEventListener("click", (e) => {
+      e.stopPropagation();
       atualizarSheet(!sheet.classList.contains("closed"));
-    }
+    });
 
-    function aplicarFiltros() {
-      const busca = search.value.toLowerCase().trim();
-
-      const ativos = filters
-        .filter((button) => button.classList.contains("active"))
-        .map((button) => button.dataset.filter);
-
-      let visiveis = 0;
-
-      cards.forEach((card) => {
-        const correspondeBusca = card.textContent.toLowerCase().includes(busca);
-
-        const correspondeFiltro =
-          ativos.length === 0 ||
-          ativos.includes(card.dataset.status) ||
-          ativos.includes(card.dataset.type);
-
-        const mostrar = correspondeBusca && correspondeFiltro;
-
-        card.hidden = !mostrar;
-
-        if (mostrar) {
-          visiveis++;
-        }
-      });
-
-      count.textContent = visiveis;
-    }
-
-    toggleButton.addEventListener("click", alternarSheet);
-
-    handle.addEventListener("click", (event) => {
-      if (event.target.closest("#view-map")) {
-        return;
-      }
-
-      if (sheet.classList.contains("closed")) {
+    handle.addEventListener("click", (e) => {
+      if (!e.target.closest("#view-map") && sheet.classList.contains("closed")) {
         atualizarSheet(false);
       }
     });
 
-    handle.addEventListener(
-      "touchstart",
-      (event) => {
-        touchStartY = event.touches[0].clientY;
-      },
-      { passive: true },
-    );
+    handle.addEventListener("touchstart", (e) => {
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
 
-    handle.addEventListener(
-      "touchend",
-      (event) => {
-        const movimento = event.changedTouches[0].clientY - touchStartY;
-
-        if (movimento > 35) {
-          atualizarSheet(true);
-        }
-
-        if (movimento < -35) {
-          atualizarSheet(false);
-        }
-      },
-      { passive: true },
-    );
+    handle.addEventListener("touchend", (e) => {
+      const movimento = e.changedTouches[0].clientY - touchStartY;
+      if (movimento > 35) atualizarSheet(true);
+      if (movimento < -35) atualizarSheet(false);
+    }, { passive: true });
 
     filters.forEach((button) => {
       button.addEventListener("click", () => {
+        if (button.dataset.sort) {
+          filters
+            .filter((f) => f.dataset.sort && f !== button)
+            .forEach((f) => f.classList.remove("active"));
+        }
         button.classList.toggle("active");
-        aplicarFiltros();
+        carregarEstacoes();
       });
     });
 
-    search.addEventListener("input", aplicarFiltros);
+    let debounceBusca;
+    search.addEventListener("input", () => {
+      clearTimeout(debounceBusca);
+      debounceBusca = setTimeout(carregarEstacoes, 250);
+    });
 
     document.getElementById("footer-mapa")?.classList.add("active");
-
-    lucide.createIcons();
-
-    aplicarFiltros();
+    if (window.lucide) lucide.createIcons();
+    carregarEstacoes();
   });
 </script>
 {% endblock %}

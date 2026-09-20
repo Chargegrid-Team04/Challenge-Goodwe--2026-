@@ -1,348 +1,286 @@
-.wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-4);
-  perspective: 1000px;
-}
-
-.page-detalhes .main-header h1 {
-  margin-left: auto;
-  margin-right: auto;
-  font-size: var(--text-lg);
-}
-
-/* ==========================================================================
-   1. ANIMAÇÕES DE ENTRADA (Page Entrance Fade & Slide)
-   ========================================================================== */
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Encadeamento em cascata por seção */
-.page-detalhes .main-header {
-  animation: fadeInUp var(--transition-base) forwards;
-}
-
-.banner-section {
-  width: 100%;
-  animation: fadeInUp var(--transition-base) 60ms forwards;
-}
-
-.info-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  animation: fadeInUp var(--transition-base) 120ms forwards;
-}
-
-.schedule-section {
-  animation: fadeInUp var(--transition-base) 180ms forwards;
-}
-
-.pricing-card {
-  animation: fadeInUp var(--transition-base) 240ms forwards;
-}
-
-.connectors-section {
-  animation: fadeInUp var(--transition-base) 300ms forwards;
-}
-
-.scan-card {
-  animation: fadeInUp var(--transition-base) 360ms forwards;
-}
-
-/* ==========================================================================
-   2. BANNER DE CAPA & BADGES
-   ========================================================================== */
-
-.station-image-wrapper {
-  position: relative;
-  width: 100%;
-  height: 180px;
-  border-radius: var(--s-4);
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.station-image {
-  width: 100%;
+.station-details-page {
   height: 100%;
-  object-fit: cover;
-  transition: transform var(--transition-medium);
+  overflow-y: auto;
+  background: #f5f7f8;
+  padding: 16px 16px 80px;
+  box-sizing: border-box;
 }
 
-.station-image-wrapper:hover .station-image {
-  transform: scale(1.03); /* Leve zoom ao passar o rato */
-}
-
-.badge-status {
-  position: absolute;
-  top: var(--space-3);
-  left: var(--space-3);
-  background-color: var(--green-soft);
-  color: var(--green);
-  font-size: var(--text-sm);
-  font-weight: var(--font-weight-bold);
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-full);
-}
-
-.badge-rating {
-  position: absolute;
-  bottom: var(--space-3);
-  right: var(--space-3);
-  background-color: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
-  color: var(--white);
-  font-size: var(--text-sm);
-  font-weight: var(--font-weight-bold);
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-full);
+.details-header {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
-}
-
-.badge-rating svg {
-  color: var(--yellow);
-}
-
-/* ==========================================================================
-   3. INFORMAÇÕES & HORÁRIOS
-   ========================================================================== */
-
-.station-title {
-  font-size: var(--text-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--primary);
-  margin: 0;
-}
-
-.station-address {
-  font-size: var(--text-sm);
-  color: var(--l-text-2);
-  margin: 0;
-}
-
-.section-subtitle {
-  font-size: var(--text-md);
-  font-weight: var(--font-weight-bold);
-  color: var(--primary);
-  margin: 0 0 var(--space-2) 0;
-}
-
-.schedule-pills {
-  display: flex;
-  width: 100%;
-  border-radius: var(--s-2);
-  overflow: hidden;
-}
-
-.pill {
-  flex: 1;
-  padding: var(--space-2) var(--space-3);
-  text-align: center;
-  font-size: var(--text-sm);
-  font-weight: var(--font-weight-bold);
-  transition: opacity var(--transition-fast);
-}
-
-.pill-peak {
-  background-color: var(--red-soft);
-  color: var(--red);
-}
-
-.pill-cheap {
-  background-color: var(--green-soft);
-  color: var(--green);
-}
-
-/* ==========================================================================
-   4. CARD DE PREÇOS
-   ========================================================================== */
-
-.pricing-card {
-  background-color: var(--white);
-  border: 1px solid var(--l-surface-2);
-  border-radius: var(--s-4);
-  padding: var(--space-4);
-  display: flex;
   justify-content: space-between;
-  align-items: center;
+  margin-bottom: 18px;
 }
 
-.price-col {
-  display: flex;
-  flex-direction: column;
-}
-
-.price-label {
-  font-size: var(--text-sm);
-  color: var(--l-text-2);
-}
-
-.price-value strong {
-  font-size: var(--text-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--primary);
-}
-
-.price-value .unit {
-  font-size: var(--text-sm);
-  color: var(--l-text-2);
-  font-weight: var(--font-weight-regular);
-}
-
-.idle-col {
-  display: flex;
-  flex-direction: column;
-  text-align: right;
-}
-
-.idle-label {
-  font-size: var(--text-sm);
-  color: var(--red);
-  font-weight: var(--font-weight-bold);
-}
-
-.idle-value {
-  font-size: var(--text-sm);
-  color: var(--l-text-2);
-}
-
-/* ==========================================================================
-   5. CONECTORES DISPONÍVEIS (Cards Interativos)
-   ========================================================================== */
-
-.connectors-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-3);
-}
-
-.connector-card {
-  background-color: var(--white);
-  border: 1px solid var(--l-surface-2);
-  border-radius: var(--s-3);
-  padding: var(--space-3);
-  display: flex;
-  flex-direction: column;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform var(--transition-bounce), 
-              border-color var(--transition-fast), 
-              box-shadow var(--transition-fast);
-}
-
-.connector-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--l-surface-3);
-}
-
-.connector-card:active {
-  transform: scale(0.96);
-}
-
-.connector-card.active {
-  border: 2px solid var(--secondary);
-  box-shadow: 0 4px 12px rgba(0, 180, 216, 0.12);
-}
-
-.connector-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-2);
-}
-
-.connector-icon-box {
-  color: var(--secondary);
-  transition: transform var(--transition-bounce);
-}
-
-.connector-card:hover .connector-icon-box {
-  transform: scale(1.1);
-}
-
-.connector-status {
-  font-size: 0.7rem;
-  font-weight: var(--font-weight-bold);
-  color: var(--green);
-}
-
-.connector-name {
-  font-size: var(--text-md);
-  font-weight: var(--font-weight-bold);
-  color: var(--primary);
+.details-header h1 {
   margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #18212b;
 }
 
-.connector-specs {
-  font-size: var(--text-sm);
-  color: var(--l-text-2);
-  margin: var(--space-1) 0 0 0;
+.back-button,
+.header-spacer {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
 }
 
-/* ==========================================================================
-   6. CARD DE AÇÃO & BOTÃO DE ESCANEAR
-   ========================================================================== */
-
-.scan-card {
-  background-color: var(--primary);
-  border-radius: var(--s-4);
-  padding: var(--space-4);
-  color: var(--d-text);
-  margin-top: var(--space-2);
-}
-
-.scan-title {
-  font-size: var(--text-lg);
-  font-weight: var(--font-weight-bold);
-  margin: 0 0 var(--space-1) 0;
-}
-
-.scan-description {
-  font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.7);
-  margin: 0 0 var(--space-4) 0;
-  line-height: 1.4;
-}
-
-.btn-scan {
-  width: 100%;
-  background-color: var(--secondary);
-  color: var(--white);
-  border: none;
-  border-radius: var(--radius-md);
-  padding: var(--space-3) var(--space-4);
-  font-size: var(--text-md);
-  font-weight: var(--font-weight-bold);
+.back-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
+  border: none;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #1f2937;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform var(--transition-bounce), 
-              background-color var(--transition-fast), 
-              box-shadow var(--transition-fast);
 }
 
-.btn-scan:hover {
-  background-color: var(--secondary-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 180, 216, 0.3);
+.details-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
-.btn-scan:active {
-  transform: scale(0.97);
-  box-shadow: 0 2px 8px rgba(0, 180, 216, 0.2);
+.station-hero {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.station-hero-image {
+  display: block;
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.hero-badges {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.92);
+  color: #18212b;
+}
+
+.hero-badge.availability {
+  color: #0b8a48;
+}
+
+.hero-badge.rating {
+  color: #18212b;
+}
+
+.hero-badge.rating svg {
+  width: 14px;
+  height: 14px;
+  color: #f5b301;
+}
+
+.station-main-info h2 {
+  margin: 0 0 4px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #17202d;
+}
+
+.station-main-info p {
+  margin: 0;
+  color: #71839a;
+  font-size: 14px;
+}
+
+.cheap-hours-section h3,
+.connectors-section h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #17202d;
+}
+
+.cheap-hours-box {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e5e9ec;
+}
+
+.cheap-hours-item {
+  padding: 12px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cheap-hours-item.peak {
+  background: #fde8e8;
+  color: #d24f4f;
+}
+
+.cheap-hours-item.economic {
+  background: #e7f7ed;
+  color: #159447;
+}
+
+.price-box {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #e5e9ec;
+  border-radius: 16px;
+}
+
+.price-label {
+  display: block;
+  margin-bottom: 6px;
+  color: #71839a;
+  font-size: 12px;
+}
+
+.price-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: #17202d;
+}
+
+.price-value small {
+  font-size: 14px;
+  font-weight: 600;
+  color: #71839a;
+}
+
+.idle-fee {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.idle-fee span {
+  color: #d24f4f;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.idle-fee strong {
+  color: #71839a;
+  font-size: 12px;
+  font-weight: 600;
+  max-width: 160px;
+}
+
+.connectors-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.connector-card {
+  padding: 14px;
+  background: #ffffff;
+  border: 1px solid #e5e9ec;
+  border-radius: 16px;
+}
+
+.connector-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.connector-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #eef4f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2176ae;
+}
+
+.connector-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.connector-status {
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.connector-status.available {
+  color: #12a150;
+}
+
+.connector-status.busy {
+  color: #d24f4f;
+}
+
+.connector-card h4 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #17202d;
+}
+
+.connector-card p {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: #71839a;
+}
+
+.connector-action {
+  display: inline-block;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 700;
+  color: #00a0c6;
+}
+
+@media (max-width: 420px) {
+  .price-box {
+    flex-direction: column;
+  }
+
+  .idle-fee {
+    text-align: left;
+  }
+
+  .connectors-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .station-main-info h2 {
+    font-size: 22px;
+  }
+
+  .price-value {
+    font-size: 22px;
+  }
 }

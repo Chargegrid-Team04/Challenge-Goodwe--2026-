@@ -1,3 +1,4 @@
+from datetime import time
 from decimal import Decimal
 from pydantic import BaseModel, ConfigDict
 
@@ -25,9 +26,14 @@ class EstacaoResponse(BaseModel):
     preco_rapido_kwh: Decimal | None = None
     preco_economico_kwh: Decimal | None = None
     preco_inteligente_kwh: Decimal | None = None
+    horario_pico_inicio: time | None = None
+    horario_pico_fim: time | None = None
+    horario_economico_inicio: time | None = None
+    horario_economico_fim: time | None = None
     taxa_ociosidade_minuto: Decimal
     tolerancia_ociosidade_minutos: int
     ativa: bool
+    distancia_km: float | None = None
     conectores: list[ConectorResponse] = []
 
     model_config = ConfigDict(from_attributes=True)
