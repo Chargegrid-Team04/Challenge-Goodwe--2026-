@@ -222,3 +222,7 @@ body {
     width: 100%;
     /* Adicionado para acompanhar o layout da grid */
 }
+
+footer {
+    display: none;
+}
