@@ -1,0 +1,348 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  perspective: 1000px;
+}
+
+.page-detalhes .main-header h1 {
+  margin-left: auto;
+  margin-right: auto;
+  font-size: var(--text-lg);
+}
+
+/* ==========================================================================
+   1. ANIMAÇÕES DE ENTRADA (Page Entrance Fade & Slide)
+   ========================================================================== */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Encadeamento em cascata por seção */
+.page-detalhes .main-header {
+  animation: fadeInUp var(--transition-base) forwards;
+}
+
+.banner-section {
+  width: 100%;
+  animation: fadeInUp var(--transition-base) 60ms forwards;
+}
+
+.info-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  animation: fadeInUp var(--transition-base) 120ms forwards;
+}
+
+.schedule-section {
+  animation: fadeInUp var(--transition-base) 180ms forwards;
+}
+
+.pricing-card {
+  animation: fadeInUp var(--transition-base) 240ms forwards;
+}
+
+.connectors-section {
+  animation: fadeInUp var(--transition-base) 300ms forwards;
+}
+
+.scan-card {
+  animation: fadeInUp var(--transition-base) 360ms forwards;
+}
+
+/* ==========================================================================
+   2. BANNER DE CAPA & BADGES
+   ========================================================================== */
+
+.station-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  border-radius: var(--s-4);
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.station-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-medium);
+}
+
+.station-image-wrapper:hover .station-image {
+  transform: scale(1.03); /* Leve zoom ao passar o rato */
+}
+
+.badge-status {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  background-color: var(--green-soft);
+  color: var(--green);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-bold);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+}
+
+.badge-rating {
+  position: absolute;
+  bottom: var(--space-3);
+  right: var(--space-3);
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  color: var(--white);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-bold);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.badge-rating svg {
+  color: var(--yellow);
+}
+
+/* ==========================================================================
+   3. INFORMAÇÕES & HORÁRIOS
+   ========================================================================== */
+
+.station-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
+  margin: 0;
+}
+
+.station-address {
+  font-size: var(--text-sm);
+  color: var(--l-text-2);
+  margin: 0;
+}
+
+.section-subtitle {
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
+  margin: 0 0 var(--space-2) 0;
+}
+
+.schedule-pills {
+  display: flex;
+  width: 100%;
+  border-radius: var(--s-2);
+  overflow: hidden;
+}
+
+.pill {
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+  text-align: center;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-bold);
+  transition: opacity var(--transition-fast);
+}
+
+.pill-peak {
+  background-color: var(--red-soft);
+  color: var(--red);
+}
+
+.pill-cheap {
+  background-color: var(--green-soft);
+  color: var(--green);
+}
+
+/* ==========================================================================
+   4. CARD DE PREÇOS
+   ========================================================================== */
+
+.pricing-card {
+  background-color: var(--white);
+  border: 1px solid var(--l-surface-2);
+  border-radius: var(--s-4);
+  padding: var(--space-4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.price-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.price-label {
+  font-size: var(--text-sm);
+  color: var(--l-text-2);
+}
+
+.price-value strong {
+  font-size: var(--text-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
+}
+
+.price-value .unit {
+  font-size: var(--text-sm);
+  color: var(--l-text-2);
+  font-weight: var(--font-weight-regular);
+}
+
+.idle-col {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+
+.idle-label {
+  font-size: var(--text-sm);
+  color: var(--red);
+  font-weight: var(--font-weight-bold);
+}
+
+.idle-value {
+  font-size: var(--text-sm);
+  color: var(--l-text-2);
+}
+
+/* ==========================================================================
+   5. CONECTORES DISPONÍVEIS (Cards Interativos)
+   ========================================================================== */
+
+.connectors-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+.connector-card {
+  background-color: var(--white);
+  border: 1px solid var(--l-surface-2);
+  border-radius: var(--s-3);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--transition-bounce), 
+              border-color var(--transition-fast), 
+              box-shadow var(--transition-fast);
+}
+
+.connector-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--l-surface-3);
+}
+
+.connector-card:active {
+  transform: scale(0.96);
+}
+
+.connector-card.active {
+  border: 2px solid var(--secondary);
+  box-shadow: 0 4px 12px rgba(0, 180, 216, 0.12);
+}
+
+.connector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+.connector-icon-box {
+  color: var(--secondary);
+  transition: transform var(--transition-bounce);
+}
+
+.connector-card:hover .connector-icon-box {
+  transform: scale(1.1);
+}
+
+.connector-status {
+  font-size: 0.7rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--green);
+}
+
+.connector-name {
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
+  margin: 0;
+}
+
+.connector-specs {
+  font-size: var(--text-sm);
+  color: var(--l-text-2);
+  margin: var(--space-1) 0 0 0;
+}
+
+/* ==========================================================================
+   6. CARD DE AÇÃO & BOTÃO DE ESCANEAR
+   ========================================================================== */
+
+.scan-card {
+  background-color: var(--primary);
+  border-radius: var(--s-4);
+  padding: var(--space-4);
+  color: var(--d-text);
+  margin-top: var(--space-2);
+}
+
+.scan-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 var(--space-1) 0;
+}
+
+.scan-description {
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 var(--space-4) 0;
+  line-height: 1.4;
+}
+
+.btn-scan {
+  width: 100%;
+  background-color: var(--secondary);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-bold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--transition-bounce), 
+              background-color var(--transition-fast), 
+              box-shadow var(--transition-fast);
+}
+
+.btn-scan:hover {
+  background-color: var(--secondary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 180, 216, 0.3);
+}
+
+.btn-scan:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 8px rgba(0, 180, 216, 0.2);
+}

@@ -11,6 +11,7 @@ main {
   height: 100%;
   overflow: hidden;
   background: #f8fafc;
+  perspective: 1000px;
 }
 
 .map-section {
@@ -27,6 +28,47 @@ main {
   object-fit: cover;
 }
 
+/* ==========================================================================
+   1. ANIMAÇÕES DE ENTRADA (Page & Elements Entrance)
+   ========================================================================== */
+
+/* Keyframe para entrada suave vinda de cima (Cabeçalho/Filtros) */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Keyframe para entrada do Bottom Sheet */
+@keyframes sheetEntrance {
+  0% {
+    transform: translateY(100%);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Keyframe para entrada escalonada dos cards dentro da lista */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Entrada progressiva do topo */
 .map-header {
   position: absolute;
   top: 16px;
@@ -46,13 +88,43 @@ main {
   background: #ffffff;
   border-radius: 24px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  animation: fadeInDown var(--transition-base, 300ms) forwards;
+  transition: box-shadow var(--transition-fast, 150ms), transform var(--transition-bounce, 300ms);
 }
+
+.search-container:focus-within {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  animation: fadeInDown var(--transition-base, 300ms) 80ms forwards;
+}
+
+.filters::-webkit-scrollbar {
+  display: none;
+}
+
+/* ==========================================================================
+   2. ELEMENTOS DE PESQUISA & FILTROS (Micro-interações)
+   ========================================================================== */
 
 .search-icon {
   width: 20px;
   height: 20px;
   flex-shrink: 0;
   color: #64748b;
+  transition: transform var(--transition-bounce, 300ms), color var(--transition-fast, 150ms);
+}
+
+.search-container:focus-within .search-icon {
+  color: #0a3d2c;
+  transform: scale(1.1);
 }
 
 .search-container input {
@@ -81,18 +153,16 @@ main {
   background: transparent;
   color: #0f3e2e;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--transition-bounce, 300ms), color var(--transition-fast, 150ms);
 }
 
-.filters {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
+.filter-main-button:hover {
+  transform: scale(1.1) rotate(15deg);
 }
 
-.filters::-webkit-scrollbar {
-  display: none;
+.filter-main-button:active {
+  transform: scale(0.92);
 }
 
 .filter-button {
@@ -108,14 +178,32 @@ main {
   white-space: nowrap;
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--transition-bounce, 300ms),
+              background-color var(--transition-fast, 150ms),
+              border-color var(--transition-fast, 150ms),
+              box-shadow var(--transition-fast, 150ms);
+}
+
+.filter-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.filter-button:active {
+  transform: scale(0.95);
 }
 
 .filter-button.active {
   border-color: #0a3d2c;
   background: #0a3d2c;
   color: #ffffff;
+  box-shadow: 0 4px 12px rgba(10, 61, 44, 0.2);
 }
+
+/* ==========================================================================
+   3. BOTTOM SHEET (Painel Deslizante)
+   ========================================================================== */
 
 .hidden-section {
   position: absolute;
@@ -132,17 +220,6 @@ main {
   transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform;
   animation: sheetEntrance 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes sheetEntrance {
-  0% {
-    transform: translateY(100%);
-    opacity: 0.85;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
 }
 
 .hidden-section.closed {
@@ -164,14 +241,12 @@ main {
   margin: 0 auto 12px;
   border-radius: 10px;
   background: #cbd5e1;
-  transition:
-    background-color 0.2s ease,
-    transform 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .sheet-handle-area:hover .drag-bar {
   background: #94a3b8;
-  transform: scaleX(1.1);
+  transform: scaleX(1.2);
 }
 
 .nearby-header {
@@ -202,6 +277,7 @@ main {
   font-weight: 700;
   padding: 2px 8px;
   border-radius: 12px;
+  transition: transform var(--transition-bounce, 300ms);
 }
 
 .toggle-sheet-btn {
@@ -216,20 +292,36 @@ main {
   display: flex;
   align-items: center;
   gap: 4px;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--transition-bounce, 300ms),
+              background-color var(--transition-fast, 150ms),
+              color var(--transition-fast, 150ms);
 }
 
 .toggle-sheet-btn:hover {
   background: #bae6fd;
+  transform: translateY(-1px);
+}
+
+.toggle-sheet-btn:active {
+  transform: scale(0.94);
 }
 
 .toggle-sheet-btn i,
 .toggle-sheet-btn svg {
   width: 16px;
   height: 16px;
+  transition: transform var(--transition-bounce, 300ms);
 }
+
+.toggle-sheet-btn:hover i,
+.toggle-sheet-btn:hover svg {
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   4. LISTA DE POSTOS & CARDS
+   ========================================================================== */
 
 .station-list {
   flex: 1;
@@ -249,13 +341,28 @@ main {
   border-radius: 16px;
   background: #ffffff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--transition-bounce, 300ms),
+              box-shadow var(--transition-fast, 150ms),
+              border-color var(--transition-fast, 150ms);
 }
 
+/* Animação em cascata para a lista de cartões */
+.station-card:nth-child(1) { animation: fadeInUp var(--transition-base, 300ms) 100ms forwards; }
+.station-card:nth-child(2) { animation: fadeInUp var(--transition-base, 300ms) 160ms forwards; }
+.station-card:nth-child(3) { animation: fadeInUp var(--transition-base, 300ms) 220ms forwards; }
+.station-card:nth-child(4) { animation: fadeInUp var(--transition-base, 300ms) 280ms forwards; }
+.station-card:nth-child(n+5) { animation: fadeInUp var(--transition-base, 300ms) 340ms forwards; }
+
 .station-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+.station-card:active {
+  transform: scale(0.98);
 }
 
 .station-logo {
@@ -264,6 +371,11 @@ main {
   border-radius: 12px;
   object-fit: cover;
   flex-shrink: 0;
+  transition: transform var(--transition-bounce, 300ms);
+}
+
+.station-card:hover .station-logo {
+  transform: scale(1.04);
 }
 
 .station-info {
@@ -294,6 +406,11 @@ main {
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
+  transition: transform var(--transition-bounce, 300ms);
+}
+
+.station-card:hover .station-status {
+  transform: scale(1.05);
 }
 
 .station-status.available {

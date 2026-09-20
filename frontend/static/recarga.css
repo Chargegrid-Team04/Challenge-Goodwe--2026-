@@ -1,0 +1,295 @@
+.wrapper{
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-4)
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-configurar .main-header h1 {
+  margin-left: auto;
+  margin-right: auto;
+  font-size: var(--text-lg);
+}
+
+/* Bateria */
+.battery-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom : var(--s-2)
+}
+
+.battery-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.battery-label {
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--l-text-2);
+}
+
+.vehicle-model {
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
+}
+
+.battery-bar-container {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.battery-bar-track {
+  flex: 1;
+  height: 24px;
+  background-color: var(--l-surface-2);
+  border-radius: var(--s-1);
+  overflow: hidden;
+}
+
+.battery-bar-fill {
+  height: 100%;
+  background-color: var(--primary);
+  border-radius: var(--s-1) 0 0 var(--s-1);
+}
+
+.battery-percentage {
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--l-text-3);
+  min-width: 40px;
+  text-align: right;
+}
+
+/* Títulos de Seção */
+.section-title {
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--l-text-3);
+  margin: 0 0 var(--space-3) 0;
+}
+
+.highlight-blue {
+  color: var(--secondary);
+}
+
+/* Grade de Configurações de Recarga */
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+.config-card {
+  background-color: var(--white);
+  border: 1px solid var(--l-surface-2);
+  border-radius: var(--s-3);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 64px;
+}
+
+.config-card.active {
+  border: 2px solid var(--secondary);
+}
+
+    .config-card.active .config-card-label {
+        color: var(--primary);
+    }
+
+.config-card-label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--l-text-3);
+}
+
+.config-card-value {
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
+  margin-top: 2px;
+}
+
+.config-card-placeholder {
+  font-size: var(--text-md);
+  color: var(--l-text-2);
+  margin-top: 2px;
+}
+
+/* Estimativa de Valores */
+.estimation-card {
+  background-color: var(--white);
+  border: 1px solid var(--l-surface-2);
+  border-radius: var(--s-4);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.estimation-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.estimation-label {
+  font-size: var(--text-sm);
+  color: var(--l-text-2);
+}
+
+.estimation-value {
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
+}
+
+.estimation-divider {
+  height: 1px;
+  background-color: var(--l-surface-2);
+  margin: var(--space-1) 0;
+}
+
+.estimation-total-label {
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
+}
+
+.estimation-total-value {
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
+}
+
+/* Modos de Carregamento */
+.modes-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.mode-card {
+  cursor: pointer;
+  display: block;
+}
+
+.mode-card input[type="radio"] {
+  display: none;
+}
+
+.mode-content {
+  background-color: var(--white);
+  border: 1px solid var(--l-surface-2);
+  border-radius: var(--s-4);
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  transition: border-color var(--transition-fast);
+}
+
+.mode-card input[type="radio"]:checked + .mode-content {
+  border-color: var(--l-surface-2);
+}
+
+.mode-icon-box {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--s-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.orange-bg {
+  background-color: var(--orange-soft);
+  color: var(--orange);
+}
+
+.green-bg {
+  background-color: var(--green-soft);
+  color: var(--green);
+}
+
+.blue-bg {
+  background-color: var(--blue-soft);
+  color: var(--blue);
+}
+
+.mode-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.mode-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mode-title {
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--l-text-3);
+  text-wrap : nowrap
+}
+
+.mode-price {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--l-text-2);
+  text-wrap : nowrap
+}
+
+.mode-note {
+    color : var(--red);
+    margin-left : auto
+}
+
+.mode-sub {
+  font-size: var(--text-sm);
+  color: var(--l-text-2);
+  margin-top: 2px;
+}
+
+/* Botão Confirmar Recarga */
+.action-footer {
+  margin-top: var(--space-2);
+  padding-bottom: var(--space-4);
+}
+
+.btn-confirm {
+  width: 100%;
+  background-color: var(--primary);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.btn-confirm:hover {
+  opacity: 0.92;
+}

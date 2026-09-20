@@ -2,8 +2,101 @@
 
 {% block Titulo %} {% endblock %}
 
-{% block Head %} {% endblock %}
+{% block Head %} 
+    <link rel="stylesheet" href="/frontend/static/pagamento.css">
+{% endblock %}
 
 {% block Conteudo %}
+
+<div class="wrapper">
+    <header class="main-header">
+        <button class="back" aria-label="Voltar">
+            <i data-lucide="arrow-left" style="width : 20px; height: 20px; stroke : currentColor; stroke-width: 2.5;"></i>
+        </button>
+        <h1 style="margin-right: auto; margin-left:  0;" class="page-title">Pagamento</h1>
+    </header>
+
+<!-- Resumo do Pedido -->
+    <section class="summary-section">
+      <h2 class="section-title">Resumo do Pedido</h2>
+      
+      <div class="summary-details">
+        <div class="summary-row">
+          <span class="label">Estação</span>
+          <span class="value">E-Volt Pinheiros</span>
+        </div>
+        <div class="summary-row">
+          <span class="label">Meta de Energia</span>
+          <span class="value">45 kWh</span>
+        </div>
+        <div class="summary-row">
+          <span class="label">Conector</span>
+          <span class="value">CCS Type 2 (#12)</span>
+        </div>
+      </div>
+
+      <div class="total-row">
+        <span class="total-label">Valor Total</span>
+        <span class="total-value">R$ 88,00</span>
+      </div>
+    </section>
+
+    <!-- Forma de Pagamento -->
+    <section class="payment-methods-section">
+      <h2 class="section-title">Forma de Pagamento</h2>
+
+      <div class="payment-options">
+        <!-- Opção PIX -->
+        <label class="payment-option">
+          <input type="radio" name="payment-method" value="pix">
+          <div class="option-content">
+            <svg class="icon-pix" viewBox="0 0 16 16" width="22" height="22" fill="currentColor">
+              <path xmlns="http://www.w3.org/2000/svg" d="M11.917 11.71a2.046 2.046 0 0 1-1.454-.602l-2.1-2.1a.4.4 0 0 0-.551 0l-2.108 2.108a2.044 2.044 0 0 1-1.454.602h-.414l2.66 2.66c.83.83 2.177.83 3.007 0l2.667-2.668h-.253zM4.25 4.282c.55 0 1.066.214 1.454.602l2.108 2.108a.39.39 0 0 0 .552 0l2.1-2.1a2.044 2.044 0 0 1 1.453-.602h.253L9.503 1.623a2.127 2.127 0 0 0-3.007 0l-2.66 2.66h.414z"/>
+              <path xmlns="http://www.w3.org/2000/svg" d="m14.377 6.496-1.612-1.612a.307.307 0 0 1-.114.023h-.733c-.379 0-.75.154-1.017.422l-2.1 2.1a1.005 1.005 0 0 1-1.425 0L5.268 5.32a1.448 1.448 0 0 0-1.018-.422h-.9a.306.306 0 0 1-.109-.021L1.623 6.496c-.83.83-.83 2.177 0 3.008l1.618 1.618a.305.305 0 0 1 .108-.022h.901c.38 0 .75-.153 1.018-.421L7.375 8.57a1.034 1.034 0 0 1 1.426 0l2.1 2.1c.267.268.638.421 1.017.421h.733c.04 0 .079.01.114.024l1.612-1.612c.83-.83.83-2.178 0-3.008z"/>
+            </svg>
+            <span class="option-text"><b>PIX instantâneo</b></span>
+            <div class="check-box"><span></span></div>
+          </div>
+        </label>
+
+        <!-- Opção Cartão de Crédito -->
+        <label class="payment-option">
+          <input type="radio" name="payment-method" value="card" checked>
+          <div class="option-content">
+            <i class="icon-card" data-lucide="credit-card" style="width: 22px; height: 22px; stroke : currentColor"></i>
+            <span class="option-text">Cartão de Crédito •••• 4242</span>
+            <div class="check-box"><span></span></div>
+          </div>
+        </label>
+      </div>
+
+      <!-- Alerta / Informação de Segurança (2FA) -->
+      <div class="security-info">
+        <div class="security-info-header">
+          <i data-lucide="lock"></i>
+          <span>CÓDIGO DE SEGURANÇA (2FA)</span>
+        </div>
+        <div class="password-input-grid">
+            <input type="text" maxlength="1" class="password-input">
+            <input type="text" maxlength="1" class="password-input">
+            <input type="text" maxlength="1" class="password-input">
+            <input type="text" maxlength="1" class="password-input">
+            <input type="text" maxlength="1" class="password-input">
+            <input type="text" maxlength="1" class="password-input">
+        </div>
+        <p class="note">Enviado por SMS para o número cadastrado</p>
+      </div>
+    </section>
+
+    <!-- Botão de Ação Principal -->
+    <div class="action-footer">
+      <button class="btn-submit">
+        <i data-lucide="shield-check" style="width : 20px; height: 20px; stroke : currentColor; stroke-width: 2.75;"></i>
+        <span>Confirmar Pagamento</span>
+      </button>
+    </div>
+
+    <p style="text-align: center; font-size : 0.75rem" class="note">Ao confirmar, você concorda com nossos termos de adesão e cobrança automática.</p>
+</div>
 
 {% endblock %}

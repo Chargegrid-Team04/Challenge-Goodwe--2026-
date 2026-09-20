@@ -1,99 +1,137 @@
 /* =========================================
-   ESTRUTURA BASE E TRAVAMENTO DE TELA
+   1. ESTRUTURA BASE E ANIMAÇÕES GLOBAL
 ========================================= */
 html,
 body {
     margin: 0;
     padding: 0;
     width: 100%;
-    height: 100vh;
-    overflow: hidden;
-    /* Impede qualquer scroll na página */
+    min-height: 100vh;
     background-color: var(--primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes logoFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-6px);
+    }
 }
 
 .container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    min-height: 100vh;
     width: 100%;
 }
 
-.container .company-section,
-.container .login-section {
-    display: flex;
-    flex-direction: column;
-    height: 50%;
-    /* Força cada seção a ter exatos 50% da tela */
-    align-items: center;
-}
-
 /* =========================================
-   SEÇÃO DA EMPRESA (METADE SUPERIOR)
+   2. SEÇÃO DA EMPRESA (TOPO)
 ========================================= */
 .container .company-section {
-    padding-top: var(--s-6);
-    text-align: center;
-    gap: var(--s-5);
-}
-
-.container .company-section div {
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    align-items: center;
+    padding: var(--s-5) var(--s-4) var(--s-4);
+    text-align: center;
+    gap: var(--s-2);
+    flex-shrink: 0;
+    animation: fadeInUp var(--transition-base) forwards;
 }
 
-.container .company-section div * {
-    margin: 0px;
+.container .company-section img {
+    height: 80px;
+    width: 80px;
+    object-fit: contain;
+    animation: logoFloat 4s ease-in-out infinite;
 }
 
 .container .company-section h1 {
     color: var(--d-text);
     font-size: var(--text-xl);
+    font-weight: var(--font-weight-bold);
+    margin: 0;
 }
 
 .container .company-section p {
     color: var(--secondary);
     font-size: 13px;
-}
-
-.container .company-section img {
-    height: 100px;
-    width: 100px;
+    margin: 4px 0 0 0;
 }
 
 /* =========================================
-   SEÇÃO DE LOGIN (METADE INFERIOR)
+   3. SEÇÃO DE AUTENTICAÇÃO (LOGIN / REGISTRO)
 ========================================= */
 .container .login-section {
-    background-color: white;
-    border-top-right-radius: 10%;
-    border-top-left-radius: 10%;
-    padding: var(--s-3) var(--s-5);
+    flex: 1;
+    background-color: #ffffff;
+    border-top-right-radius: 28px;
+    border-top-left-radius: 28px;
+    padding: var(--s-4) var(--s-5);
+    display: flex;
+    flex-direction: column;
     align-items: flex-start;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.15);
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    /* Garante alinhamento sem forçar espaço extra para scroll vacilo */
+    box-sizing: border-border-box;
+    animation: fadeInUp var(--transition-base) 100ms forwards;
 }
 
 .container .login-section h2 {
     font-size: 20px;
-    font-weight: var(--font-weight-extra);
+    font-weight: var(--font-weight-bold);
+    color: var(--l-text-3);
+    margin: 0 0 var(--s-3) 0;
 }
 
-.container .login-section .input-grid {
-    display: flex;
+.container .login-section::-webkit-scrollbar {
+    display: none;
+}
+.container .login-section {
+    scrollbar-width: none;
+}
+
+/* Formulários */
+.auth-form {
     width: 100%;
-    gap: var(--s-4);
+    display: flex;
     flex-direction: column;
+    gap: var(--s-3);
+    margin: 0;
+    padding-bottom: var(--s-2); /* Espaçamento leve no fundo */
+    animation: fadeInUp var(--transition-base) forwards;
 }
 
-.container .login-section .input-grid span {
-    color: var(--l-text-2);
-    font-weight: var(--font-weight-medium);
+.auth-form.hidden {
+    display: none !important;
 }
 
 .container .login-section .input-section {
     display: flex;
     flex-direction: column;
-    gap: var(--s-1);
+    gap: 4px;
+}
+
+.container .login-section .input-section span {
+    color: var(--l-text-2);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--text-sm);
 }
 
 .container .login-section .input-wrap {
@@ -107,23 +145,40 @@ body {
     background: var(--l-surface);
     border-radius: var(--radius-md);
     padding: var(--s-2) var(--s-3);
+    transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.container .login-section .input-wrap:focus-within {
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.2);
+    background: #ffffff;
+    transform: translateY(-1px);
 }
 
 .container .login-section .input-wrap input {
+    width: 100%;
     background: none;
     outline: none;
     border: none;
+    font-size: var(--text-sm);
+    color: var(--l-text-3);
 }
 
 .container .login-section .input-wrap svg {
     width: 20px;
     height: 20px;
     fill: var(--l-surface-3);
-    stroke: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: fill var(--transition-fast);
+}
+
+.container .login-section .input-wrap svg:hover {
+    fill: var(--secondary);
 }
 
 /* =========================================
-   GRID DE VEÍCULOS
+   4. CARD DO VEÍCULO
 ========================================= */
 .container .login-section .vehicle-grid {
     width: 100%;
@@ -131,9 +186,16 @@ body {
     flex-direction: column;
     gap: var(--s-2);
     background: var(--l-surface);
-    border-radius: 20px;
+    border-radius: var(--radius-md);
     padding: var(--s-2) var(--s-3);
     border: 1px solid var(--l-surface-2);
+    box-sizing: border-box;
+    transition: transform var(--transition-bounce), border-color var(--transition-fast);
+}
+
+.container .login-section .vehicle-grid:hover {
+    border-color: var(--l-surface-3);
+    transform: translateY(-2px);
 }
 
 .container .login-section .vehicle-header {
@@ -143,84 +205,127 @@ body {
     align-items: center;
 }
 
-.container .login-section .vehicle-header * {
-    margin: 0px;
-}
-
 .container .login-section .vehicle-header p {
+    margin: 0;
     font-weight: bold;
     font-size: var(--text-sm);
+    color: var(--l-text-3);
 }
 
-.container .login-section .vehicle-header span {
+.btn-text {
+    background: none;
+    border: none;
     color: var(--secondary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    padding: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.btn-text:hover {
+    opacity: 0.8;
 }
 
 .container .login-section .vehicle-options {
     display: flex;
     flex-direction: column;
-    gap: var(--s-3);
     border: 1px solid var(--l-surface-2);
-    background: var(--l-surface);
-    padding: 6px;
+    background: #ffffff;
+    padding: 8px 12px;
     border-radius: var(--radius-md);
 }
 
 .container .login-section .selected-vehicle {
     display: flex;
     flex-direction: row;
-    gap: 14px;
+    gap: 12px;
     align-items: center;
     border: none;
     outline: none;
     background: transparent;
-    justify-content: flex-start;
-}
-
-.container .login-section .selected-vehicle * {
-    margin: 0px;
+    width: 100%;
+    cursor: pointer;
 }
 
 .container .login-section .selected-vehicle span {
     font-size: 0.9rem;
     color: var(--primary);
-    font-weight: 750;
+    font-weight: 700;
 }
 
 .container .login-section .selected-vehicle svg {
     width: 20px;
     height: 20px;
-    display: block;
-    transition: all var(--transition-medium);
+    flex-shrink: 0;
 }
 
 .container .login-section .selected-vehicle svg:first-child {
-    background: var(--d-text);
     fill: var(--primary);
 }
 
-.container .login-section .selected-vehicle svg:last-child {
+.container .login-section .selected-vehicle .arrow-icon {
     margin-left: auto;
     fill: var(--l-text-2);
     transform: rotate(180deg);
-}
-
-.container .login-section .selected-vehicle svg:last-child:hover {
-    transform: rotate(0);
+    transition: transform var(--transition-bounce);
 }
 
 /* =========================================
-   BOTÕES
+   5. BOTÕES & LINKS DE ALTERNÂNCIA
 ========================================= */
 .login-button {
     background: var(--primary);
-    padding: var(--s-4);
+    padding: var(--space-4);
     border-radius: var(--radius-md);
     color: var(--d-text);
     border: none;
-    font-weight: var(--font-weight-medium);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--text-md);
     width: 100%;
-    /* Adicionado para acompanhar o layout da grid */
+    cursor: pointer;
+    margin-top: var(--s-2);
+    -webkit-tap-highlight-color: transparent;
+    transition: transform var(--transition-bounce), 
+                background-color var(--transition-fast), 
+                box-shadow var(--transition-fast);
+}
+
+.login-button:hover {
+    background-color: var(--green-surface);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(11, 47, 34, 0.25);
+}
+
+.login-button:active {
+    transform: scale(0.98);
+}
+
+.toggle-text {
+    text-align: center;
+    font-size: var(--text-sm);
+    color: var(--l-text-2);
+    margin-top: var(--s-2);
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--secondary);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.btn-link:hover {
+    opacity: 0.85;
+    text-decoration: underline;
+}
+
+.btn-link:active {
+    transform: scale(0.95);
 }
 
 footer {

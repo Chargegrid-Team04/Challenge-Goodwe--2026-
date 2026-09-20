@@ -2,9 +2,147 @@
 
 {% block Titulo %} {% endblock %}
 
-{% block Head %} {% endblock %}
+{% block Head %} 
+    <link rel="stylesheet" href="/frontend/static/recarga.css">
+{% endblock %}
 
 {% block Conteudo %}
+
+<div class="wrapper">
+<header class="main-header">
+        <button class="back" aria-label="Voltar">
+            <i data-lucide="arrow-left" style="width : 20px; height: 20px; stroke : currentColor; stroke-width: 2.5;"></i>
+        </button>
+        <h1 style="margin-right: auto; margin-left:  0;" class="page-title">Configurar Recarga</h1>
+    </header>
+
+
+<!-- Estado da Bateria -->
+<section class="battery-section">
+<div class="battery-header">
+    <span class="battery-label">Estado da Bateria</span>
+    <span class="vehicle-model">BYD Dolphin • GW22K</span>
+</div>
+<div class="battery-bar-container">
+    <div class="battery-bar-track">
+    <div class="battery-bar-fill" style="width: 45%;"></div>
+    </div>
+    <span class="battery-percentage">45%</span>
+</div>
+</section>
+
+<!-- Grade de Opções de Definição -->
+<section class="config-grid-section">
+<h2 class="section-title">Como deseja definir a recarga?</h2>
+
+<div class="config-grid">
+    <!-- Card Selecionado -->
+    <div class="config-card active">
+    <span class="config-card-label">Quantidade (kWh)</span>
+    <span class="config-card-value">35 kWh</span>
+    </div>
+
+    <!-- Card Percentual -->
+    <div class="config-card">
+    <span class="config-card-label">Percentual (%)</span>
+    <span class="config-card-placeholder">Desejado</span>
+    </div>
+
+    <!-- Card Tempo -->
+    <div class="config-card">
+    <span class="config-card-label">Tempo disponível</span>
+    <span class="config-card-placeholder">Ex: 40 min</span>
+    </div>
+
+    <!-- Card Horário -->
+    <div class="config-card">
+    <span class="config-card-label">Horário de saída</span>
+    <span class="config-card-placeholder">Ex: 18h30</span>
+    </div>
+</div>
+</section>
+
+<!-- Resumo do Estimativa -->
+<section class="estimation-card">
+<div class="estimation-row">
+    <span class="estimation-label">Estimativa de Recarga (45 kWh)</span>
+    <span class="estimation-value">R$ 85,50</span>
+</div>
+<div class="estimation-row">
+    <span class="estimation-label">Taxa de Serviço e Conveniência</span>
+    <span class="estimation-value">R$ 2,50</span>
+</div>
+<div class="estimation-divider"></div>
+<div class="estimation-row total-row">
+    <span class="estimation-total-label">Total Estimado</span>
+    <span class="estimation-total-value">R$ 88,00</span>
+</div>
+</section>
+
+<!-- Modos de Carregamento -->
+<section class="modes-section">
+<h2 class="section-title">Selecione o <span class="highlight-blue">modo</span> de carregamento</h2>
+
+<div class="modes-list">
+    <!-- Modo Rápido -->
+    <label class="mode-card">
+    <input type="radio" name="charge-mode" value="fast">
+    <div class="mode-content">
+        <div class="mode-icon-box orange-bg">
+        <i data-lucide="zap" class="bolt-icon" width="20" height="20" fill="none" stroke="currentColor"></i>
+        </div>
+        <div class="mode-info">
+        <div class="mode-header">
+            <span class="mode-title">Modo Rápido</span>
+            <span class="mode-price">R$ 2,15/kWh</span>
+        </div>
+        <span class="mode-sub">Estimado: 25 min • Até 80%</span>
+        </div>
+    </div>
+    </label>
+
+    <!-- Modo Econômico -->
+    <label class="mode-card">
+    <input type="radio" name="charge-mode" value="eco">
+    <div class="mode-content">
+        <div class="mode-icon-box green-bg">
+        <i data-lucide="leaf" class="bolt-icon" width="20" height="20" fill="none" stroke="currentColor"></i>
+        </div>
+        <div class="mode-info">
+        <div class="mode-header">
+            <span class="mode-title">Modo Econômico </span>
+            <span class="mode-price" style="color:var(--primary)">R$ 1,69/kWh</span>
+        </div>
+        <span class="mode-sub">Estimado: 1h 10m • Inicia às 22h no off-peak</span>
+        <span class="mode-note">(Agendado)</span>
+        </div>
+    </div>
+    </label>
+
+    <!-- Modo Inteligente -->
+    <label class="mode-card">
+    <input type="radio" name="charge-mode" value="smart" checked>
+    <div class="mode-content">
+        <div class="mode-icon-box blue-bg">
+        <i data-lucide="clock-4" class="bolt-icon" width="20" height="20" fill="none" stroke="currentColor"></i>
+        </div>
+        <div class="mode-info">
+        <div class="mode-header">
+            <span class="mode-title">Modo Inteligente (IA)</span>
+            <span class="mode-price">R$ 1,89/kWh</span>
+        </div>
+        <span class="mode-sub">Otimiza potência para equilibrar tempo e custo</span>
+        </div>
+    </div>
+    </label>
+</div>
+</section>
+
+<!-- Botão de Ação -->
+<div class="action-footer">
+<button class="btn-confirm">Confirmar Recarga</button>
+</div>
+</div>
 
 {% endblock %}
 

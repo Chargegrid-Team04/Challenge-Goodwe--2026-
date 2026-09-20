@@ -7,57 +7,114 @@
 {% endblock %}
 
 {% block Conteudo %}
-    <div class="container">
-        <div class="company-section">
-            <img src="/frontend/static/images/amper/Logo.png">
-            <div>
-                <h1>Amper</h1>
-                <p>Sua Jornada Elétrica Começa Aqui</p>
-            </div>
-        </div>
-        <div class="login-section">
-            <h2>Entrar na sua conta</h2>
-            <div class="input-grid">
-                <div class="input-section">
-                    <span>E-mail</span>
-                    <div class="input-wrap">
-                        <input placeholder="email@gmail.com">
-                    </div>
-                </div>
-                <div class="input-section">
-                    <span>Senha</span>
-                    <div class="input-wrap">
-                        <input placeholder = "Insira Aqui a sua Senha">
-                        <svg viewBox="0 0 24 24">
-                            <rect xmlns="http://www.w3.org/2000/svg" width="24" height="24" opacity="0" />
-                            <path xmlns="http://www.w3.org/2000/svg" d="M4.71 3.29a1 1 0 0 0-1.42 1.42l5.63 5.63a3.5 3.5 0 0 0 4.74 4.74l5.63 5.63a1 1 0 0 0 1.42 0 1 1 0 0 0 0-1.42zM12 13.5a1.5 1.5 0 0 1-1.5-1.5v-.07l1.56 1.56z"/>
-                            <path xmlns="http://www.w3.org/2000/svg" d="M12.22 17c-4.3.1-7.12-3.59-8-5a13.7 13.7 0 0 1 2.24-2.72L5 7.87a15.89 15.89 0 0 0-2.87 3.63 1 1 0 0 0 0 1c.63 1.09 4 6.5 9.89 6.5h.25a9.48 9.48 0 0 0 3.23-.67l-1.58-1.58a7.74 7.74 0 0 1-1.7.25z"/>
-                            <path xmlns="http://www.w3.org/2000/svg" d="M21.87 11.5c-.64-1.11-4.17-6.68-10.14-6.5a9.48 9.48 0 0 0-3.23.67l1.58 1.58a7.74 7.74 0 0 1 1.7-.25c4.29-.11 7.11 3.59 8 5a13.7 13.7 0 0 1-2.29 2.72L19 16.13a15.89 15.89 0 0 0 2.91-3.63 1 1 0 0 0-.04-1z"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="vehicle-grid">
-                    <div class="vehicle-header">
-                        <p>Seu Veículo Elétrico</p>
-                        <span>Alterar</span>
-                    </div>
-                    <div class="vehicle-options">
-                        <button class="selected-vehicle">
-                            <svg viewbox="0 0 50 50">
-                                <path xmlns="http://www.w3.org/2000/svg"
-                                    d="M38.800781 4C38.018781 4 37.269359 4.3175781 36.693359 4.8925781L33.59375 7.9921875C33.19475 8.3901875 33 8.8513906 33 9.4003906L33 10L13 10C5.8545455 10 0 15.854545 0 23L0 34C0 35.645455 1.3545455 37 3 37L4 37L4 39C4 40.654 5.346 42 7 42L8.2148438 42C8.8723801 44.301307 10.994575 46 13.5 46C16.357053 46 18.719773 43.793358 18.974609 41L34.025391 41C34.280227 43.793358 36.642947 46 39.5 46C42.005425 46 44.12762 44.301307 44.785156 42L47 42C48.654 42 50 40.654 50 39L50 34.173828C50 31.964828 48.418281 30.097375 46.238281 29.734375L38.589844 28.103516L35.009766 23.09375C34.072341 21.780105 32.554637 21 30.941406 21L17.544922 21C16.25394 21 15.03917 21.623946 14.289062 22.673828L10.412109 28.101562L7.796875 28.646484C5.454875 29.134484 4 30.942187 4 33.367188L4 35L3 35C2.4454545 35 2 34.554545 2 34L2 23C2 16.945455 6.9454545 12 13 12L33 12L33 12.599609C33 13.148609 33.19475 13.608813 33.59375 14.007812L36.691406 17.107422C37.268406 17.683422 38.018781 18 38.800781 18L43 18C44.159 18 45 17.159 45 16L50 16L50 14L45 14L45 8L50 8L50 6L45 6C45 4.841 44.159 4 43 4L38.800781 4 z M 17.544922 23L23 23L23 28L12.943359 28L15.916016 23.837891C16.29191 23.311772 16.897903 23 17.544922 23 z M 25 23L30.941406 23C31.910175 23 32.820238 23.467504 33.382812 24.255859L36.056641 28L25 28L25 23 z M 13.5 37C15.444841 37 17 38.555159 17 40.5C17 42.444841 15.444841 44 13.5 44C11.555159 44 10 42.444841 10 40.5C10 38.555159 11.555159 37 13.5 37 z M 39.5 37C41.444841 37 43 38.555159 43 40.5C43 42.444841 41.444841 44 39.5 44C37.555159 44 36 42.444841 36 40.5C36 38.555159 37.555159 37 39.5 37 z" />
-                            </svg>
-                            <span>BYD Dolphin</span>
-                            <svg viewbox="0 0 24 24">
-                                <path xmlns="http://www.w3.org/2000/svg" d="M12 7C12.2652 7 12.5196 7.10536 12.7071 7.29289L19.7071 14.2929C20.0976 14.6834 20.0976 15.3166 19.7071 15.7071C19.3166 16.0976 18.6834 16.0976 18.2929 15.7071L12 9.41421L5.70711 15.7071C5.31658 16.0976 4.68342 16.0976 4.29289 15.7071C3.90237 15.3166 3.90237 14.6834 4.29289 14.2929L11.2929 7.29289C11.4804 7.10536 11.7348 7 12 7Z" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                <button class="login-button" onclick="window.location.href='/mapa'">Entrar</button>
-            </div>
+<div class="container">
+<!-- Seção Superior da Marca -->
+    <div class="company-section">
+        <img src="/frontend/static/images/amper/Logo.png" alt="Amper Logo">
+        <div>
+            <h1>Amper</h1>
+            <p>Sua Jornada Elétrica Começa Aqui</p>
         </div>
     </div>
+
+    <!-- Seção Inferior de Autenticação -->
+    <div class="login-section">
+        
+        <!-- FORMULÁRIO DE LOGIN -->
+        <form class="input-grid auth-form" id="form-login">
+            <h2>Entrar na sua conta</h2>
+
+            <div class="input-section">
+                <span>E-mail</span>
+                <div class="input-wrap">
+                    <input type="email" placeholder="motorista@electric.com" required>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <span>Senha</span>
+                <div class="input-wrap">
+                    <input type="password" placeholder="Insira a sua senha" required>
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Seleção do Veículo Elétrico -->
+            <div class="vehicle-grid">
+                <div class="vehicle-header">
+                    <p>Seu Veículo Elétrico</p>
+                    <button type="button" class="btn-text">Alterar</button>
+                </div>
+                <div class="vehicle-options">
+                    <button type="button" class="selected-vehicle">
+                        <svg viewBox="0 0 50 50">
+                            <path d="M38.800781 4C38.018781 4 37.269359 4.3175781 36.693359 4.8925781L33.59375 7.9921875C33.19475 8.3901875 33 8.8513906 33 9.4003906L33 10L13 10C5.8545455 10 0 15.854545 0 23L0 34C0 35.645455 1.3545455 37 3 37L4 37L4 39C4 40.654 5.346 42 7 42L8.2148438 42C8.8723801 44.301307 10.994575 46 13.5 46C16.357053 46 18.719773 43.793358 18.974609 41L34.025391 41C34.280227 43.793358 36.642947 46 39.5 46C42.005425 46 44.12762 44.301307 44.785156 42L47 42C48.654 42 50 40.654 50 39L50 34.173828C50 31.964828 48.418281 30.097375 46.238281 29.734375L38.589844 28.103516L35.009766 23.09375C34.072341 21.780105 32.554637 21 30.941406 21L17.544922 21C16.25394 21 15.03917 21.623946 14.289062 22.673828L10.412109 28.101562L7.796875 28.646484C5.454875 29.134484 4 30.942187 4 33.367188L4 35L3 35C2.4454545 35 2 34.554545 2 34L2 23C2 16.945455 6.9454545 12 13 12L33 12L33 12.599609C33 13.148609 33.19475 13.608813 33.59375 14.007812L36.691406 17.107422C37.268406 17.683422 38.018781 18 38.800781 18L43 18C44.159 18 45 17.159 45 16L50 16L50 14L45 14L45 8L50 8L50 6L45 6C45 4.841 44.159 4 43 4L38.800781 4 z M 17.544922 23L23 23L23 28L12.943359 28L15.916016 23.837891C16.29191 23.311772 16.897903 23 17.544922 23 z M 25 23L30.941406 23C31.910175 23 32.820238 23.467504 33.382812 24.255859L36.056641 28L25 28L25 23 z M 13.5 37C15.444841 37 17 38.555159 17 40.5C17 42.444841 15.444841 44 13.5 44C11.555159 44 10 42.444841 10 40.5C10 38.555159 11.555159 37 13.5 37 z M 39.5 37C41.444841 37 43 38.555159 43 40.5C43 42.444841 41.444841 44 39.5 44C37.555159 44 36 42.444841 36 40.5C36 38.555159 37.555159 37 39.5 37 z"/>
+                        </svg>
+                        <span>BYD Dolphin</span>
+                        <svg viewBox="0 0 24 24" class="arrow-icon">
+                            <path d="M12 7C12.2652 7 12.5196 7.10536 12.7071 7.29289L19.7071 14.2929C20.0976 14.6834 20.0976 15.3166 19.7071 15.7071C19.3166 16.0976 18.6834 16.0976 18.2929 15.7071L12 9.41421L5.70711 15.7071C5.31658 16.0976 4.68342 16.0976 4.29289 15.7071C3.90237 15.3166 3.90237 14.6834 4.29289 14.2929L11.2929 7.29289C11.4804 7.10536 11.7348 7 12 7Z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="login-button">Entrar</button>
+
+            <p class="toggle-text">
+                Ainda não tem conta? <button type="button" class="btn-link" onclick="toggleAuthMode('register')">Criar conta</button>
+            </p>
+        </form>
+
+        <!-- FORMULÁRIO DE CRIAR CONTA (Oculto até clicar em 'Criar conta') -->
+        <form class="input-grid auth-form hidden" id="form-register">
+            <h2>Crie sua conta</h2>
+
+            <div class="input-section">
+                <span>Nome completo</span>
+                <div class="input-wrap">
+                    <input type="text" placeholder="Seu nome e sobrenome" required>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <span>E-mail</span>
+                <div class="input-wrap">
+                    <input type="email" placeholder="motorista@electric.com" required>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <span>Telefone</span>
+                <div class="input-wrap">
+                    <input type="tel" placeholder="(11) 99999-9999" required>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <span>Senha</span>
+                <div class="input-wrap">
+                    <input type="password" placeholder="Crie uma senha forte" required>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <span>Confirmar senha</span>
+                <div class="input-wrap">
+                    <input type="password" placeholder="Repita a senha criada" required>
+                </div>
+            </div>
+
+            <button type="submit" class="login-button">Criar conta</button>
+
+            <p class="toggle-text">
+                Já tem uma conta? <button type="button" class="btn-link" onclick="toggleAuthMode('login')">Entrar</button>
+            </p>
+        </form>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block Footer %}
@@ -66,5 +123,17 @@
 
 {% block Scripts %}
     <script>
+        function toggleAuthMode(mode) {
+            const loginForm = document.getElementById('form-login');
+            const registerForm = document.getElementById('form-register');
+
+            if (mode === 'register') {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+            } else {
+                registerForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+            }
+        }
     </script>
 {% endblock %}    

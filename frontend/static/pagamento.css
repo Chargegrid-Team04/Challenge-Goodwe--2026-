@@ -1,0 +1,357 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  perspective: 1000px;
+}
+
+/* ==========================================================================
+   1. ANIMAÇÕES DE ENTRADA (Page Entrance Fade & Slide)
+   ========================================================================== */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Encadeamento em cascata por seção */
+.summary-section {
+  animation: fadeInUp var(--transition-base) forwards;
+}
+
+.payment-methods-section {
+  animation: fadeInUp var(--transition-base) 80ms forwards;
+}
+
+.security-info {
+  animation: fadeInUp var(--transition-base) 160ms forwards;
+}
+
+.action-footer {
+  margin-top: auto;
+  padding-bottom: var(--space-1);
+  animation: fadeInUp var(--transition-base) 240ms forwards;
+}
+
+/* ==========================================================================
+   2. RESUMO DO PEDIDO
+   ========================================================================== */
+
+.section-title {
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-extra);
+  color: var(--l-text-3);
+  margin-top: 0;
+  margin-bottom: var(--space-4);
+}
+
+.summary-section {
+  margin-bottom: var(--space-6);
+  background: var(--white);
+  padding: var(--s-3);
+  border: 1px solid var(--l-surface-2);
+  border-radius: var(--radius-md);
+  transition: transform var(--transition-bounce), 
+              box-shadow var(--transition-fast);
+}
+
+.summary-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+}
+
+.summary-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.summary-row .label {
+  font-size: var(--text-md);
+  color: var(--l-text-3);
+  font-weight: var(--font-weight-regular);
+}
+
+.summary-row .value {
+  font-size: var(--text-md);
+  color: var(--l-text-3);
+  font-weight: var(--font-weight-medium);
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--l-surface-2);
+  padding-top: var(--space-2);
+}
+
+.total-label {
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-extra);
+  color: var(--primary);
+}
+
+.total-value {
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
+}
+
+/* ==========================================================================
+   3. OPÇÕES DE PAGAMENTO (Radio Customizado & Interativo)
+   ========================================================================== */
+
+.payment-methods-section {
+  margin-bottom: var(--space-6);
+}
+
+.payment-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.payment-option {
+  display: flex;
+  align-items: center;
+  background: var(--white);
+  border-radius: 20px;
+  border: 1px solid var(--l-surface-2);
+  cursor: pointer;
+  padding: var(--s-3);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--transition-bounce), 
+              border-color var(--transition-fast), 
+              box-shadow var(--transition-fast);
+}
+
+.payment-option:hover {
+  transform: translateY(-2px);
+  border-color: var(--l-surface-3);
+}
+
+.payment-option:active {
+  transform: scale(0.98);
+}
+
+.payment-option input[type="radio"] {
+  display: none;
+}
+
+.option-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: var(--space-3) 0;
+  color: var(--l-text-3);
+  font-size: var(--text-md);
+}
+
+.option-content span {
+  font-weight: 550;
+}
+
+.icon-pix {
+  color: #00d2a0;
+  margin-right: var(--space-3);
+  transition: transform var(--transition-bounce);
+}
+
+.icon-card {
+  color: var(--l-text-2);
+  margin-right: var(--space-3);
+  transition: transform var(--transition-bounce);
+}
+
+.payment-option:hover .icon-pix,
+.payment-option:hover .icon-card {
+  transform: scale(1.15);
+}
+
+.option-content .check-box {
+  height: 20px;
+  width: 20px;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  background: var(--l-surface-2);
+  justify-content: center;
+  transition: background-color var(--transition-fast), transform var(--transition-bounce);
+}
+
+.option-content .check-box span {
+  display: block;
+  height: 75%;
+  width: 75%;
+  border-radius: 100%;
+  background: var(--white);
+  align-self: center;
+  margin: auto;
+  transition: transform var(--transition-bounce), background-color var(--transition-fast);
+}
+
+/* Estado Selecionado do Radio */
+.payment-option input[type="radio"]:checked + .option-content .check-box {
+  background: var(--primary);
+  transform: scale(1.1);
+}
+
+.payment-option input[type="radio"]:checked + .option-content .check-box span {
+  transform: scale(0.4);
+}
+
+.payment-option:has(input[type="radio"]:checked) {
+  border-color: var(--primary);
+  border-width: 2px;
+  box-shadow: 0 4px 12px rgba(11, 43, 32, 0.08);
+}
+
+/* ==========================================================================
+   4. AVISO DE CÓDIGO DE SEGURANÇA / PIN
+   ========================================================================== */
+
+.security-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-block: var(--s-4);
+  margin-top: var(--space-3);
+  gap: var(--s-3);
+  border-radius: 20px;
+  border: 1px solid var(--l-surface-2);
+  background: var(--white);
+  transition: transform var(--transition-bounce), box-shadow var(--transition-fast);
+}
+
+.security-info:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+}
+
+.security-info-header {
+  display: flex;
+  align-items: center;
+  padding-inline: var(--space-3);
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.security-info-header span {
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-medium);
+  color: var(--l-text-3);
+}
+
+.security-info i,
+.security-info svg {
+  width: 17.5px;
+  height: 17.5px;
+  stroke: var(--l-text-3);
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform var(--transition-bounce), stroke var(--transition-fast);
+}
+
+.security-info:hover i,
+.security-info:hover svg {
+  stroke: var(--secondary);
+}
+
+.password-input-grid {
+  display: flex;
+  width: 80%;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-inline: var(--space-3);
+}
+
+.password-input {
+  width: 100%;
+  text-align: center;
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--l-text-3);
+  border: 1px solid var(--l-surface-2);
+  border-radius: var(--radius-md);
+  background: var(--l-surface);
+  padding: var(--space-3) 0;
+  outline: none;
+  transition: transform var(--transition-bounce), 
+              border-color var(--transition-fast), 
+              background-color var(--transition-fast),
+              box-shadow var(--transition-fast);
+}
+
+.password-input:focus {
+  border-color: var(--secondary);
+  background-color: var(--white);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 180, 216, 0.15);
+}
+
+/* ==========================================================================
+   5. BOTÃO DE CONFIRMAÇÃO & NOTAS
+   ========================================================================== */
+
+.btn-submit {
+  width: 100%;
+  background-color: var(--primary);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-bold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--transition-bounce), 
+              background-color var(--transition-fast), 
+              box-shadow var(--transition-fast);
+}
+
+.btn-submit span {
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--white);
+}
+
+.btn-submit:hover {
+  background-color: var(--green-surface);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(11, 43, 32, 0.25);
+}
+
+.btn-submit:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 8px rgba(11, 43, 32, 0.15);
+}
+
+.note {
+  font-size: var(--text-sm);
+  color: var(--l-surface-3);
+  opacity: 0.7;
+  text-align: center;
+  margin: 0px;
+}

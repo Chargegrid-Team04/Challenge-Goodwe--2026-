@@ -1,11 +1,47 @@
-/* Card do Utilizador */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  perspective: 1000px;
+}
+
+/* ==========================================================================
+   1. ANIMAÇÕES DE ENTRADA (Page Entrance Fade & Slide)
+   ========================================================================== */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Encadeamento em cascata por seção */
+.user-card {
+  animation: fadeInUp var(--transition-base) forwards;
+}
+
+.card-section:nth-of-type(1) { animation: fadeInUp var(--transition-base) 80ms forwards; }
+.card-section:nth-of-type(2) { animation: fadeInUp var(--transition-base) 140ms forwards; }
+.card-section:nth-of-type(3) { animation: fadeInUp var(--transition-base) 200ms forwards; }
+.card-section:nth-of-type(n+4) { animation: fadeInUp var(--transition-base) 260ms forwards; }
+
+/* ==========================================================================
+   2. CARD DO UTILIZADOR
+   ========================================================================== */
+
 .user-card {
   display: flex;
   align-items: center;
   background-color: var(--white);
   padding: var(--space-4);
   border-bottom: 1px solid var(--l-surface-2);
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-4);
+  transition: transform var(--transition-bounce), box-shadow var(--transition-fast);
 }
 
 .user-avatar {
@@ -13,6 +49,11 @@
   height: 64px;
   border-radius: var(--radius-full);
   object-fit: cover;
+  transition: transform var(--transition-bounce);
+}
+
+.user-card:hover .user-avatar {
+  transform: scale(1.05);
 }
 
 .user-info {
@@ -23,7 +64,7 @@
 .user-name {
   font-size: var(--text-lg);
   font-weight: var(--font-weight-bold);
-  color: var(--primary);
+  color: var(--l-text-3);
   margin: 0 0 var(--space-1) 0;
 }
 
@@ -33,7 +74,10 @@
   margin: 0;
 }
 
-/* Botão de Ícone Arredondado */
+/* ==========================================================================
+   3. BOTÕES DE ÍCONE
+   ========================================================================== */
+
 .btn-icon {
   width: 40px;
   height: 40px;
@@ -45,6 +89,20 @@
   justify-content: center;
   color: var(--l-text);
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--transition-bounce), 
+              background-color var(--transition-fast), 
+              color var(--transition-fast);
+}
+
+.btn-icon:hover {
+  background-color: var(--l-surface-3);
+  color: var(--primary);
+  transform: scale(1.08);
+}
+
+.btn-icon:active {
+  transform: scale(0.92);
 }
 
 .btn-icon-simple {
@@ -53,15 +111,42 @@
   color: var(--l-text);
   cursor: pointer;
   padding: var(--space-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--transition-bounce), color var(--transition-fast);
 }
 
-/* Bloco de Secção (Cards) */
+.btn-icon-simple:hover {
+  color: var(--secondary);
+  transform: scale(1.1);
+}
+
+.btn-icon-simple:active {
+  transform: scale(0.92);
+}
+
+/* ==========================================================================
+   4. BLOCOS DE SECÇÃO (CARDS)
+   ========================================================================== */
+
 .card-section {
   background-color: var(--white);
   border: 1px solid var(--l-surface-2);
   border-radius: var(--s-4);
   padding: var(--space-4);
   margin-bottom: var(--space-4);
+  transition: transform var(--transition-bounce), 
+              border-color var(--transition-fast), 
+              box-shadow var(--transition-fast);
+}
+
+.card-section:hover {
+  transform: translateY(-2px);
+  border-color: var(--l-surface-3);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
 }
 
 .card-header {
@@ -78,7 +163,10 @@
   margin: 0;
 }
 
-/* Secção do Veículo */
+/* ==========================================================================
+   5. SECÇÃO DO VEÍCULO & PAGAMENTOS
+   ========================================================================== */
+
 .vehicle-item {
   display: flex;
   align-items: center;
@@ -94,6 +182,12 @@
   justify-content: center;
   color: var(--primary);
   margin-right: var(--space-3);
+  transition: transform var(--transition-bounce), background-color var(--transition-fast);
+}
+
+.card-section:hover .vehicle-icon-box {
+  transform: scale(1.06);
+  background-color: var(--l-surface-2);
 }
 
 .vehicle-name {
@@ -109,7 +203,6 @@
   margin: 0;
 }
 
-/* Métodos de Pagamento */
 .payment-list {
   display: flex;
   flex-direction: column;
@@ -121,14 +214,31 @@
   align-items: center;
   font-size: var(--text-md);
   color: var(--l-text-2);
+  padding: var(--space-1) 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color var(--transition-fast), transform var(--transition-bounce);
+}
+
+.payment-item:hover {
+  color: var(--primary);
+  transform: translateX(4px);
 }
 
 .payment-icon {
   margin-right: var(--space-3);
   color: var(--l-text-2);
+  transition: color var(--transition-fast);
 }
 
-/* Configurações */
+.payment-item:hover .payment-icon {
+  color: var(--secondary);
+}
+
+/* ==========================================================================
+   6. CONFIGURAÇÕES & TOGGLE SWITCH
+   ========================================================================== */
+
 .settings-list {
   display: flex;
   flex-direction: column;
@@ -142,6 +252,7 @@
   border-bottom: 1px solid var(--l-surface-2);
   font-size: var(--text-md);
   color: var(--l-text-2);
+  transition: background-color var(--transition-fast);
 }
 
 .setting-item:last-child {
@@ -158,17 +269,18 @@
   color: var(--l-text-2);
 }
 
-    .setting-value b {
-        color : var(--primary);
-        font-weight: 475
-    }
+.setting-value b {
+  color: var(--primary);
+  font-weight: 475;
+}
 
-/* Toggle Switch (Notificações) */
+/* Toggle Switch com Efeito Tátil Elastic (Bounce) */
 .toggle-switch {
   position: relative;
   display: inline-block;
   width: 44px;
   height: 24px;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .toggle-switch input {
@@ -185,7 +297,7 @@
   right: 0;
   bottom: 0;
   background-color: var(--l-surface-3);
-  transition: var(--transition-fast);
+  transition: background-color var(--transition-fast);
   border-radius: var(--radius-full);
 }
 
@@ -197,8 +309,13 @@
   left: 3px;
   bottom: 3px;
   background-color: var(--white);
-  transition: var(--transition-fast);
+  transition: transform var(--transition-bounce), background-color var(--transition-fast);
   border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.toggle-switch:active .slider:before {
+  transform: scaleX(1.15); /* Efeito elástico ao segurar/clicar no switch */
 }
 
 input:checked + .slider {
@@ -207,4 +324,8 @@ input:checked + .slider {
 
 input:checked + .slider:before {
   transform: translateX(20px);
+}
+
+input:checked:active + .slider:before {
+  transform: translateX(20px) scaleX(1.15);
 }

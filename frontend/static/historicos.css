@@ -1,4 +1,50 @@
-/* Card Principal de Resumo (Escuro) */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  perspective: 1000px;
+}
+
+/* ==========================================================================
+   1. ANIMAÇÕES DE ENTRADA (Page Entrance Fade & Slide)
+   ========================================================================== */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Encadeamento em cascata por seção */
+.summary-card {
+  animation: fadeInUp var(--transition-base) forwards;
+}
+
+.history-section-header {
+  animation: fadeInUp var(--transition-base) 80ms forwards;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Animação em cascata para os cards da lista */
+.charge-card:nth-child(1) { animation: fadeInUp var(--transition-base) 140ms forwards; }
+.charge-card:nth-child(2) { animation: fadeInUp var(--transition-base) 200ms forwards; }
+.charge-card:nth-child(3) { animation: fadeInUp var(--transition-base) 260ms forwards; }
+.charge-card:nth-child(4) { animation: fadeInUp var(--transition-base) 320ms forwards; }
+.charge-card:nth-child(n+5) { animation: fadeInUp var(--transition-base) 380ms forwards; }
+
+/* ==========================================================================
+   2. CARD PRINCIPAL DE RESUMO (ESCURO)
+   ========================================================================== */
+
 .summary-card {
   background-color: var(--primary);
   color: var(--d-text);
@@ -7,7 +53,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-2);
+  box-shadow: 0 8px 24px rgba(11, 43, 32, 0.15);
+  transition: transform var(--transition-bounce), box-shadow var(--transition-fast);
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(11, 43, 32, 0.2);
 }
 
 .summary-col {
@@ -24,7 +77,7 @@
 }
 
 .summary-label {
-  font-size: var(--text-sm);
+  font-size: calc(var(--text-sm) * 0.9);
   color: rgba(255, 255, 255, 0.7);
   margin-bottom: var(--space-1);
 }
@@ -45,12 +98,15 @@
   margin-top: var(--space-1);
 }
 
-/* Seção de Lista */
+/* ==========================================================================
+   3. SEÇÃO DE CABEÇALHO DA LISTA E FILTRO
+   ========================================================================== */
+
 .history-section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-2);
 }
 
 .history-section-header h2 {
@@ -70,15 +126,58 @@
   align-items: center;
   gap: var(--space-1);
   cursor: pointer;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--s-2);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--transition-bounce), 
+              background-color var(--transition-fast), 
+              color var(--transition-fast);
 }
 
-/* Cards de Recarga */
+.filter-dropdown:hover {
+  background-color: rgba(0, 180, 216, 0.08);
+  transform: translateY(-1px);
+}
+
+.filter-dropdown:active {
+  transform: scale(0.95);
+}
+
+.filter-dropdown svg,
+.filter-dropdown i {
+  transition: transform var(--transition-bounce);
+}
+
+.filter-dropdown:hover svg,
+.filter-dropdown:hover i {
+  transform: translateY(1px);
+}
+
+/* ==========================================================================
+   4. CARDS DE HISTÓRICO DE RECARGA
+   ========================================================================== */
+
 .charge-card {
   background-color: var(--white);
   border: 1px solid var(--l-surface-2);
   border-radius: var(--s-4);
   padding: var(--space-4);
   margin-bottom: var(--space-4);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--transition-bounce), 
+              border-color var(--transition-fast), 
+              box-shadow var(--transition-fast);
+}
+
+.charge-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--l-surface-3);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+}
+
+.charge-card:active {
+  transform: scale(0.98);
 }
 
 .charge-card-header {
@@ -109,6 +208,14 @@
   border-radius: var(--radius-full);
   font-size: var(--text-sm);
   font-weight: var(--font-weight-bold);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: transform var(--transition-bounce);
+}
+
+.charge-card:hover .badge {
+  transform: scale(1.05);
 }
 
 .badge-success {

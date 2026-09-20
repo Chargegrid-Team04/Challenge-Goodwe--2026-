@@ -2,8 +2,105 @@
 
 {% block Titulo %} {% endblock %}
 
-{% block Head %} {% endblock %}
+{% block Head %} 
+    <link rel="stylesheet" href="/frontend/static/posto.css">
+{% endblock %}
 
 {% block Conteudo %}
+
+<div class="wrapper">
+    <header class="main-header">
+        <button class="back" aria-label="Voltar">
+            <i data-lucide="arrow-left" style="width : 20px; height: 20px; stroke : currentColor; stroke-width: 2.5;"></i>
+        </button>
+        <h1 style="margin-right: auto; margin-left:  0;" class="page-title">Detalhes do Posto</h1>
+    </header>
+
+    <!-- Imagem de Capa do Posto com Badges -->
+      <section class="banner-section">
+        <div class="station-image-wrapper">
+          <img src="https://images.unsplash.com/photo-1563720223185-11003d516935?w=800" alt="Posto E-Volt Pinheiros" class="station-image">
+          <span class="badge-status">Disponível (4/4)</span>
+          <span class="badge-rating">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            4.9
+          </span>
+        </div>
+      </section>
+
+      <!-- Informações do Posto -->
+      <section class="info-section">
+        <h2 class="station-title">E-Volt Pinheiros</h2>
+        <p class="station-address">Avenida das Nações Unidas, 12901 - Pinheiros, São Paulo</p>
+      </section>
+
+      <!-- Horários Mais Baratos -->
+      <section class="schedule-section">
+        <h3 class="section-subtitle">Horários mais baratos (Econômico)</h3>
+        <div class="schedule-pills">
+          <div class="pill pill-peak">Pico (18h-22h)</div>
+          <div class="pill pill-cheap">Barato (22h-08h)</div>
+        </div>
+      </section>
+
+      <!-- Card de Preços e Taxa -->
+      <section class="pricing-card">
+        <div class="price-col">
+          <span class="price-label">Preço da Recarga</span>
+          <div class="price-value">
+            <strong>R$ 1,90</strong>
+            <span class="unit">/ kWh</span>
+          </div>
+        </div>
+        <div class="idle-col">
+          <span class="idle-label">Taxa de Ociosidade</span>
+          <span class="idle-value">R$ 0,50 / min após 15min</span>
+        </div>
+      </section>
+
+      <!-- Conectores Disponíveis -->
+      <section class="connectors-section">
+        <h3 class="section-subtitle">Conectores Disponíveis</h3>
+        <div class="connectors-grid">
+          
+          <!-- Conector 1 (Ativo / Selecionado) -->
+          <div class="connector-card active">
+            <div class="connector-header">
+              <div class="connector-icon-box">
+                <i data-lucide="circle-x" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></i>
+              </div>
+              <span class="connector-status">LIVRE</span>
+            </div>
+            <h4 class="connector-name">GW22K-HCA-20</h4>
+            <p class="connector-specs">Rápido • 22 kW</p>
+          </div>
+
+          <!-- Conector 2 -->
+          <div class="connector-card">
+            <div class="connector-header">
+              <div class="connector-icon-box">
+                <i data-lucide="cable" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></i>
+              </div>
+              <span class="connector-status">LIVRE</span>
+            </div>
+            <h4 class="connector-name">GW11K-HCA-20</h4>
+            <p class="connector-specs">Padrão • 11 kW</p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Card CTA Escaneamento -->
+      <section class="scan-card">
+        <h3 class="scan-title">Pronto para carregar?</h3>
+        <p class="scan-description">Escaneie o QR Code no terminal físico para desbloquear a recarga.</p>
+        <button class="btn-scan">
+            <i data-lucide="scan-qr-code" style="width: 20px; height: 20px; stroke : currentColor"></i>
+            <span>Escanear QR Code</span>
+        </button>
+      </section>
+</div>
 
 {% endblock %}
