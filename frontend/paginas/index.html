@@ -60,7 +60,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="login-button">Entrar</button>
+            <button id="entrar" href="/mapa" type="submit" class="login-button">Entrar</button>
 
             <p class="toggle-text">
                 Ainda não tem conta? <button type="button" class="btn-link" onclick="toggleAuthMode('register')">Criar conta</button>
@@ -135,5 +135,17 @@
                 loginForm.classList.remove('hidden');
             }
         }
+
+        // Redireciona ao enviar o formulário de Login
+        document.getElementById('form-login').addEventListener('submit', function(event) {
+            event.preventDefault(); // Impede o envio padrao do formulario
+            window.location.href = '/mapa'; // Redireciona para a rota /mapa
+        });
+
+        // Opcional: Redirecionar tambem ao criar conta (para testes)
+        document.getElementById('form-register').addEventListener('submit', function(event) {
+            event.preventDefault();
+            window.location.href = '/mapa';
+        });
     </script>
 {% endblock %}    

@@ -1,9 +1,22 @@
-.wrapper{
-    display: flex;
-    flex-direction: column;
-    gap: var(--s-4)
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  /* Prepara os filhos diretos para animar a entrada */
+  perspective: 1000px;
 }
 
+.page-configurar .main-header h1 {
+  margin-left: auto;
+  margin-right: auto;
+  font-size: var(--text-lg);
+}
+
+/* ==========================================================================
+   1. ANIMAÇÕES DE ENTRADA (Page Entrance Fade & Slide)
+   ========================================================================== */
+
+/* Keyframe para entrada suave dos blocos */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -15,19 +28,54 @@
   }
 }
 
-.page-configurar .main-header h1 {
-  margin-left: auto;
-  margin-right: auto;
-  font-size: var(--text-lg);
+/* Animação progressiva para cada seção da tela */
+.page-configurar .main-header {
+  animation: fadeInUp var(--transition-base) forwards;
 }
 
-/* Bateria */
 .battery-section {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  margin-bottom : var(--s-2)
+  margin-bottom: var(--s-2);
+  animation: fadeInUp var(--transition-base) 60ms forwards;
 }
+
+.config-grid-section {
+  animation: fadeInUp var(--transition-base) 120ms forwards;
+}
+
+.estimation-card {
+  animation: fadeInUp var(--transition-base) 180ms forwards;
+}
+
+.modes-section {
+  animation: fadeInUp var(--transition-base) 240ms forwards;
+}
+
+.action-footer {
+  margin-top: var(--space-2);
+  padding-bottom: var(--space-4);
+  animation: fadeInUp var(--transition-base) 300ms forwards;
+}
+
+/* Animação da barra de bateria ao carregar */
+@keyframes fillBattery {
+  from {
+    width: 0%;
+  }
+}
+
+.battery-bar-fill {
+  height: 100%;
+  background-color: var(--primary);
+  border-radius: var(--s-1) 0 0 var(--s-1);
+  animation: fillBattery 800ms var(--ease-smooth) forwards;
+}
+
+/* ==========================================================================
+   2. ELEMENTOS ESTÁTICOS & ESTRUTURA
+   ========================================================================== */
 
 .battery-header {
   display: flex;
@@ -61,12 +109,6 @@
   overflow: hidden;
 }
 
-.battery-bar-fill {
-  height: 100%;
-  background-color: var(--primary);
-  border-radius: var(--s-1) 0 0 var(--s-1);
-}
-
 .battery-percentage {
   font-size: var(--text-lg);
   font-weight: var(--font-weight-bold);
@@ -87,7 +129,10 @@
   color: var(--secondary);
 }
 
-/* Grade de Configurações de Recarga */
+/* ==========================================================================
+   3. GRADE DE CONFIGURAÇÕES DE RECARGA (Cards)
+   ========================================================================== */
+
 .config-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -103,20 +148,36 @@
   flex-direction: column;
   justify-content: center;
   height: 64px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--transition-bounce), 
+              border-color var(--transition-fast), 
+              box-shadow var(--transition-fast);
+}
+
+.config-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--l-surface-3);
+}
+
+.config-card:active {
+  transform: scale(0.96);
 }
 
 .config-card.active {
   border: 2px solid var(--secondary);
+  box-shadow: 0 4px 12px rgba(0, 180, 216, 0.12);
 }
 
-    .config-card.active .config-card-label {
-        color: var(--primary);
-    }
+.config-card.active .config-card-label {
+  color: var(--primary);
+}
 
 .config-card-label {
   font-size: var(--text-sm);
   font-weight: var(--font-weight-bold);
   color: var(--l-text-3);
+  transition: color var(--transition-fast);
 }
 
 .config-card-value {
@@ -132,7 +193,10 @@
   margin-top: 2px;
 }
 
-/* Estimativa de Valores */
+/* ==========================================================================
+   4. ESTIMATIVA DE VALORES
+   ========================================================================== */
+
 .estimation-card {
   background-color: var(--white);
   border: 1px solid var(--l-surface-2);
@@ -141,6 +205,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+  transition: box-shadow var(--transition-fast);
 }
 
 .estimation-row {
@@ -178,7 +243,10 @@
   color: var(--primary);
 }
 
-/* Modos de Carregamento */
+/* ==========================================================================
+   5. MODOS DE CARREGAMENTO
+   ========================================================================== */
+
 .modes-list {
   display: flex;
   flex-direction: column;
@@ -188,6 +256,7 @@
 .mode-card {
   cursor: pointer;
   display: block;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .mode-card input[type="radio"] {
@@ -202,11 +271,29 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  transition: border-color var(--transition-fast);
+  transition: transform var(--transition-bounce), 
+              border-color var(--transition-fast), 
+              box-shadow var(--transition-fast);
 }
 
+.mode-card:hover .mode-content {
+  transform: translateY(-2px);
+  border-color: var(--l-surface-3);
+}
+
+.mode-card:active .mode-content {
+  transform: scale(0.98);
+}
+
+/* Estado Selecionado do Radio */
 .mode-card input[type="radio"]:checked + .mode-content {
-  border-color: var(--l-surface-2);
+  border-color: var(--secondary);
+  border-width: 2px;
+  box-shadow: 0 4px 12px rgba(0, 180, 216, 0.1);
+}
+
+.mode-card input[type="radio"]:checked + .mode-content .mode-icon-box {
+  transform: scale(1.08);
 }
 
 .mode-icon-box {
@@ -217,6 +304,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: transform var(--transition-bounce);
 }
 
 .orange-bg {
@@ -250,19 +338,19 @@
   font-size: var(--text-md);
   font-weight: var(--font-weight-bold);
   color: var(--l-text-3);
-  text-wrap : nowrap
+  text-wrap: nowrap;
 }
 
 .mode-price {
   font-size: var(--text-sm);
   font-weight: var(--font-weight-bold);
   color: var(--l-text-2);
-  text-wrap : nowrap
+  text-wrap: nowrap;
 }
 
 .mode-note {
-    color : var(--red);
-    margin-left : auto
+  color: var(--red);
+  margin-left: auto;
 }
 
 .mode-sub {
@@ -271,11 +359,9 @@
   margin-top: 2px;
 }
 
-/* Botão Confirmar Recarga */
-.action-footer {
-  margin-top: var(--space-2);
-  padding-bottom: var(--space-4);
-}
+/* ==========================================================================
+   6. BOTÃO DE CONFIRMAÇÃO
+   ========================================================================== */
 
 .btn-confirm {
   width: 100%;
@@ -287,9 +373,19 @@
   font-size: var(--text-md);
   font-weight: var(--font-weight-bold);
   cursor: pointer;
-  transition: opacity var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--transition-bounce), 
+              background-color var(--transition-fast), 
+              box-shadow var(--transition-fast);
 }
 
 .btn-confirm:hover {
-  opacity: 0.92;
+  background-color: var(--green-surface);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(11, 43, 32, 0.25);
+}
+
+.btn-confirm:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 8px rgba(11, 43, 32, 0.15);
 }
