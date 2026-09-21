@@ -17,8 +17,74 @@ from app.schemas.recarga import (
     RecargaResponse,
     ResumoRecargasResponse,
 )
+from app.schemas.energy_management import EnergyManagementRequest, EnergyManagementResponse
+from app.services.energy_management_service import ChargingLoad, calculate_energy_management
 
 router = APIRouter()
+
+
+@router.post("/controle-demanda", response_model=EnergyManagementResponse)
+def controlar_demanda(
+    dados: EnergyManagementRequest,
+    db: Session = Depends(get_db),
+):
+    estacao = db.get(Estacao, dados.estacao_id)
+    if not estacao:
+        raise HTTPException(status_code=404, detail="Estação não encontrada.")
+
+    recargas_ativas = db.scalars(
+        select(Recarga).where(
+            Recarga.estacao_id == dados.estacao_id,
+            Recarga.status == "CARREGANDO",
+        )
+    ).all()
+    loads = [
+        ChargingLoad(
+            charging_id=recarga.id,
+            requested_power_kw=Decimal(recarga.potencia_atual_kw or recarga.conector.potencia_kw or 0),
+        )
+        for recarga in recargas_ativas
+    ]
+
+    result = calculate_energy_management(
+        loads,
+        station_capacity_kw=dados.station_capacity_kw,
+        base_price_per_kwh=Decimal(estacao.preco_base_kwh),
+        current_at=dados.current_at or datetime.now(timezone.utc),
+        peak_start=estacao.horario_pico_inicio,
+        peak_end=estacao.horario_pico_fim,
+        external_price_multiplier=dados.external_price_multiplier,
+        minimum_power_kw=dados.minimum_power_kw,
+    )
+
+    if dados.aplicar_ajuste:
+        allocations_by_id = {item.charging_id: item for item in result.allocations}
+        for recarga in recargas_ativas:
+            allocation = allocations_by_id.get(recarga.id)
+            if allocation is not None:
+                recarga.potencia_atual_kw = allocation.allocated_power_kw
+        db.commit()
+
+    return EnergyManagementResponse(
+        estacao_id=estacao.id,
+        active_charging_count=len(recargas_ativas),
+        total_requested_power_kw=result.total_requested_power_kw,
+        total_allocated_power_kw=result.total_allocated_power_kw,
+        available_power_kw=result.available_power_kw,
+        utilization_percent=result.utilization_percent,
+        price_per_kwh=result.price_per_kwh,
+        price_multiplier=result.price_multiplier,
+        peak_period=result.peak_period,
+        allocations=[
+            {
+                "recarga_id": item.charging_id,
+                "requested_power_kw": item.requested_power_kw,
+                "allocated_power_kw": item.allocated_power_kw,
+                "reduction_percent": item.reduction_percent,
+            }
+            for item in result.allocations
+        ],
+    )
 
 
 def calcular_preco_kwh(estacao: Estacao, modo: str) -> Decimal:

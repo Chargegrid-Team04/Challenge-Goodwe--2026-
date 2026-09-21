@@ -4,4 +4,8 @@ sqlalchemy>=2.0
 psycopg[binary]>=3.2
 alembic
 pydantic-settings
+python-dotenv
 jinja2
+google-genai
+gradio
+pypdf
