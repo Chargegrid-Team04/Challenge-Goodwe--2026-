@@ -2,6 +2,9 @@ from datetime import datetime, timezone
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+
+from app.api.routes.ocpp_ws import enviar_remote_start, enviar_remote_stop
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -181,7 +184,7 @@ def obter_recarga(
 
 
 @router.post("/{recarga_id}/iniciar", response_model=RecargaResponse)
-def iniciar_recarga(
+async def iniciar_recarga(
     recarga_id: int,
     db: Session = Depends(get_db),
 ):
@@ -189,22 +192,23 @@ def iniciar_recarga(
     if not recarga:
         raise HTTPException(status_code=404, detail="Recarga não encontrada.")
 
-    recarga.status = "CARREGANDO"
-    recarga.iniciada_em = datetime.now(timezone.utc)
-    recarga.potencia_atual_kw = Decimal("22.0")
-    recarga.tempo_restante_minutos = 45
-
     conector = db.get(Conector, recarga.conector_id)
-    if conector:
-        conector.status = "CARREGANDO"
+    if not conector:
+        raise HTTPException(status_code=404, detail="Conector não encontrado.")
 
-    db.commit()
+    aceito = await enviar_remote_start(conector.codigo, recarga.id)
+    if not aceito:
+        raise HTTPException(
+            status_code=409,
+            detail="Carregador não conectado ou não aceitou o comando.",
+        )
+
     db.refresh(recarga)
     return recarga
 
 
 @router.post("/{recarga_id}/finalizar", response_model=RecargaResponse)
-def finalizar_recarga(
+async def finalizar_recarga(
     recarga_id: int,
     db: Session = Depends(get_db),
 ):
@@ -212,22 +216,19 @@ def finalizar_recarga(
     if not recarga:
         raise HTTPException(status_code=404, detail="Recarga não encontrada.")
 
-    recarga.status = "CONCLUIDA"
-    recarga.finalizada_em = datetime.now(timezone.utc)
-    recarga.soc_final = recarga.percentual_desejado or Decimal("100")
-    recarga.energia_entregue_kwh = recarga.quantidade_kwh or Decimal("30.0")
-    recarga.valor_final = recarga.valor_estimado
-    recarga.potencia_atual_kw = Decimal("0.0")
-    recarga.tempo_restante_minutos = 0
-
     conector = db.get(Conector, recarga.conector_id)
-    if conector:
-        conector.status = "DISPONIVEL"
+    if not conector:
+        raise HTTPException(status_code=404, detail="Conector não encontrado.")
 
-    db.commit()
+    aceito = await enviar_remote_stop(conector.codigo, recarga.id)
+    if not aceito:
+        raise HTTPException(
+            status_code=409,
+            detail="Carregador não conectado ou não aceitou o comando.",
+        )
+
     db.refresh(recarga)
     return recarga
-
 
 @router.post("/{recarga_id}/cancelar", response_model=RecargaResponse)
 def cancelar_recarga(
