@@ -46,7 +46,7 @@ def get_charging_stations_context(db: Session) -> str:
             name = row.get("nome", "Estação")
             address = row.get("endereco", "Endereço não informado")
             price = row.get("preco_base_kwh", "N/D")
-            lines.append(f"- {name}: {address} | preço base: {price} €/kWh")
+            lines.append(f"- {name}: {address} | preço base: R$ {price}/kWh")
         return "\n".join(lines)
     except Exception:
         return DEFAULT_CHARGING_CONTEXT
