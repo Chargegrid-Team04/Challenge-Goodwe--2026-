@@ -20,8 +20,144 @@ from app.schemas.recarga import (
     RecargaResponse,
     ResumoRecargasResponse,
 )
+from app.schemas.energy_management import EnergyManagementRequest, EnergyManagementResponse
+from app.schemas.charging_prediction import ChargingPredictionRequest, ChargingPredictionResponse
+from app.services.charging_prediction_service import predict_charging
+from app.services.energy_management_service import ChargingLoad, calculate_energy_management
 
 router = APIRouter()
+
+
+@router.post("/previsao-inteligente", response_model=ChargingPredictionResponse)
+def prever_recarga_inteligente(
+    dados: ChargingPredictionRequest,
+    db: Session = Depends(get_db),
+):
+    estacao = db.get(Estacao, dados.estacao_id)
+    if not estacao:
+        raise HTTPException(status_code=404, detail="Estação não encontrada.")
+
+    veiculo = db.get(Veiculo, dados.veiculo_id)
+    if not veiculo:
+        raise HTTPException(status_code=404, detail="Veículo não encontrado.")
+
+    connector_types = {
+        veiculo.tipo_conector.upper(),
+        (veiculo.conector_secundario or "").upper(),
+    }
+    conector = next(
+        (
+            item for item in estacao.conectores
+            if item.tipo.upper() in connector_types and item.status.upper() == "DISPONIVEL"
+        ),
+        None,
+    )
+    if not conector:
+        conector = next((item for item in estacao.conectores if item.status.upper() == "DISPONIVEL"), None)
+    if not conector:
+        raise HTTPException(status_code=409, detail="Nenhum conector disponível na estação.")
+
+    active_cars = len(db.scalars(
+        select(Recarga).where(
+            Recarga.estacao_id == dados.estacao_id,
+            Recarga.status == "CARREGANDO",
+        )
+    ).all())
+
+    try:
+        prediction = predict_charging(
+            battery_capacity_kwh=Decimal(veiculo.capacidade_bateria_kwh),
+            current_soc_percent=dados.current_soc_percent,
+            target_soc_percent=dados.target_soc_percent,
+            requested_source=dados.requested_source,
+            connector_power_kw=Decimal(conector.potencia_kw),
+            station_capacity_kw=dados.station_capacity_kw,
+            base_price_per_kwh=Decimal(estacao.preco_base_kwh),
+            active_cars=active_cars,
+            current_at=dados.current_at or datetime.now(timezone.utc),
+            solar_available_kw=dados.solar_available_kw,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    return ChargingPredictionResponse(
+        estacao_id=estacao.id,
+        veiculo_id=veiculo.id,
+        active_cars=prediction.active_cars,
+        source=prediction.source,
+        suggestion=prediction.suggestion,
+        energy_required_kwh=prediction.energy_required_kwh,
+        charging_power_kw=prediction.charging_power_kw,
+        estimated_minutes=prediction.estimated_minutes,
+        price_per_kwh=prediction.price_per_kwh,
+        estimated_cost=prediction.estimated_cost,
+        peak_period=prediction.peak_period,
+        source_is_estimated=prediction.source_is_estimated,
+    )
+
+
+@router.post("/controle-demanda", response_model=EnergyManagementResponse)
+def controlar_demanda(
+    dados: EnergyManagementRequest,
+    db: Session = Depends(get_db),
+):
+    estacao = db.get(Estacao, dados.estacao_id)
+    if not estacao:
+        raise HTTPException(status_code=404, detail="Estação não encontrada.")
+
+    recargas_ativas = db.scalars(
+        select(Recarga).where(
+            Recarga.estacao_id == dados.estacao_id,
+            Recarga.status == "CARREGANDO",
+        )
+    ).all()
+    loads = [
+        ChargingLoad(
+            charging_id=recarga.id,
+            requested_power_kw=Decimal(recarga.potencia_atual_kw or recarga.conector.potencia_kw or 0),
+        )
+        for recarga in recargas_ativas
+    ]
+
+    result = calculate_energy_management(
+        loads,
+        station_capacity_kw=dados.station_capacity_kw,
+        base_price_per_kwh=Decimal(estacao.preco_base_kwh),
+        current_at=dados.current_at or datetime.now(timezone.utc),
+        peak_start=estacao.horario_pico_inicio,
+        peak_end=estacao.horario_pico_fim,
+        external_price_multiplier=dados.external_price_multiplier,
+        minimum_power_kw=dados.minimum_power_kw,
+    )
+
+    if dados.aplicar_ajuste:
+        allocations_by_id = {item.charging_id: item for item in result.allocations}
+        for recarga in recargas_ativas:
+            allocation = allocations_by_id.get(recarga.id)
+            if allocation is not None:
+                recarga.potencia_atual_kw = allocation.allocated_power_kw
+        db.commit()
+
+    return EnergyManagementResponse(
+        estacao_id=estacao.id,
+        active_charging_count=len(recargas_ativas),
+        total_requested_power_kw=result.total_requested_power_kw,
+        total_allocated_power_kw=result.total_allocated_power_kw,
+        available_power_kw=result.available_power_kw,
+        utilization_percent=result.utilization_percent,
+        price_per_kwh=result.price_per_kwh,
+        price_multiplier=result.price_multiplier,
+        peak_period=result.peak_period,
+        allocations=[
+            {
+                "recarga_id": item.charging_id,
+                "requested_power_kw": item.requested_power_kw,
+                "allocated_power_kw": item.allocated_power_kw,
+                "reduction_percent": item.reduction_percent,
+            }
+            for item in result.allocations
+        ],
+    )
 
 
 def calcular_preco_kwh(estacao: Estacao, modo: str) -> Decimal:

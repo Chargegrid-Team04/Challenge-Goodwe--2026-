@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app.api.router import api_router
+from app.api.routes.ai import router as ai_router
 from app.api.routes import views
 from app.db.session import engine
 
@@ -30,6 +31,12 @@ app.mount("/frontend", StaticFiles(directory=str(FRONTEND_DIR)), name="frontend"
 app.include_router(
     api_router,
     prefix="/api",
+)
+
+app.include_router(
+    ai_router,
+    prefix="/api/v1/ai",
+    tags=["AI"],
 )
 
 app.include_router(

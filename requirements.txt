@@ -6,3 +6,7 @@ alembic
 pydantic-settings
 jinja2
 ocpp
+python-dotenv
+google-genai
+gradio
+pypdf
