@@ -16,6 +16,7 @@ body {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -23,11 +24,24 @@ body {
 }
 
 @keyframes logoFloat {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0);
     }
+
     50% {
         transform: translateY(-6px);
+    }
+}
+
+@keyframes fadeText {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
     }
 }
 
@@ -103,6 +117,7 @@ body {
 .container .login-section::-webkit-scrollbar {
     display: none;
 }
+
 .container .login-section {
     scrollbar-width: none;
 }
@@ -114,7 +129,8 @@ body {
     flex-direction: column;
     gap: var(--s-3);
     margin: 0;
-    padding-bottom: var(--s-2); /* Espaçamento leve no fundo */
+    padding-bottom: var(--s-2);
+    /* Espaçamento leve no fundo */
     animation: fadeInUp var(--transition-base) forwards;
 }
 
@@ -126,6 +142,13 @@ body {
     display: flex;
     flex-direction: column;
     gap: 4px;
+}
+.error-msg {
+    text-align : center;
+    color: var(--red);
+    margin-block: 0px;
+    transition: opacity var(--transition-base);
+    animation: fadeText var(--transition-base) forwards;
 }
 
 .container .login-section .input-section span {
@@ -155,6 +178,11 @@ body {
     transform: translateY(-1px);
 }
 
+.container .login-section .input-wrap:focus-within svg,
+.container .login-section .input-wrap:focus-within I {
+    stroke: var(--secondary);
+}
+
 .container .login-section .input-wrap input {
     width: 100%;
     background: none;
@@ -164,17 +192,19 @@ body {
     color: var(--l-text-3);
 }
 
+.container .login-section .input-wrap I,
 .container .login-section .input-wrap svg {
     width: 20px;
     height: 20px;
-    fill: var(--l-surface-3);
+    stroke: var(--l-surface-3);
     cursor: pointer;
     flex-shrink: 0;
-    transition: fill var(--transition-fast);
+    transition: stroke var(--transition-fast);
 }
 
+.container .login-section .input-wrap I:hover,
 .container .login-section .input-wrap svg:hover {
-    fill: var(--secondary);
+    stroke: var(--secondary);
 }
 
 /* =========================================
@@ -286,9 +316,9 @@ body {
     cursor: pointer;
     margin-top: var(--s-2);
     -webkit-tap-highlight-color: transparent;
-    transition: transform var(--transition-bounce), 
-                background-color var(--transition-fast), 
-                box-shadow var(--transition-fast);
+    transition: transform var(--transition-bounce),
+        background-color var(--transition-fast),
+        box-shadow var(--transition-fast);
 }
 
 .login-button:hover {

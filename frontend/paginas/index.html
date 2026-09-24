@@ -35,10 +35,7 @@
                 <span>Senha</span>
                 <div class="input-wrap">
                     <input id="inputSenha" type="password" placeholder="Insira a sua senha" required>
-                    <svg viewBox="0 0 24 24">
-                        <path
-                            d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
-                    </svg>
+                    <I id="eye-icon" data-lucide="eye"></I>
                 </div>
             </div>
 
@@ -64,6 +61,8 @@
             </div>
 
             <button id="entrar" href="/mapa" type="submit" class="login-button">Entrar</button>
+
+            <p id="login-error" class="error-msg"></p>
 
             <p class="toggle-text">
                 Ainda não tem conta? <button type="button" class="btn-link" onclick="toggleAuthMode('register')">Criar
@@ -92,7 +91,7 @@
             <div class="input-section">
                 <span>Telefone</span>
                 <div class="input-wrap">
-                    <input type="tel" placeholder="(11) 99999-9999" required>
+                    <input id="inputTelefone" type="text" placeholder="(11) 99999-9999" maxlength="15" required>
                 </div>
             </div>
 
@@ -112,6 +111,8 @@
 
             <button type="submit" class="login-button">Criar conta</button>
 
+            <p id="register-error" class="error-msg"></p>
+
             <p class="toggle-text">
                 Já tem uma conta? <button type="button" class="btn-link"
                     onclick="toggleAuthMode('login')">Entrar</button>
@@ -128,66 +129,542 @@
 
 {% block Scripts %}
 <script>
-    function toggleAuthMode(mode) {
-        const loginForm = document.getElementById('form-login');
-        const registerForm = document.getElementById('form-register');
 
-        if (mode === 'register') {
-            loginForm.classList.add('hidden');
-            registerForm.classList.remove('hidden');
-        } else {
-            registerForm.classList.add('hidden');
-            loginForm.classList.remove('hidden');
-        }
+    /* =====================================================
+       TELEFONE
+    ===================================================== */
+
+    const inputTelefone =
+        document.getElementById("inputTelefone");
+
+
+    if (inputTelefone) {
+
+        inputTelefone.addEventListener(
+            "input",
+            function (event) {
+
+                let valor =
+                    event.target.value
+                        .replace(/\D/g, "")
+                        .substring(0, 11);
+
+
+                if (valor.length <= 10) {
+
+                    valor = valor.replace(
+                        /^(\d{2})(\d{0,4})(\d{0,4})$/,
+                        (_, ddd, parte1, parte2) => {
+
+                            let resultado = "";
+
+                            if (ddd) {
+                                resultado = `(${ddd}`;
+                            }
+
+                            if (ddd.length === 2) {
+                                resultado += ") ";
+                            }
+
+                            resultado += parte1;
+
+                            if (parte2) {
+                                resultado += `-${parte2}`;
+                            }
+
+                            return resultado;
+
+                        }
+                    );
+
+                } else {
+
+                    valor = valor.replace(
+                        /^(\d{2})(\d{0,5})(\d{0,4})$/,
+                        (_, ddd, parte1, parte2) => {
+
+                            let resultado = "";
+
+                            if (ddd) {
+                                resultado = `(${ddd}`;
+                            }
+
+                            if (ddd.length === 2) {
+                                resultado += ") ";
+                            }
+
+                            resultado += parte1;
+
+                            if (parte2) {
+                                resultado += `-${parte2}`;
+                            }
+
+                            return resultado;
+
+                        }
+                    );
+
+                }
+
+                event.target.value = valor;
+
+            }
+        );
+
     }
 
-    document.getElementById('form-login').addEventListener('submit', async function (event) {
-        event.preventDefault(); // Evita o envio do formulário
 
-        let email = document.getElementById("inputEmail").value;
-        let senha = document.getElementById("inputSenha").value;
+    /* =====================================================
+       TROCAR LOGIN / CADASTRO
+    ===================================================== */
+
+    function toggleAuthMode(mode) {
+
+        const loginForm =
+            document.getElementById("form-login");
+
+        const registerForm =
+            document.getElementById("form-register");
+
+
+        document.getElementById("login-error")
+            .textContent = "";
+
+        document.getElementById("register-error")
+            .textContent = "";
+
+
+        if (mode === "register") {
+
+            loginForm.classList.add("hidden");
+            registerForm.classList.remove("hidden");
+
+        } else {
+
+            registerForm.classList.add("hidden");
+            loginForm.classList.remove("hidden");
+
+        }
+
+    }
+
+
+    /* =====================================================
+       MENSAGEM
+    ===================================================== */
+
+    function clearMessage(element) {
+
+        setTimeout(() => {
+
+            element.textContent = "";
+
+        }, 1500);
+
+    }
+
+
+    function mensagemErro(dados, mensagemPadrao) {
+
+        if (typeof dados.detail === "string") {
+            return dados.detail;
+        }
+
+
+        if (Array.isArray(dados.detail)) {
+
+            return dados.detail
+                .map(erro => {
+
+                    if (typeof erro === "string") {
+                        return erro;
+                    }
+
+                    return erro.msg ||
+                        "Dados inválidos.";
+
+                })
+                .join(" ");
+
+        }
+
+
+        return mensagemPadrao;
+
+    }
+
+
+    async function lerResposta(response) {
+
+        const texto =
+            await response.text();
+
+        if (!texto) {
+            return {};
+        }
 
         try {
-            const resposta = await fetch('/api/usuarios/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    email: email,
-                    senha: senha
-                })
-            }
-            );
 
-            const dados = await resposta.json();
+            return JSON.parse(texto);
 
-            if (!resposta.ok) {
-                alert(dados.detail || 'Erro ao fazer login.'); return;
-            }
+        } catch {
 
-            // LOGIN BEM-SUCEDIDO // 
-            console.log('Login realizado:', dados);
-            sessionStorage.setItem('usuario_id', dados.usuario_id);
-            window.location.href = '/mapa';
+            return {
+                detail: texto
+            };
 
-        } catch (error) {
-            console.error("ERRO COMPLETO:", error);
-
-            alert(
-                "Erro ao fazer requisição.\n\n" +
-                error.message
-            );
         }
-    });
 
-    document.getElementById("form-register").addEventListener("submit", async function (event) {
-        event.preventDefault();
+    }
 
-        let nome = this.querySelector('input[type="text"]').value;
-        let email = this.querySelector('input[type="email"]').value;
-        let telefone = this.querySelector('input[type="tel"]').value;
-        let senha = this.querySelector('input[type="password"]').value;
-    });
+
+    /* =====================================================
+       LOGIN
+    ===================================================== */
+
+    document
+        .getElementById("form-login")
+        .addEventListener(
+            "submit",
+            async function (event) {
+
+                event.preventDefault();
+
+
+                const email =
+                    document.getElementById("inputEmail")
+                        .value
+                        .trim();
+
+                const senha =
+                    document.getElementById("inputSenha")
+                        .value;
+
+                const errorElement =
+                    document.getElementById("login-error");
+
+
+                errorElement.textContent = "";
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "/api/usuarios/login",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body: JSON.stringify({
+                                    email,
+                                    senha
+                                })
+                            }
+                        );
+
+
+                    const dados =
+                        await lerResposta(response);
+
+
+                    if (!response.ok) {
+
+                        errorElement.textContent =
+                            mensagemErro(
+                                dados,
+                                "Erro ao fazer login."
+                            );
+
+                        clearMessage(errorElement);
+
+                        return;
+
+                    }
+
+
+                    /*
+                     * A API retorna:
+                     *
+                     * {
+                     *   mensagem: "...",
+                     *   usuario: {
+                     *      id: 1,
+                     *      nome: "...",
+                     *      ...
+                     *   }
+                     * }
+                     */
+
+
+                    if (
+                        !dados.usuario ||
+                        !dados.usuario.id
+                    ) {
+
+                        errorElement.textContent =
+                            "Resposta inválida do servidor.";
+
+                        clearMessage(errorElement);
+
+                        return;
+
+                    }
+
+
+                    sessionStorage.setItem(
+                        "usuario_id",
+                        dados.usuario.id
+                    );
+
+
+                    /*
+                     * Guarda também alguns dados úteis.
+                     * A página de perfil continua buscando
+                     * os dados diretamente da API.
+                     */
+
+                    sessionStorage.setItem(
+                        "usuario_email",
+                        dados.usuario.email || ""
+                    );
+
+
+                    console.log(
+                        "Login realizado:",
+                        dados.usuario
+                    );
+
+
+                    window.location.href =
+                        "/mapa";
+
+                } catch (error) {
+
+                    console.error(
+                        "ERRO COMPLETO:",
+                        error
+                    );
+
+
+                    errorElement.textContent =
+                        "Não foi possível conectar ao servidor.";
+
+                    clearMessage(errorElement);
+
+                }
+
+            }
+        );
+
+
+    /* =====================================================
+       CRIAR CONTA
+    ===================================================== */
+
+    document
+        .getElementById("form-register")
+        .addEventListener(
+            "submit",
+            async function (event) {
+
+                event.preventDefault();
+
+
+                const form = this;
+
+                const errorElement =
+                    document.getElementById(
+                        "register-error"
+                    );
+
+
+                errorElement.textContent = "";
+
+
+                const inputs =
+                    form.querySelectorAll("input");
+
+
+                /*
+                 * Campos:
+                 *
+                 * 0 = nome
+                 * 1 = email
+                 * 2 = telefone
+                 * 3 = senha
+                 * 4 = confirmação
+                 */
+
+                const nome =
+                    inputs[0].value.trim();
+
+                const email =
+                    inputs[1].value.trim();
+
+                const telefone =
+                    inputs[2].value
+                        .replace(/\D/g, "");
+
+                const senha =
+                    inputs[3].value;
+
+                const confirmarSenha =
+                    inputs[4].value;
+
+
+                if (senha !== confirmarSenha) {
+
+                    errorElement.textContent =
+                        "As senhas não coincidem.";
+
+                    clearMessage(errorElement);
+
+                    return;
+
+                }
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "/api/usuarios",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body: JSON.stringify({
+
+                                    nome,
+
+                                    email,
+
+                                    senha,
+
+                                    telefone,
+
+                                    /*
+                                     * A API atual ainda possui
+                                     * url_foto.
+                                     */
+                                    url_foto: ""
+
+                                })
+                            }
+                        );
+
+
+                    const dados =
+                        await lerResposta(response);
+
+
+                    if (!response.ok) {
+
+                        errorElement.textContent =
+                            mensagemErro(
+                                dados,
+                                "Erro ao criar conta."
+                            );
+
+                        clearMessage(errorElement);
+
+                        return;
+
+                    }
+
+
+                    console.log(
+                        "Usuário criado:",
+                        dados
+                    );
+
+
+                    form.reset();
+
+
+                    toggleAuthMode("login");
+
+
+                    const loginError =
+                        document.getElementById(
+                            "login-error"
+                        );
+
+
+                    loginError.textContent =
+                        "Conta criada com sucesso! Faça login.";
+
+
+                    clearMessage(loginError);
+
+                } catch (error) {
+
+                    console.error(
+                        "ERRO COMPLETO:",
+                        error
+                    );
+
+
+                    errorElement.textContent =
+                        "Não foi possível conectar ao servidor.";
+
+                    clearMessage(errorElement);
+
+                }
+
+            }
+        );
+
+
+    /* =====================================================
+       MOSTRAR / OCULTAR SENHA
+    ===================================================== */
+
+    const eyeIcon =
+        document.getElementById("eye-icon");
+
+
+    if (eyeIcon) {
+
+        eyeIcon.addEventListener(
+            "click",
+            function () {
+
+                const passwordInput =
+                    document.getElementById(
+                        "inputSenha"
+                    );
+
+
+                if (
+                    passwordInput.type ===
+                    "password"
+                ) {
+
+                    passwordInput.type =
+                        "text";
+
+                } else {
+
+                    passwordInput.type =
+                        "password";
+
+                }
+
+            }
+        );
+
+    }
+
 </script>
+
 {% endblock %}

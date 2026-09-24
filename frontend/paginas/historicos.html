@@ -1,107 +1,1039 @@
 {% extends "base.html" %}
 
 {% block Head %}
-    <link rel="stylesheet" href="/frontend/static/historicos.css">
+<link rel="stylesheet" href="/frontend/static/historicos.css">
 {% endblock %}
 
-{% block Titulo %} {% endblock %}
+{% block Titulo %}Histórico de Carga{% endblock %}
 
 {% block Conteudo %}
 <div class="wrapper">
-<header class="main-header">
-    <h1 class="page-title">Histórico de Carga</h1>
-    <button class="options" aria-label="Opções">
-      <i data-lucide="more-horizontal"></i>
-    </button>
-</header>
 
-<!-- Card de Resumo Mensal -->
-<section class="summary-card">
-    <div class="summary-col">
-    <span class="summary-label">Total de kWh este mês</span>
-    <div class="summary-value">184 kWh</div>
-    <span class="summary-subtext">~ 1,120 km rodados</span>
-    </div>
-    
-    <div class="summary-divider"></div>
+    <header class="main-header">
+        <h1 class="page-title">Histórico de Carga</h1>
 
-    <div class="summary-col">
-    <span class="summary-label">Total gasto (R$)</span>
-    <div class="summary-value highlight">R$ 352,40</div>
-    <span class="summary-subtext">5 recargas completas</span>
-    </div>
-</section>
+        <button class="options" aria-label="Opções" type="button">
+            <i data-lucide="more-horizontal"></i>
+        </button>
+    </header>
 
-<!-- Lista de Recargas -->
-<section class="history-section">
-    <div class="history-section-header">
-    <h2>Recargas Anteriores</h2>
-    <button class="filter-dropdown">
-        Últimos 30 dias
-        <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
-    </button>
-    </div>
 
-    <!-- Item de Recarga 1 -->
-    <article class="charge-card">
-    <div class="charge-card-header">
-        <div>
-        <h3 class="charge-location">E-Volt Pinheiros</h3>
-        <p class="charge-date">18 Jan 2026 • 14:32</p>
-        </div>
-        <span class="badge badge-success">Concluída</span>
-    </div>
-    <div class="charge-card-details">
-        <div class="detail-item">
-        <span class="detail-label">Consumido</span>
-        <span class="detail-value">45.2 kWh</span>
-        </div>
-        <div class="detail-item">
-        <span class="detail-label">Duração</span>
-        <span class="detail-value">32 min</span>
-        </div>
-        <div class="detail-item">
-        <span class="detail-label">Valor Pago</span>
-        <span class="detail-value">R$ 88,00</span>
-        </div>
-    </div>
-    </article>
+    <!-- RESUMO -->
+    <section class="summary-card">
 
-    <!-- Item de Recarga 2 -->
-    <article class="charge-card">
-    <div class="charge-card-header">
-        <div>
-        <h3 class="charge-location">E-Volt Jardins</h3>
-        <p class="charge-date">10 Jan 2026 • 09:15</p>
+        <div class="summary-col">
+
+            <span class="summary-label">
+                Total de kWh
+            </span>
+
+            <div class="summary-value" id="totalKwh">
+                -- kWh
+            </div>
+
+            <span class="summary-subtext" id="totalRecargas">
+                -- recargas
+            </span>
+
         </div>
-        <span class="badge badge-success">Concluída</span>
-    </div>
-    <div class="charge-card-details">
-        <div class="detail-item">
-        <span class="detail-label">Consumido</span>
-        <span class="detail-value">22.8 kWh</span>
+
+
+        <div class="summary-divider"></div>
+
+
+        <div class="summary-col">
+
+            <span class="summary-label">
+                Total gasto
+            </span>
+
+            <div class="summary-value highlight" id="totalGasto">
+                R$ --
+            </div>
+
+            <span class="summary-subtext">
+                Total acumulado
+            </span>
+
         </div>
-        <div class="detail-item">
-        <span class="detail-label">Duração</span>
-        <span class="detail-value">18 min</span>
+
+    </section>
+
+
+    <!-- RECARGA ATIVA -->
+    <section class="history-section" id="activeChargeSection" style="display: none;">
+
+        <div class="history-section-header">
+
+            <h2>Recarga em andamento</h2>
+
+            <span class="badge badge-active" id="activeChargeStatus">
+                Ativa
+            </span>
+
         </div>
-        <div class="detail-item">
-        <span class="detail-label">Valor Pago</span>
-        <span class="detail-value">R$ 45,82</span>
+
+
+        <article class="charge-card active-charge-card">
+
+            <div class="charge-card-header">
+
+                <div>
+
+                    <h3 class="charge-location">
+                        Recarga atual
+                    </h3>
+
+                    <p class="charge-date" id="activeChargeDate">
+                        --
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="charge-card-details">
+
+                <div class="detail-item">
+
+                    <span class="detail-label">
+                        Consumido
+                    </span>
+
+                    <span class="detail-value" id="activeEnergy">
+                        -- kWh
+                    </span>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span class="detail-label">
+                        Potência
+                    </span>
+
+                    <span class="detail-value" id="activePower">
+                        -- kW
+                    </span>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span class="detail-label">
+                        Valor estimado
+                    </span>
+
+                    <span class="detail-value" id="activeEstimatedValue">
+                        R$ --
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="active-charge-progress">
+
+                <div class="progress-header">
+
+                    <span>
+                        Estado da bateria
+                    </span>
+
+                    <strong id="activeSoc">
+                        --%
+                    </strong>
+
+                </div>
+
+
+                <div class="progress-bar">
+
+                    <div class="progress-fill" id="activeSocProgress" style="width: 0%;"></div>
+
+                </div>
+
+            </div>
+
+        </article>
+
+    </section>
+
+
+    <!-- HISTÓRICO -->
+    <section class="history-section">
+
+        <div class="history-section-header">
+
+            <h2>Recargas Anteriores</h2>
+
+            <button class="filter-dropdown" id="filterButton" type="button">
+                Últimas recargas
+
+                <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+
+            </button>
+
         </div>
-    </div>
-    </article>
-</section>
+
+
+        <div id="historyList">
+
+            <div class="history-loading">
+                Carregando recargas...
+            </div>
+
+        </div>
+
+    </section>
+
 </div>
-
 {% endblock %}
 
+
 {% block Scripts %}
+
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const footerOptions = document.querySelectorAll(".footer-option");
-        const currentFooterOption = document.getElementById("footer-historicos");
-        currentFooterOption.classList.add("active");
+
+    document.addEventListener("DOMContentLoaded", async function () {
+
+        const currentFooterOption =
+            document.getElementById("footer-historicos");
+
+        if (currentFooterOption) {
+            currentFooterOption.classList.add("active");
+        }
+
+
+        const totalKwh =
+            document.getElementById("totalKwh");
+
+        const totalRecargas =
+            document.getElementById("totalRecargas");
+
+        const totalGasto =
+            document.getElementById("totalGasto");
+
+
+        const activeChargeSection =
+            document.getElementById("activeChargeSection");
+
+        const activeChargeStatus =
+            document.getElementById("activeChargeStatus");
+
+        const activeChargeDate =
+            document.getElementById("activeChargeDate");
+
+        const activeEnergy =
+            document.getElementById("activeEnergy");
+
+        const activePower =
+            document.getElementById("activePower");
+
+        const activeEstimatedValue =
+            document.getElementById("activeEstimatedValue");
+
+        const activeSoc =
+            document.getElementById("activeSoc");
+
+        const activeSocProgress =
+            document.getElementById("activeSocProgress");
+
+
+        const historyList =
+            document.getElementById("historyList");
+
+
+        /*
+         * ============================
+         * FORMATAÇÃO
+         * ============================
+         */
+
+        function toNumber(value) {
+
+            if (
+                value === null ||
+                value === undefined ||
+                value === ""
+            ) {
+                return null;
+            }
+
+            const number = Number(value);
+
+            return Number.isFinite(number)
+                ? number
+                : null;
+        }
+
+
+        function formatNumber(value, decimals = 2) {
+
+            const number = toNumber(value);
+
+            if (number === null) {
+                return "--";
+            }
+
+            return number.toLocaleString("pt-BR", {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            });
+        }
+
+
+        function formatCurrency(value) {
+
+            const number = toNumber(value);
+
+            if (number === null) {
+                return "R$ --";
+            }
+
+            return number.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL"
+            });
+        }
+
+
+        function formatDate(dateString) {
+
+            if (!dateString) {
+                return "--";
+            }
+
+            const date = new Date(dateString);
+
+            if (Number.isNaN(date.getTime())) {
+                return "--";
+            }
+
+            return date.toLocaleString("pt-BR", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            });
+        }
+
+
+        function formatDuration(start, end) {
+
+            if (!start || !end) {
+                return "--";
+            }
+
+            const startDate = new Date(start);
+            const endDate = new Date(end);
+
+            if (
+                Number.isNaN(startDate.getTime()) ||
+                Number.isNaN(endDate.getTime())
+            ) {
+                return "--";
+            }
+
+            const difference =
+                endDate.getTime() - startDate.getTime();
+
+
+            if (difference < 0) {
+                return "--";
+            }
+
+
+            const totalMinutes =
+                Math.round(difference / 60000);
+
+
+            const hours =
+                Math.floor(totalMinutes / 60);
+
+            const minutes =
+                totalMinutes % 60;
+
+
+            if (hours > 0) {
+
+                return `${hours}h ${minutes}min`;
+
+            }
+
+
+            return `${minutes} min`;
+        }
+
+
+        function formatStatus(status) {
+
+            if (!status) {
+                return "Desconhecida";
+            }
+
+            const value =
+                status
+                    .toString()
+                    .toLowerCase();
+
+
+            const statuses = {
+
+                ativa: "Ativa",
+                ativo: "Ativa",
+
+                iniciada: "Iniciada",
+
+                carregando: "Carregando",
+
+                pendente: "Pendente",
+
+                concluida: "Concluída",
+                concluída: "Concluída",
+
+                finalizada: "Finalizada",
+
+                cancelada: "Cancelada",
+
+                erro: "Erro"
+
+            };
+
+
+            return statuses[value] || status;
+        }
+
+
+        function getStatusClass(status) {
+
+            if (!status) {
+                return "";
+            }
+
+            const value =
+                status
+                    .toString()
+                    .toLowerCase();
+
+
+            if (
+                value === "concluida" ||
+                value === "concluída" ||
+                value === "finalizada"
+            ) {
+                return "badge-success";
+            }
+
+
+            if (
+                value === "ativa" ||
+                value === "ativo" ||
+                value === "carregando" ||
+                value === "iniciada"
+            ) {
+                return "badge-active";
+            }
+
+
+            if (value === "cancelada") {
+                return "badge-cancelled";
+            }
+
+
+            return "";
+        }
+
+
+        function isActive(recarga) {
+
+            if (!recarga) {
+                return false;
+            }
+
+            const status =
+                (recarga.status || "")
+                    .toString()
+                    .toLowerCase();
+
+
+            return [
+                "ativa",
+                "ativo",
+                "iniciada",
+                "carregando",
+                "pendente"
+            ].includes(status);
+        }
+
+
+        /*
+         * ============================
+         * RESUMO
+         * ============================
+         */
+
+        async function carregarResumo() {
+
+            const response =
+                await fetch("/api/recargas/resumo", {
+                    method: "GET",
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                });
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    `Erro ao carregar resumo: ${response.status}`
+                );
+
+            }
+
+
+            const resumo =
+                await response.json();
+
+
+            /*
+             * Total de energia
+             */
+
+            totalKwh.textContent =
+                `${formatNumber(resumo.total_kwh)} kWh`;
+
+
+            /*
+             * Quantidade de recargas
+             */
+
+            const quantidade =
+                toNumber(resumo.total_recargas);
+
+
+            if (quantidade !== null) {
+
+                totalRecargas.textContent =
+                    quantidade === 1
+                        ? "1 recarga"
+                        : `${formatNumber(quantidade, 0)} recargas`;
+
+            }
+
+
+            /*
+             * Total gasto
+             */
+
+            totalGasto.textContent =
+                formatCurrency(resumo.total_gasto);
+
+
+            /*
+             * Recarga ativa
+             */
+
+            renderActiveCharge(
+                resumo.recarga_ativa
+            );
+
+        }
+
+
+        /*
+         * ============================
+         * RECARGA ATIVA
+         * ============================
+         */
+
+        function renderActiveCharge(recarga) {
+
+            if (!recarga || !isActive(recarga)) {
+
+                activeChargeSection.style.display =
+                    "none";
+
+                return;
+            }
+
+
+            activeChargeSection.style.display =
+                "block";
+
+
+            activeChargeStatus.textContent =
+                formatStatus(recarga.status);
+
+
+            activeChargeStatus.className =
+                `badge ${getStatusClass(recarga.status)}`;
+
+
+            activeChargeDate.textContent =
+                recarga.iniciada_em
+                    ? formatDate(recarga.iniciada_em)
+                    : formatDate(recarga.data_criacao);
+
+
+            /*
+             * Energia entregue
+             */
+
+            const energia =
+                recarga.energia_entregue_kwh ??
+                recarga.quantidade_kwh;
+
+
+            activeEnergy.textContent =
+                `${formatNumber(energia)} kWh`;
+
+
+            /*
+             * Potência
+             */
+
+            activePower.textContent =
+                `${formatNumber(recarga.potencia_atual_kw)} kW`;
+
+
+            /*
+             * Valor
+             */
+
+            activeEstimatedValue.textContent =
+                formatCurrency(recarga.valor_estimado);
+
+
+            /*
+             * SOC
+             */
+
+            const soc =
+                toNumber(recarga.soc_atual);
+
+
+            if (soc !== null) {
+
+                const safeSoc =
+                    Math.max(
+                        0,
+                        Math.min(100, soc)
+                    );
+
+
+                activeSoc.textContent =
+                    `${formatNumber(safeSoc, 1)}%`;
+
+
+                activeSocProgress.style.width =
+                    `${safeSoc}%`;
+
+            } else {
+
+                activeSoc.textContent =
+                    "--%";
+
+                activeSocProgress.style.width =
+                    "0%";
+            }
+
+        }
+
+
+        /*
+         * ============================
+         * HISTÓRICO
+         * ============================
+         */
+
+        async function carregarRecargas() {
+
+            historyList.innerHTML = `
+            <div class="history-loading">
+                Carregando recargas...
+            </div>
+        `;
+
+
+            const response =
+                await fetch("/api/recargas", {
+                    method: "GET",
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                });
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    `Erro ao carregar recargas: ${response.status}`
+                );
+
+            }
+
+
+            const recargas =
+                await response.json();
+
+
+            renderHistory(recargas);
+
+        }
+
+
+        /*
+         * ============================
+         * RENDER HISTÓRICO
+         * ============================
+         */
+
+        function renderHistory(recargas) {
+
+            if (!Array.isArray(recargas)) {
+
+                renderHistoryError();
+
+                return;
+            }
+
+
+            /*
+             * Remove recargas ativas.
+             *
+             * Elas aparecem no card
+             * "Recarga em andamento".
+             */
+
+            const historico =
+                recargas.filter(
+                    recarga => !isActive(recarga)
+                );
+
+
+            /*
+             * Ordena da mais recente
+             * para a mais antiga.
+             */
+
+            historico.sort(function (a, b) {
+
+                const dateA =
+                    new Date(
+                        a.finalizada_em ||
+                        a.iniciada_em ||
+                        a.data_criacao
+                    ).getTime();
+
+
+                const dateB =
+                    new Date(
+                        b.finalizada_em ||
+                        b.iniciada_em ||
+                        b.data_criacao
+                    ).getTime();
+
+
+                return dateB - dateA;
+
+            });
+
+
+            if (historico.length === 0) {
+
+                renderEmptyHistory();
+
+                return;
+            }
+
+
+            historyList.innerHTML =
+                historico
+                    .map(
+                        recarga =>
+                            createChargeCard(recarga)
+                    )
+                    .join("");
+
+
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+        }
+
+
+        /*
+         * ============================
+         * CARD DE RECARGA
+         * ============================
+         */
+
+        function createChargeCard(recarga) {
+
+            const statusText =
+                formatStatus(recarga.status);
+
+
+            const statusClass =
+                getStatusClass(recarga.status);
+
+
+            /*
+             * A API fornece estacao_id,
+             * mas não fornece o nome da estação.
+             */
+
+            const stationName =
+                recarga.estacao_id !== null &&
+                    recarga.estacao_id !== undefined
+                    ? `Estação #${recarga.estacao_id}`
+                    : "Estação de recarga";
+
+
+            const date =
+                recarga.finalizada_em ||
+                recarga.iniciada_em ||
+                recarga.data_criacao;
+
+
+            /*
+             * Para histórico, energia_entregue_kwh
+             * representa melhor o consumo real.
+             */
+
+            const energy =
+                recarga.energia_entregue_kwh ??
+                recarga.quantidade_kwh;
+
+
+            /*
+             * O valor final é usado quando
+             * a recarga já foi concluída.
+             */
+
+            const amount =
+                recarga.valor_final ??
+                recarga.valor_estimado;
+
+
+            const duration =
+                formatDuration(
+                    recarga.iniciada_em,
+                    recarga.finalizada_em
+                );
+
+
+            return `
+            <article class="charge-card">
+
+                <div class="charge-card-header">
+
+                    <div>
+
+                        <h3 class="charge-location">
+                            ${escapeHtml(stationName)}
+                        </h3>
+
+                        <p class="charge-date">
+                            ${formatDate(date)}
+                        </p>
+
+                    </div>
+
+
+                    <span class="badge ${statusClass}">
+                        ${escapeHtml(statusText)}
+                    </span>
+
+                </div>
+
+
+                <div class="charge-card-details">
+
+                    <div class="detail-item">
+
+                        <span class="detail-label">
+                            Consumido
+                        </span>
+
+                        <span class="detail-value">
+                            ${formatNumber(energy)} kWh
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail-item">
+
+                        <span class="detail-label">
+                            Duração
+                        </span>
+
+                        <span class="detail-value">
+                            ${duration}
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail-item">
+
+                        <span class="detail-label">
+                            Valor Pago
+                        </span>
+
+                        <span class="detail-value">
+                            ${formatCurrency(amount)}
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </article>
+        `;
+
+        }
+
+
+        /*
+         * ============================
+         * ESTADOS
+         * ============================
+         */
+
+        function renderEmptyHistory() {
+
+            historyList.innerHTML = `
+            <div class="history-empty">
+
+                <i data-lucide="battery-charging"></i>
+
+                <h3>
+                    Nenhuma recarga anterior
+                </h3>
+
+                <p>
+                    Suas recargas concluídas
+                    aparecerão aqui.
+                </p>
+
+            </div>
+        `;
+
+
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+        }
+
+
+        function renderHistoryError() {
+
+            historyList.innerHTML = `
+            <div class="history-empty error-state">
+
+                <i data-lucide="alert-circle"></i>
+
+                <h3>
+                    Não foi possível carregar
+                </h3>
+
+                <p>
+                    O servidor retornou dados
+                    inválidos para as recargas.
+                </p>
+
+            </div>
+        `;
+
+
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+        }
+
+
+        /*
+         * ============================
+         * SEGURANÇA
+         * ============================
+         */
+
+        function escapeHtml(value) {
+
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+
+        }
+
+
+        /*
+         * ============================
+         * CARREGAMENTO
+         * ============================
+         */
+
+        try {
+
+            await Promise.all([
+                carregarResumo(),
+                carregarRecargas()
+            ]);
+
+        } catch (error) {
+
+            console.error(
+                "Erro ao carregar página de histórico:",
+                error
+            );
+
+
+            /*
+             * Se o resumo falhar
+             */
+
+            totalKwh.textContent =
+                "-- kWh";
+
+            totalRecargas.textContent =
+                "Não foi possível carregar";
+
+            totalGasto.textContent =
+                "R$ --";
+
+
+            /*
+             * Se o histórico falhar
+             */
+
+            if (
+                historyList.textContent
+                    .includes("Carregando")
+            ) {
+
+                renderHistoryError();
+
+            }
+
+        }
+
     });
+
 </script>
+
 {% endblock %}

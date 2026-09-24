@@ -1,100 +1,1670 @@
 {% extends "base.html" %}
 
-{% block Titulo %} {% endblock %}
+{% block Titulo %}Meu Perfil{% endblock %}
 
-{% block Head %} 
-    <link rel="stylesheet" href="/frontend/static/perfil.css">
+{% block Head %}
+<link rel="stylesheet" href="/frontend/static/perfil.css">
 {% endblock %}
 
 {% block Conteudo %}
+
 <div class="wrapper">
-<header class="main-header">
-    <h1 style="margin:0px" class="page-title">Meu Perfil</h1>
-</header>
 
-<section class="user-card">
-    <div class="user-avatar-wrapper">
-    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150" alt="Foto de Thiago Silva" class="user-avatar">
-    </div>
-    <div class="user-info">
-    <h2 class="user-name">Thiago Silva</h2>
-    <p class="user-email">thiago.silva@eletromail.com</p>
-    </div>
-    <button class="btn-icon" aria-label="Editar Perfil">
-        <i data-lucide="pencil" style="width: 18px; height : 18px; stroke : var(--primary)"></i>
-    </button>
-</section>
+    <header class="main-header">
+        <h1 style="margin:0" class="page-title">Meu Perfil</h1>
+    </header>
 
-<!-- Secção: Meus Veículos -->
-<section class="card-section">
-    <div class="card-header">
-    <h2>Meus Veículos</h2>
-    <button class="btn-icon-simple" aria-label="Editar Veículos">
-        <i data-lucide="pencil" style="width: 18px; height : 18px; stroke : var(--l-text-2)"></i>
-    </button>
-    </div>
-    <div class="vehicle-item">
-        <i data-lucide="truck" style="width: 28px; height : 28px; stroke : var(--primary); margin-right:  var(--s-4)"></i>
-        <div class="vehicle-details">
-            <h3 class="vehicle-name">BYD Dolphin GS</h3>
-            <p class="vehicle-sub">60 kWh • CCS2 e Type 2</p>
+    <section class="user-card">
+
+        <div class="user-avatar-wrapper">
+            <img id="profilePhoto" src="/frontend/static/images/amper/avatar-default.png" alt="Foto de perfil"
+                class="user-avatar">
         </div>
-    </div>
-</section>
 
-<!-- Secção: Métodos de Pagamento -->
-<section class="card-section">
-    <div class="card-header">
-    <h2>Métodos de Pagamento</h2>
-    <button class="btn-icon-simple" aria-label="Editar Métodos de Pagamento">
-        <i data-lucide="pencil" style="width: 18px; height : 18px; stroke : var(--l-text-2)"></i>
-    </button>
-    </div>
-    <div class="payment-list">
-    <div class="payment-item">
-        <i class="payment-icon" data-lucide="credit-card-check" style="width: 20px; height: 20px; stroke : currentColor"></i>
-        <span>Visa final 4252 (Principal)</span>
-    </div>
-    <div class="payment-item">
-        <i class="payment-icon" data-lucide="circle-x" style="width: 20px; height: 20px; stroke : var(--secondary)"></i>
-        <span>Chave PIX Salva</span>
-    </div>
-    </div>
-</section>
+        <div class="user-info">
+            <h2 id="profileName" class="user-name">Carregando...</h2>
+            <p id="profileEmail" class="user-email">Carregando...</p>
+        </div>
 
-<!-- Secção: Configurações -->
-<section class="card-section">
-    <div class="card-header">
-    <h2>Configurações</h2>
-    </div>
-    <div class="settings-list">
-    <div class="setting-item">
-        <span>Notificações Push</span>
-        <label class="toggle-switch">
-        <input type="checkbox" checked>
-        <span class="slider"></span>
-        </label>
-    </div>
-    <div class="setting-item">
-        <span>Modo de recarga preferido</span>
-        <span class="setting-value"><b>Econômico</b></span>
-    </div>
-    <div class="setting-item">
-        <span>Idioma</span>
-        <span class="setting-value">Português (BR)</span>
-    </div>
-    </div>
-</section>
+        <button type="button" id="btnEditProfile" class="btn-icon" aria-label="Editar Perfil">
+            <i data-lucide="pencil" style="width:18px;height:18px;stroke:var(--primary)"></i>
+        </button>
+
+    </section>
+
+    <section id="profileFormSection" class="card-section hidden">
+
+        <div class="card-header">
+            <h2>Editar Perfil</h2>
+        </div>
+
+        <form id="profileForm">
+
+            <div class="input-section">
+                <span>Nome</span>
+
+                <div class="input-wrap">
+                    <input id="inputNome" type="text" required>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <span>Telefone</span>
+
+                <div class="input-wrap">
+                    <input id="inputTelefone" type="text" maxlength="15" placeholder="(11) 99999-9999">
+                </div>
+            </div>
+
+            <div class="input-section">
+                <span>Foto de perfil</span>
+
+                <div class="input-wrap">
+                    <input id="inputFoto" type="file" accept="image/png,image/jpeg,image/webp">
+                </div>
+            </div>
+
+            <button type="submit" class="login-button">
+                Salvar alterações
+            </button>
+
+            <button type="button" id="btnCancelProfile" class="btn-text">
+                Cancelar
+            </button>
+
+            <p id="profileMessage" class="error-msg"></p>
+
+        </form>
+
+    </section>
+
+    <section class="card-section">
+
+        <div class="card-header">
+
+            <h2>Meus Veículos</h2>
+
+            <button type="button" id="btnAddVehicle" class="btn-icon-simple" aria-label="Adicionar veículo">
+                <i data-lucide="plus" style="width:18px;height:18px;stroke:var(--l-text-2)"></i>
+            </button>
+
+        </div>
+
+        <div id="vehicleList">
+            <p>Carregando veículos...</p>
+        </div>
+
+        <form id="vehicleForm" class="hidden">
+
+            <div class="input-section">
+                <span>Marca</span>
+
+                <div class="input-wrap">
+                    <input id="vehicleMarca" type="text" required>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <span>Modelo</span>
+
+                <div class="input-wrap">
+                    <input id="vehicleModelo" type="text" required>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <span>Versão</span>
+
+                <div class="input-wrap">
+                    <input id="vehicleVersao" type="text">
+                </div>
+            </div>
+
+            <div class="input-section">
+                <span>Bateria (kWh)</span>
+
+                <div class="input-wrap">
+                    <input id="vehicleBattery" type="number" step="0.01" min="0" required>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <span>Conector principal</span>
+
+                <div class="input-wrap">
+                    <input id="vehicleConnector" type="text" placeholder="CCS2" required>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <span>Conector secundário</span>
+
+                <div class="input-wrap">
+                    <input id="vehicleSecondaryConnector" type="text" placeholder="Type 2">
+                </div>
+            </div>
+
+            <label class="setting-item">
+                <span>Definir como principal</span>
+
+                <input id="vehiclePrincipal" type="checkbox">
+            </label>
+
+            <button type="submit" class="login-button">
+                Adicionar veículo
+            </button>
+
+            <button type="button" id="btnCancelVehicle" class="btn-text">
+                Cancelar
+            </button>
+
+            <p id="vehicleMessage" class="error-msg"></p>
+
+        </form>
+
+    </section>
+
+    <section class="card-section">
+
+        <div class="card-header">
+
+            <h2>Métodos de Pagamento</h2>
+
+            <button type="button" id="btnAddPayment" class="btn-icon-simple" aria-label="Adicionar método de pagamento">
+                <i data-lucide="plus" style="width:18px;height:18px;stroke:var(--l-text-2)"></i>
+            </button>
+
+        </div>
+
+        <div id="paymentList">
+            <p>Carregando métodos de pagamento...</p>
+        </div>
+
+
+        <form id="paymentForm" class="hidden">
+
+            <div class="input-section">
+
+                <span>Tipo</span>
+
+                <div class="input-wrap">
+                    <select id="paymentType">
+
+                        <option value="CARTAO_CREDITO">
+                            Cartão
+                        </option>
+
+                        <option value="pix">
+                            PIX
+                        </option>
+
+                    </select>
+                </div>
+
+            </div>
+
+
+            <div id="cardFields">
+
+                <div class="input-section">
+
+                    <span>Bandeira</span>
+
+                    <div class="input-wrap">
+                        <input id="paymentBrand" type="text" placeholder="Visa">
+                    </div>
+
+                </div>
+
+
+                <div class="input-section">
+
+                    <span>Últimos 4 dígitos</span>
+
+                    <div class="input-wrap">
+                        <input id="paymentLast4" type="text" maxlength="4" inputmode="numeric" placeholder="4252">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <label class="setting-item">
+
+                <span>Definir como principal</span>
+
+                <input id="paymentPrincipal" type="checkbox">
+
+            </label>
+
+
+            <button type="submit" class="login-button">
+                Adicionar método
+            </button>
+
+            <button type="button" id="btnCancelPayment" class="btn-text">
+                Cancelar
+            </button>
+
+            <p id="paymentMessage" class="error-msg"></p>
+
+        </form>
+
+    </section>
+
+    <section class="card-section">
+
+        <div class="card-header">
+            <h2>Configurações</h2>
+        </div>
+
+        <div class="settings-list">
+
+            <div class="setting-item">
+
+                <span>Notificações Push</span>
+
+                <label class="toggle-switch">
+
+                    <input id="pushNotifications" type="checkbox" checked>
+
+                    <span class="slider"></span>
+
+                </label>
+
+            </div>
+
+            <div class="setting-item">
+
+                <span>Modo de recarga preferido</span>
+
+                <span class="setting-value">
+                    <b>Econômico</b>
+                </span>
+
+            </div>
+
+            <div class="setting-item">
+
+                <span>Idioma</span>
+
+                <span class="setting-value">
+                    Português (BR)
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
 
 </div>
+
 {% endblock %}
 
 {% block Scripts %}
+
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const footerOptions = document.querySelectorAll(".footer-option");
-        const currentFooterOption = document.getElementById("footer-perfil");
-        currentFooterOption.classList.add("active");
-    });
+
+    /* =====================================================
+       CONFIGURAÇÃO
+    ===================================================== */
+
+    const usuarioId = Number(
+        sessionStorage.getItem("usuario_id")
+    );
+
+    if (!usuarioId) {
+        window.location.href = "/";
+    }
+
+
+    /* =====================================================
+       ELEMENTOS
+    ===================================================== */
+
+    const profileName = document.getElementById("profileName");
+    const profileEmail = document.getElementById("profileEmail");
+    const profilePhoto = document.getElementById("profilePhoto");
+
+    const profileFormSection =
+        document.getElementById("profileFormSection");
+
+    const vehicleList =
+        document.getElementById("vehicleList");
+
+    const paymentList =
+        document.getElementById("paymentList");
+
+
+    /* =====================================================
+       UTILITÁRIOS
+    ===================================================== */
+
+    function mostrarMensagem(elemento, mensagem, tipo = "error") {
+
+        elemento.textContent = mensagem;
+
+        elemento.classList.remove(
+            "error",
+            "success"
+        );
+
+        elemento.classList.add(
+            "show",
+            tipo
+        );
+
+        setTimeout(() => {
+
+            elemento.textContent = "";
+
+            elemento.classList.remove(
+                "show",
+                "error",
+                "success"
+            );
+
+        }, 1500);
+    }
+
+
+    async function lerResposta(response) {
+
+        const texto = await response.text();
+
+        if (!texto) {
+            return {};
+        }
+
+        try {
+            return JSON.parse(texto);
+        } catch {
+            return {
+                detail: texto
+            };
+        }
+    }
+
+
+    function mensagemErro(dados, mensagemPadrao) {
+
+        if (typeof dados.detail === "string") {
+            return dados.detail;
+        }
+
+        if (Array.isArray(dados.detail)) {
+
+            return dados.detail
+                .map(erro =>
+                    typeof erro === "string"
+                        ? erro
+                        : erro.msg || "Dados inválidos."
+                )
+                .join(" ");
+
+        }
+
+        return mensagemPadrao;
+    }
+
+
+    function formatarTelefone(valor) {
+
+        if (!valor) {
+            return "";
+        }
+
+        const numeros = String(valor)
+            .replace(/\D/g, "");
+
+        if (numeros.length === 11) {
+
+            return numeros.replace(
+                /^(\d{2})(\d{5})(\d{4})$/,
+                "($1) $2-$3"
+            );
+
+        }
+
+        if (numeros.length === 10) {
+
+            return numeros.replace(
+                /^(\d{2})(\d{4})(\d{4})$/,
+                "($1) $2-$3"
+            );
+
+        }
+
+        return valor;
+    }
+
+
+    /* =====================================================
+       CARREGAR USUÁRIO
+    ===================================================== */
+
+    async function carregarUsuario() {
+
+        try {
+
+            const response = await fetch(
+                `/api/usuarios/me?usuario_id=${usuarioId}`
+            );
+
+            const dados = await lerResposta(response);
+
+            if (!response.ok) {
+                throw new Error(
+                    mensagemErro(
+                        dados,
+                        "Não foi possível carregar o usuário."
+                    )
+                );
+            }
+
+            profileName.textContent =
+                dados.nome || "Usuário";
+
+            profileEmail.textContent =
+                dados.email || "";
+
+            document.getElementById("inputNome").value =
+                dados.nome || "";
+
+            document.getElementById("inputTelefone").value =
+                formatarTelefone(dados.telefone);
+
+            if (dados.url_foto) {
+                profilePhoto.src = dados.url_foto;
+            }
+
+        } catch (error) {
+
+            console.error(error);
+
+            profileName.textContent =
+                "Não foi possível carregar";
+
+            profileEmail.textContent = "";
+
+        }
+
+    }
+
+
+    /* =====================================================
+       CARREGAR VEÍCULOS
+    ===================================================== */
+
+    async function carregarVeiculos() {
+
+        vehicleList.innerHTML =
+            "<p>Carregando veículos...</p>";
+
+        try {
+
+            const response = await fetch(
+                `/api/veiculos?usuario_id=${usuarioId}`
+            );
+
+            const dados = await lerResposta(response);
+
+            if (!response.ok) {
+                throw new Error(
+                    mensagemErro(
+                        dados,
+                        "Não foi possível carregar os veículos."
+                    )
+                );
+            }
+
+            renderizarVeiculos(dados);
+
+        } catch (error) {
+
+            console.error(error);
+
+            vehicleList.innerHTML = `
+                <p class="error-msg show">
+                    ${error.message}
+                </p>
+            `;
+
+        }
+
+    }
+
+    function renderizarVeiculos(veiculos) {
+
+            vehicleList.innerHTML = "";
+
+            if (!Array.isArray(veiculos) || veiculos.length === 0) {
+
+                vehicleList.innerHTML = `
+            <p>Nenhum veículo cadastrado.</p>
+        `;
+
+                return;
+            }
+
+            veiculos.forEach(veiculo => {
+
+                const item = document.createElement("div");
+
+                item.className = "vehicle-item";
+
+                const versao =
+                    veiculo.versao
+                        ? ` ${veiculo.versao}`
+                        : "";
+
+                const conectores = [
+                    veiculo.tipo_conector,
+                    veiculo.conector_secundario
+                ]
+                    .filter(Boolean)
+                    .join(" e ");
+
+                item.innerHTML = `
+
+            <i
+                data-lucide="car-front"
+                class="vehicle-icon"
+            ></i>
+
+            <div class="vehicle-details">
+
+                <h3 class="vehicle-name">
+
+                    ${veiculo.marca}
+                    ${veiculo.modelo}
+                    ${versao}
+
+                    ${veiculo.principal
+                        ? `<small>(Principal)</small>`
+                        : ""
+                    }
+
+                </h3>
+
+                <p class="vehicle-sub">
+
+                    ${veiculo.capacidade_bateria_kwh}
+                    kWh
+
+                    ${conectores
+                        ? ` • ${conectores}`
+                        : ""
+                    }
+
+                </p>
+
+                <div class="vehicle-actions">
+
+                    ${!veiculo.principal
+                        ? `
+                            <button
+                                type="button"
+                                class="btn-text btn-set-principal"
+                                data-id="${veiculo.id}"
+                            >
+                                Definir como principal
+                            </button>
+                        `
+                        : ""
+                    }
+
+                    <button
+                        type="button"
+                        class="btn-delete btn-delete-vehicle"
+                        data-id="${veiculo.id}"
+                        aria-label="Excluir veículo"
+                    >
+                        <i data-lucide="trash-2"></i>
+                        Excluir
+                    </button>
+
+                </div>
+
+            </div>
+        `;
+
+                vehicleList.appendChild(item);
+
+            });
+
+            /*
+             * Definir veículo principal
+             */
+            document
+                .querySelectorAll(".btn-set-principal")
+                .forEach(button => {
+
+                    button.addEventListener(
+                        "click",
+                        () => definirVeiculoPrincipal(
+                            button.dataset.id
+                        )
+                    );
+
+                });
+
+            /*
+             * Excluir veículo
+             */
+            document
+                .querySelectorAll(".btn-delete-vehicle")
+                .forEach(button => {
+
+                    button.addEventListener(
+                        "click",
+                        () => excluirVeiculo(
+                            button.dataset.id
+                        )
+                    );
+
+                });
+
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+        }
+    
+
+
+    /* =====================================================
+       DEFINIR VEÍCULO PRINCIPAL
+    ===================================================== */
+
+    async function definirVeiculoPrincipal(veiculoId) {
+
+        try {
+
+            const response = await fetch(
+                `/api/veiculos/${veiculoId}/principal`,
+                {
+                    method: "PATCH"
+                }
+            );
+
+            const dados = await lerResposta(response);
+
+            if (!response.ok) {
+
+                throw new Error(
+                    mensagemErro(
+                        dados,
+                        "Não foi possível definir o veículo principal."
+                    )
+                );
+
+            }
+
+            await carregarVeiculos();
+
+        } catch (error) {
+
+            console.error(error);
+
+            mostrarMensagem(
+                document.getElementById("vehicleMessage"),
+                error.message
+            );
+
+        }
+
+    }
+
+    async function excluirVeiculo(veiculoId) {
+
+        const confirmar = window.confirm(
+            "Tem certeza que deseja excluir este veículo?"
+        );
+
+        if (!confirmar) {
+            return;
+        }
+
+        const message =
+            document.getElementById("vehicleMessage");
+
+        try {
+
+            const response = await fetch(
+                `/api/veiculos/${veiculoId}`,
+                {
+                    method: "DELETE"
+                }
+            );
+
+            const dados =
+                await lerResposta(response);
+
+            if (!response.ok) {
+
+                throw new Error(
+                    mensagemErro(
+                        dados,
+                        "Não foi possível excluir o veículo."
+                    )
+                );
+
+            }
+
+            mostrarMensagem(
+                message,
+                "Veículo excluído com sucesso!",
+                "success"
+            );
+
+            await carregarVeiculos();
+
+        } catch (error) {
+
+            console.error(error);
+
+            mostrarMensagem(
+                message,
+                error.message || "Não foi possível excluir o veículo."
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       CARREGAR PAGAMENTOS
+    ===================================================== */
+
+    async function carregarPagamentos() {
+
+        paymentList.innerHTML =
+            "<p>Carregando métodos de pagamento...</p>";
+
+        try {
+
+            const response = await fetch(
+                `/api/metodos-pagamento?usuario_id=${usuarioId}`
+            );
+
+            const dados = await lerResposta(response);
+
+            if (!response.ok) {
+
+                throw new Error(
+                    mensagemErro(
+                        dados,
+                        "Não foi possível carregar os pagamentos."
+                    )
+                );
+
+            }
+
+            renderizarPagamentos(dados);
+
+        } catch (error) {
+
+            console.error(error);
+
+            paymentList.innerHTML = `
+                <p class="error-msg show">
+                    ${error.message}
+                </p>
+            `;
+
+        }
+
+    }
+
+
+    function renderizarPagamentos(metodos) {
+
+            paymentList.innerHTML = "";
+
+            if (!Array.isArray(metodos) || metodos.length === 0) {
+
+                paymentList.innerHTML = `
+            <p>Nenhum método de pagamento cadastrado.</p>
+        `;
+
+                return;
+            }
+
+            metodos.forEach(metodo => {
+
+                const item =
+                    document.createElement("div");
+
+                item.className = "payment-item";
+
+                const isPix =
+                    metodo.tipo &&
+                    metodo.tipo.toLowerCase() === "pix";
+
+                let descricao = "";
+
+                if (isPix) {
+
+                    descricao = "Chave PIX salva";
+
+                } else {
+
+                    const bandeira =
+                        metodo.bandeira || "Cartão";
+
+                    const ultimos =
+                        metodo.ultimos_4
+                            ? `final ${metodo.ultimos_4}`
+                            : "";
+
+                    descricao =
+                        `${bandeira} ${ultimos}`.trim();
+
+                }
+
+                item.innerHTML = `
+
+            <div class="payment-main">
+
+                <i
+                    class="payment-icon"
+                    data-lucide="${isPix
+                        ? "qr-code"
+                        : "credit-card"
+                    }"
+                ></i>
+
+                <div class="payment-info">
+
+                    <span class="payment-description">
+                        ${descricao}
+                    </span>
+
+                    ${metodo.principal
+                        ? `
+                            <span class="payment-principal">
+                                Principal
+                            </span>
+                        `
+                        : ""
+                    }
+
+                </div>
+
+            </div>
+
+            <button
+                type="button"
+                class="btn-delete btn-delete-payment"
+                data-id="${metodo.id}"
+                aria-label="Excluir método de pagamento"
+            >
+                <i data-lucide="trash-2"></i>
+                Excluir
+            </button>
+
+        `;
+
+                paymentList.appendChild(item);
+
+            });
+
+            /*
+             * Excluir métodos de pagamento
+             */
+            document
+                .querySelectorAll(".btn-delete-payment")
+                .forEach(button => {
+
+                    button.addEventListener(
+                        "click",
+                        () => excluirMetodoPagamento(
+                            button.dataset.id
+                        )
+                    );
+
+                });
+
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+        }
+    /* =====================================================
+       EXCLUIR MÉTODO DE PAGAMENTO
+    ===================================================== */
+
+    async function excluirMetodoPagamento(metodoId) {
+
+        const confirmar = window.confirm(
+            "Tem certeza que deseja excluir este método de pagamento?"
+        );
+
+        if (!confirmar) {
+            return;
+        }
+
+        const message =
+            document.getElementById("paymentMessage");
+
+        try {
+
+            const response = await fetch(
+                `/api/metodos-pagamento/${metodoId}`,
+                {
+                    method: "DELETE"
+                }
+            );
+
+            const dados =
+                await lerResposta(response);
+
+            if (!response.ok) {
+
+                throw new Error(
+                    mensagemErro(
+                        dados,
+                        "Não foi possível excluir o método de pagamento."
+                    )
+                );
+
+            }
+
+            mostrarMensagem(
+                message,
+                "Método de pagamento excluído com sucesso!",
+                "success"
+            );
+
+            await carregarPagamentos();
+
+        } catch (error) {
+
+            console.error(error);
+
+            mostrarMensagem(
+                message,
+                error.message ||
+                "Não foi possível excluir o método de pagamento."
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       EDITAR PERFIL
+    ===================================================== */
+
+    document
+        .getElementById("btnEditProfile")
+        .addEventListener("click", () => {
+
+            profileFormSection.classList.toggle("hidden");
+
+        });
+
+
+    document
+        .getElementById("btnCancelProfile")
+        .addEventListener("click", () => {
+
+            profileFormSection.classList.add("hidden");
+
+        });
+
+
+    /* =====================================================
+       SALVAR PERFIL
+    ===================================================== */
+
+    document
+        .getElementById("profileForm")
+        .addEventListener("submit", async event => {
+
+            event.preventDefault();
+
+            const nome =
+                document.getElementById("inputNome")
+                    .value
+                    .trim();
+
+            const telefone =
+                document.getElementById("inputTelefone")
+                    .value
+                    .replace(/\D/g, "");
+
+            const foto =
+                document.getElementById("inputFoto")
+                    .files[0];
+
+            const message =
+                document.getElementById("profileMessage");
+
+
+            const payload = {
+
+                nome,
+                telefone,
+
+                url_foto:
+                    foto
+                        ? await converterFotoParaDataUrl(foto)
+                        : null
+
+            };
+
+
+            try {
+
+                const response = await fetch(
+                    `/api/usuarios/me?usuario_id=${usuarioId}`,
+                    {
+                        method: "PUT",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify(payload)
+                    }
+                );
+
+
+                const dados =
+                    await lerResposta(response);
+
+
+                if (!response.ok) {
+
+                    mostrarMensagem(
+                        message,
+                        mensagemErro(
+                            dados,
+                            "Não foi possível atualizar o perfil."
+                        )
+                    );
+
+                    return;
+                }
+
+
+                profileName.textContent =
+                    dados.nome || nome;
+
+                profileEmail.textContent =
+                    dados.email || profileEmail.textContent;
+
+
+                if (dados.url_foto) {
+                    profilePhoto.src =
+                        dados.url_foto;
+                }
+
+
+                if (foto) {
+
+                    profilePhoto.src =
+                        URL.createObjectURL(foto);
+
+                }
+
+
+                mostrarMensagem(
+                    message,
+                    "Perfil atualizado!",
+                    "success"
+                );
+
+
+                setTimeout(() => {
+
+                    profileFormSection
+                        .classList
+                        .add("hidden");
+
+                }, 1500);
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                mostrarMensagem(
+                    message,
+                    "Não foi possível conectar ao servidor."
+                );
+
+            }
+
+        });
+
+
+    /* =====================================================
+       CONVERTER FOTO
+       
+       O endpoint atual aceita url_foto.
+       Para não quebrar o backend atual, a imagem
+       selecionada é convertida para Data URL.
+    ===================================================== */
+
+    function converterFotoParaDataUrl(file) {
+
+        return new Promise((resolve, reject) => {
+
+            const reader =
+                new FileReader();
+
+            reader.onload =
+                () => resolve(reader.result);
+
+            reader.onerror =
+                reject;
+
+            reader.readAsDataURL(file);
+
+        });
+
+    }
+
+
+    /* =====================================================
+       PREVIEW DA FOTO
+    ===================================================== */
+
+    document
+        .getElementById("inputFoto")
+        .addEventListener("change", event => {
+
+            const foto =
+                event.target.files[0];
+
+            if (!foto) {
+                return;
+            }
+
+            if (!foto.type.startsWith("image/")) {
+
+                event.target.value = "";
+
+                mostrarMensagem(
+                    document.getElementById("profileMessage"),
+                    "Selecione uma imagem válida."
+                );
+
+                return;
+            }
+
+            profilePhoto.src =
+                URL.createObjectURL(foto);
+
+        });
+
+
+    /* =====================================================
+       MÁSCARA TELEFONE
+    ===================================================== */
+
+    document
+        .getElementById("inputTelefone")
+        .addEventListener("input", event => {
+
+            let valor =
+                event.target.value
+                    .replace(/\D/g, "")
+                    .substring(0, 11);
+
+
+            if (valor.length <= 10) {
+
+                valor = valor.replace(
+                    /^(\d{2})(\d{0,4})(\d{0,4})$/,
+                    (_, ddd, parte1, parte2) => {
+
+                        let resultado = "";
+
+                        if (ddd) {
+                            resultado = `(${ddd}`;
+                        }
+
+                        if (ddd.length === 2) {
+                            resultado += ") ";
+                        }
+
+                        resultado += parte1;
+
+                        if (parte2) {
+                            resultado += `-${parte2}`;
+                        }
+
+                        return resultado;
+
+                    }
+                );
+
+            } else {
+
+                valor = valor.replace(
+                    /^(\d{2})(\d{0,5})(\d{0,4})$/,
+                    (_, ddd, parte1, parte2) => {
+
+                        let resultado = "";
+
+                        if (ddd) {
+                            resultado = `(${ddd}`;
+                        }
+
+                        if (ddd.length === 2) {
+                            resultado += ") ";
+                        }
+
+                        resultado += parte1;
+
+                        if (parte2) {
+                            resultado += `-${parte2}`;
+                        }
+
+                        return resultado;
+
+                    }
+                );
+
+            }
+
+            event.target.value = valor;
+
+        });
+
+
+    /* =====================================================
+       FORMULÁRIO VEÍCULO
+    ===================================================== */
+
+    document
+        .getElementById("btnAddVehicle")
+        .addEventListener("click", () => {
+
+            document
+                .getElementById("vehicleForm")
+                .classList
+                .toggle("hidden");
+
+        });
+
+
+    document
+        .getElementById("btnCancelVehicle")
+        .addEventListener("click", () => {
+
+            document
+                .getElementById("vehicleForm")
+                .classList
+                .add("hidden");
+
+        });
+
+
+    document
+        .getElementById("vehicleForm")
+        .addEventListener("submit", async event => {
+
+            event.preventDefault();
+
+            const message =
+                document.getElementById("vehicleMessage");
+
+
+            const payload = {
+
+                marca:
+                    document.getElementById("vehicleMarca")
+                        .value
+                        .trim(),
+
+                modelo:
+                    document.getElementById("vehicleModelo")
+                        .value
+                        .trim(),
+
+                versao:
+                    document.getElementById("vehicleVersao")
+                        .value
+                        .trim() || null,
+
+                capacidade_bateria_kwh:
+                    Number(
+                        document.getElementById("vehicleBattery")
+                            .value
+                    ),
+
+                tipo_conector:
+                    document.getElementById("vehicleConnector")
+                        .value
+                        .trim(),
+
+                conector_secundario:
+                    document.getElementById(
+                        "vehicleSecondaryConnector"
+                    )
+                        .value
+                        .trim() || null,
+
+                principal:
+                    document.getElementById("vehiclePrincipal")
+                        .checked,
+
+                usuario_id:
+                    usuarioId
+
+            };
+
+
+            try {
+
+                const response = await fetch(
+                    "/api/veiculos",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify(payload)
+                    }
+                );
+
+
+                const dados =
+                    await lerResposta(response);
+
+
+                if (!response.ok) {
+
+                    mostrarMensagem(
+                        message,
+                        mensagemErro(
+                            dados,
+                            "Não foi possível cadastrar o veículo."
+                        )
+                    );
+
+                    return;
+                }
+
+
+                mostrarMensagem(
+                    message,
+                    "Veículo cadastrado!",
+                    "success"
+                );
+
+
+                event.target.reset();
+
+                await carregarVeiculos();
+
+                setTimeout(() => {
+
+                    event.target
+                        .classList
+                        .add("hidden");
+
+                }, 1500);
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                mostrarMensagem(
+                    message,
+                    "Não foi possível conectar ao servidor."
+                );
+
+            }
+
+        });
+
+
+    /* =====================================================
+       FORMULÁRIO PAGAMENTO
+    ===================================================== */
+
+    const paymentType =
+        document.getElementById("paymentType");
+
+    const cardFields =
+        document.getElementById("cardFields");
+
+
+    paymentType.addEventListener(
+        "change",
+        () => {
+
+            if (paymentType.value === "pix") {
+
+                cardFields.classList.add("hidden");
+
+            } else {
+
+                cardFields.classList.remove("hidden");
+
+            }
+
+        }
+    );
+
+
+    document
+        .getElementById("btnAddPayment")
+        .addEventListener("click", () => {
+
+            document
+                .getElementById("paymentForm")
+                .classList
+                .toggle("hidden");
+
+        });
+
+
+    document
+        .getElementById("btnCancelPayment")
+        .addEventListener("click", () => {
+
+            document
+                .getElementById("paymentForm")
+                .classList
+                .add("hidden");
+
+        });
+
+
+    document
+        .getElementById("paymentForm")
+        .addEventListener("submit", async event => {
+
+            event.preventDefault();
+
+            const message =
+                document.getElementById("paymentMessage");
+
+            const tipo =
+                paymentType.value;
+
+
+            const bandeira =
+                document.getElementById("paymentBrand")
+                    .value
+                    .trim();
+
+            const ultimos4 =
+                document.getElementById("paymentLast4")
+                    .value
+                    .replace(/\D/g, "");
+
+
+            if (
+                tipo === "CARTAO_CREDITO" &&
+                (
+                    !bandeira ||
+                    ultimos4.length !== 4
+                )
+            ) {
+
+                mostrarMensagem(
+                    message,
+                    "Informe a bandeira e os 4 últimos dígitos."
+                );
+
+                return;
+            }
+
+
+            const payload = {
+
+                usuario_id:
+                    usuarioId,
+
+                tipo,
+
+                bandeira:
+                    tipo === "CARTAO_CREDITO"
+                        ? bandeira
+                        : null,
+
+                ultimos_4:
+                    tipo === "CARTAO_CREDITO"
+                        ? ultimos4
+                        : null,
+
+                token_gateway:
+                    null,
+
+                principal:
+                    document.getElementById(
+                        "paymentPrincipal"
+                    ).checked
+
+            };
+
+
+            try {
+
+                const response = await fetch(
+                    "/api/metodos-pagamento",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify(payload)
+                    }
+                );
+
+
+                const dados =
+                    await lerResposta(response);
+
+
+                if (!response.ok) {
+
+                    mostrarMensagem(
+                        message,
+                        mensagemErro(
+                            dados,
+                            "Não foi possível cadastrar o pagamento."
+                        )
+                    );
+
+                    return;
+                }
+
+
+                mostrarMensagem(
+                    message,
+                    "Método de pagamento adicionado!",
+                    "success"
+                );
+
+
+                event.target.reset();
+
+                cardFields.classList.remove("hidden");
+
+                await carregarPagamentos();
+
+
+                setTimeout(() => {
+
+                    event.target
+                        .classList
+                        .add("hidden");
+
+                }, 1500);
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                mostrarMensagem(
+                    message,
+                    "Não foi possível conectar ao servidor."
+                );
+
+            }
+
+        });
+
+
+    /* =====================================================
+       FOOTER
+    ===================================================== */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        () => {
+
+            const currentFooterOption =
+                document.getElementById("footer-perfil");
+
+            if (currentFooterOption) {
+                currentFooterOption.classList.add("active");
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       INICIALIZAÇÃO
+    ===================================================== */
+
+    async function inicializarPerfil() {
+
+        await Promise.all([
+            carregarUsuario(),
+            carregarVeiculos(),
+            carregarPagamentos()
+        ]);
+
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+
+    }
+
+
+    inicializarPerfil();
+
 </script>
+
 {% endblock %}
