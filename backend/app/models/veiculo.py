@@ -20,5 +20,6 @@ class Veiculo(Base):
     conector_secundario: Mapped[str | None] = mapped_column(String(50), nullable=True)
     principal: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     ativo: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    soc_atual: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False, default=Decimal("0"))
     data_criacao: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     data_atualizacao: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

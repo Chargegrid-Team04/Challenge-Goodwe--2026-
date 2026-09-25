@@ -58,6 +58,18 @@ main {
   }
 }
 
+@keyframes completedPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 /* Encadeamento em cascata */
 .progress-section {
   animation: fadeInUp var(--transition-base) forwards;
@@ -79,6 +91,9 @@ main {
 .action-footer {
   margin-top: auto;
   padding-bottom: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   animation: fadeInUp var(--transition-base) 320ms forwards;
 }
 
@@ -104,6 +119,10 @@ main {
   transform: scale(1.03);
 }
 
+.progress-circle.completed {
+  animation: completedPulse 0.55s ease-out;
+}
+
 .progress-ring {
   width: 100%;
   height: 100%;
@@ -121,10 +140,8 @@ main {
   stroke: var(--secondary);
   stroke-width: 8;
   stroke-linecap: round;
-  /* Exemplo para 67% de preenchimento (comprimento da circunferência ~ 314px) */
   stroke-dasharray: 314;
-  stroke-dashoffset: 103;
-  animation: progressFill 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  stroke-dashoffset: 314;
   transition: stroke-dashoffset 0.5s ease;
 }
 
@@ -255,7 +272,7 @@ main {
 }
 
 /* ==========================================================================
-   5. AVISO & BOTÃO PARAR
+   5. AVISO & BOTÕES DE AÇÃO
    ========================================================================== */
 
 .idle-warning-text {
@@ -295,4 +312,54 @@ main {
 .btn-stop:active {
   transform: scale(0.97);
   box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
+}
+
+.btn-finish {
+  width: 100%;
+  min-height: 54px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid rgba(0, 217, 255, 0.38);
+  border-radius: 14px;
+  background: rgba(0, 174, 199, 0.14);
+  color: #00c7e8;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.1px;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease;
+}
+
+.btn-finish:hover {
+  background: rgba(0, 174, 199, 0.22);
+  border-color: rgba(0, 217, 255, 0.6);
+}
+
+.btn-finish:active {
+  transform: scale(0.985);
+}
+
+.btn-finish svg,
+.btn-finish i {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.screen-error {
+  display: none;
+  margin: 16px 28px 0;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 91, 91, 0.35);
+  border-radius: 12px;
+  background: rgba(255, 91, 91, 0.08);
+  color: #ff9c9c;
+  font-size: 13px;
+  line-height: 1.45;
 }

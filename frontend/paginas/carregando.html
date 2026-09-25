@@ -1,85 +1,387 @@
-{% extends "base.html" %}
-
-{% block Titulo %} {% endblock %}
-
+{% extends "base.html" %} {% block Titulo %}Recarga em Andamento{% endblock %}
 {% block Head %}
-    <link rel="stylesheet" href="/frontend/static/carregando.css"
-{% endblock %}
-
-{% block Conteudo %}
+<link rel="stylesheet" href="/frontend/static/carregando.css" />
+{% endblock %} {% block Conteudo %}
 
 <div class="wrapper">
-<header class="main-header green">
-    <h1 class="page-title">Carregando...</h1>
-    <button class="options green" aria-label="Opções">
+  <header class="main-header green">
+    <h1 class="page-title" id="page-title">Carregando...</h1>
+
+    <button class="options green" aria-label="Opções" type="button">
       <i data-lucide="more-horizontal"></i>
     </button>
-</header>
+  </header>
 
-<!-- Indicador Circular de Progresso -->
-<section class="progress-section">
-<div class="progress-circle">
-    <svg class="progress-ring" viewBox="0 0 120 120">
-    <circle class="progress-ring-bg" cx="60" cy="60" r="50" />
-    <circle class="progress-ring-fill" cx="60" cy="60" r="50" />
+  <section class="progress-section">
+    <div class="progress-circle" id="progress-circle">
+      <svg class="progress-ring" viewBox="0 0 120 120">
+        <circle class="progress-ring-bg" cx="60" cy="60" r="50"></circle>
+
+        <circle
+          class="progress-ring-fill"
+          id="progress-ring-fill"
+          cx="60"
+          cy="60"
+          r="50"
+        ></circle>
+      </svg>
+
+      <div class="progress-content">
+        <i
+          id="charge-icon"
+          data-lucide="zap"
+          class="bolt-icon"
+          width="24"
+          height="24"
+        ></i>
+
+        <span class="percentage" id="charge-percentage"> -- </span>
+
+        <span class="status-label" id="charge-status"> Carregando... </span>
+      </div>
+    </div>
+  </section>
+
+  <div class="status-banner" id="status-banner">
+    <svg
+      viewBox="0 0 24 24"
+      width="20"
+      height="20"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+
+      <line x1="12" y1="8" x2="12" y2="16"></line>
+
+      <line x1="8" y1="12" x2="16" y2="12"></line>
     </svg>
-    <div class="progress-content">
-    <i data-lucide="zap" class="bolt-icon" width="24" height="24" fill="none" stroke="currentColor"></i>
-    <span class="percentage">67%</span>
-    <span class="status-label">Carregando...</span>
+
+    <span id="power-status"> Preparando recarga... </span>
+  </div>
+
+  <section class="metrics-card">
+    <div class="metrics-row">
+      <div class="metric-item">
+        <span class="metric-label"> Energia Entregue </span>
+
+        <span class="metric-value" id="energy-delivered"> 0,00 kWh </span>
+      </div>
+
+      <div class="metric-item align-right">
+        <span class="metric-label"> Tempo Restante </span>
+
+        <span class="metric-value" id="remaining-time"> 01 min </span>
+      </div>
     </div>
-</div>
-</section>
 
-<!-- Banner de Alimentação Estável -->
-<div class="status-banner">
-<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-    <line x1="12" y1="8" x2="12" y2="16"/>
-    <line x1="8" y1="12" x2="16" y2="12"/>
-</svg>
-<span>Alimentação estável de energia a 85 kW</span>
-</div>
+    <div class="metrics-divider"></div>
 
-<!-- Card de Métricas do Carregamento -->
-<section class="metrics-card">
-<div class="metrics-row">
-    <div class="metric-item">
-    <span class="metric-label">Energia Entregue</span>
-    <span class="metric-value">30.15 kWh</span>
+    <div class="metrics-row">
+      <div class="metric-item">
+        <span class="metric-label"> Custo Acumulado </span>
+
+        <span class="metric-value highlight-cyan" id="accumulated-cost">
+          R$ 0,00
+        </span>
+      </div>
+
+      <div class="metric-item align-right">
+        <span class="metric-label"> Potência de Recarga </span>
+
+        <span class="metric-value" id="charge-power"> -- </span>
+      </div>
     </div>
-    <div class="metric-item align-right">
-    <span class="metric-label">Tempo Restante</span>
-    <span class="metric-value">18 min</span>
-    </div>
+  </section>
+
+  <p class="idle-warning-text" id="idle-warning">
+    Acompanhe o progresso da sua recarga.
+  </p>
+
+  <div class="screen-error" id="screen-error" role="alert"></div>
+
+  <div class="action-footer">
+    <button class="btn-stop" id="btn-stop" type="button">
+      <i data-lucide="circle-stop"></i>
+      <span>Parar Recarga</span>
+    </button>
+
+    <button
+      class="btn-finish"
+      id="btn-finish"
+      type="button"
+      style="display: none"
+    >
+      <i data-lucide="history"></i>
+      <span>Ir para o histórico</span>
+    </button>
+  </div>
 </div>
 
-<div class="metrics-divider"></div>
+{% endblock %}
 
-<div class="metrics-row">
-    <div class="metric-item">
-    <span class="metric-label">Custo Acumulado</span>
-    <span class="metric-value highlight-cyan">R$ 57,28</span>
-    </div>
-    <div class="metric-item align-right">
-    <span class="metric-label">Potência de Recarga</span>
-    <span class="metric-value">85.4 kW</span>
-    </div>
-</div>
-</section>
+{% block Scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const recarga = {{ recarga | tojson }};
 
-<!-- Texto Informativo -->
-<p class="idle-warning-text">
-Evite tarifas de ociosidade retirando seu veículo em até 15 minutos após a carga completa.
-</p>
+    // Elementos DOM
+    const pageTitle = document.getElementById("page-title");
+    const percentageElement = document.getElementById("charge-percentage");
+    const statusElement = document.getElementById("charge-status");
+    const progressCircle = document.getElementById("progress-ring-fill");
+    const progressCircleContainer = document.getElementById("progress-circle");
+    const chargeIcon = document.getElementById("charge-icon");
+    const energyElement = document.getElementById("energy-delivered");
+    const remainingElement = document.getElementById("remaining-time");
+    const costElement = document.getElementById("accumulated-cost");
+    const powerElement = document.getElementById("charge-power");
+    const powerStatus = document.getElementById("power-status");
+    const idleWarning = document.getElementById("idle-warning");
+    const btnStop = document.getElementById("btn-stop");
+    const btnFinish = document.getElementById("btn-finish");
+    const screenError = document.getElementById("screen-error");
 
-<!-- Botão Parar Recarga -->
-<div class="action-footer">
-<button class="btn-stop">
-    <i data-lucide="circle-stop" style="width: 20px; height : 20px; stroke : currentColor; fill:none"></i>
-    <span>Parar Recarga</span>
-</button>
-</div>
-</div>
+    function mostrarErro(mensagem) {
+      console.warn("Aviso na tela de recarga:", mensagem);
+      if (screenError) {
+        screenError.textContent = mensagem;
+        screenError.style.display = "block";
+      }
+    }
 
+    // Configuração e valores com fallbacks seguros
+    const DURACAO_DEMO_SEGUNDOS = 30;
+
+    const recargaId = Number(recarga?.id || 1);
+    const socInicial = Math.max(0, Math.min(99, Number(recarga?.soc_inicial ?? 20)));
+    const capacidadeBateriaKwh = Math.max(
+      10,
+      Number(recarga?.capacidade_bateria_kwh || recarga?.veiculo?.capacidade_bateria_kwh || 60)
+    );
+    const potenciaConectorKw = Math.max(
+      3.7,
+      Number(recarga?.potencia_conector_kw || recarga?.conector?.potencia_kw || 50)
+    );
+    const precoKwh = Math.max(0.1, Number(recarga?.preco_kwh || 2.10));
+    const taxaServico = Math.max(0, Number(recarga?.taxa_servico || 0));
+
+    let quantidadeMetaKwh = Number(recarga?.quantidade_kwh || 0);
+    const percentualDesejado =
+      recarga?.percentual_desejado != null ? Number(recarga.percentual_desejado) : null;
+
+    let socMeta;
+    if (percentualDesejado != null && percentualDesejado > socInicial) {
+      socMeta = Math.min(100, percentualDesejado);
+    } else if (quantidadeMetaKwh > 0) {
+      socMeta = Math.min(100, socInicial + (quantidadeMetaKwh / capacidadeBateriaKwh) * 100);
+    } else {
+      socMeta = Math.min(100, Math.max(socInicial + 25, 80));
+    }
+
+    if (quantidadeMetaKwh <= 0) {
+      quantidadeMetaKwh = Math.max(1, ((socMeta - socInicial) / 100) * capacidadeBateriaKwh);
+    }
+
+    // Estado da simulação
+    let segundosDecorridos = 0;
+    let energiaEntregueKwh = 0;
+    let socAtual = socInicial;
+    let intervalo = null;
+    let finalizando = false;
+    let encerrada = false;
+
+    // Configuração do anel de progresso SVG
+    const raio = 50;
+    const circunferencia = 2 * Math.PI * raio;
+    if (progressCircle) {
+      progressCircle.style.strokeDasharray = circunferencia;
+    }
+
+    function atualizarCirculo(percentual) {
+      if (!progressCircle) return;
+      const valor = Math.max(0, Math.min(100, Number(percentual)));
+      const offset = circunferencia - (valor / 100) * circunferencia;
+      progressCircle.style.strokeDashoffset = offset;
+    }
+
+    function numero(valor, casas = 2) {
+      return Number(valor).toLocaleString("pt-BR", {
+        minimumFractionDigits: casas,
+        maximumFractionDigits: casas
+      });
+    }
+
+    function moeda(valor) {
+      return Number(valor).toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+      });
+    }
+
+    function tempoTela() {
+      if (segundosDecorridos >= DURACAO_DEMO_SEGUNDOS) {
+        return "0 min";
+      }
+      return "01 min";
+    }
+
+    function atualizarCalculos() {
+      const p = Math.min(1, segundosDecorridos / DURACAO_DEMO_SEGUNDOS);
+      energiaEntregueKwh = quantidadeMetaKwh * p;
+      socAtual = socInicial + (socMeta - socInicial) * p;
+    }
+
+    function valorAtual() {
+      return energiaEntregueKwh * precoKwh + taxaServico;
+    }
+
+    function renderizar() {
+      atualizarCalculos();
+
+      if (percentageElement) percentageElement.textContent = `${Math.round(socAtual)}%`;
+      atualizarCirculo(socAtual);
+
+      if (energyElement) energyElement.textContent = `${numero(energiaEntregueKwh)} kWh`;
+      if (remainingElement) remainingElement.textContent = tempoTela();
+      if (costElement) costElement.textContent = moeda(valorAtual());
+      if (powerElement) powerElement.textContent = `${numero(potenciaConectorKw, 1)} kW`;
+      if (powerStatus) powerStatus.textContent = `Recarga em andamento a ${numero(potenciaConectorKw, 1)} kW`;
+    }
+
+    async function salvar(statusFinal) {
+      if (finalizando) return false;
+      finalizando = true;
+
+      try {
+        const response = await fetch(`/api/recargas/${encodeURIComponent(recargaId)}/concluir-simulada`, {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            energia_entregue_kwh: Number(energiaEntregueKwh.toFixed(3)),
+            soc_final: Number(socAtual.toFixed(2)),
+            valor_final: Number(valorAtual().toFixed(2)),
+            status: statusFinal,
+            duracao_segundos: segundosDecorridos
+          })
+        });
+
+        if (!response.ok) {
+          let mensagem = `Status HTTP ${response.status}`;
+          try {
+            const json = await response.json();
+            if (json.detail) mensagem = json.detail;
+          } catch (_) {}
+          console.warn("Aviso ao persistir recarga no backend:", mensagem);
+          return false;
+        }
+
+        await response.json();
+        return true;
+      } catch (erro) {
+        console.warn("Aviso ao persistir recarga no backend:", erro);
+        return false;
+      } finally {
+        finalizando = false;
+      }
+    }
+
+    async function concluir() {
+      if (encerrada) return;
+      encerrada = true;
+
+      clearInterval(intervalo);
+      intervalo = null;
+      segundosDecorridos = DURACAO_DEMO_SEGUNDOS;
+
+      renderizar();
+
+      if (btnStop) btnStop.disabled = true;
+
+      await salvar("CONCLUIDA");
+
+      if (pageTitle) pageTitle.textContent = "Recarga concluída";
+      if (statusElement) statusElement.textContent = "Meta atingida";
+      if (remainingElement) remainingElement.textContent = "0 min";
+      if (powerElement) powerElement.textContent = "0,0 kW";
+      if (powerStatus) powerStatus.textContent = "Recarga finalizada com sucesso";
+      if (idleWarning) idleWarning.textContent = "A recarga foi salva no histórico.";
+      if (btnStop) btnStop.style.display = "none";
+      if (btnFinish) btnFinish.style.display = "flex";
+      if (chargeIcon) chargeIcon.setAttribute("data-lucide", "check");
+      if (progressCircleContainer) progressCircleContainer.classList.add("completed");
+
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    }
+
+    if (btnStop) {
+      btnStop.addEventListener("click", async function () {
+        if (encerrada) return;
+        const confirmou = window.confirm("Deseja realmente parar a recarga?");
+        if (!confirmou) return;
+
+        clearInterval(intervalo);
+        intervalo = null;
+        encerrada = true;
+        btnStop.disabled = true;
+
+        atualizarCalculos();
+        await salvar("CANCELADA");
+
+        if (pageTitle) pageTitle.textContent = "Recarga encerrada";
+        if (statusElement) statusElement.textContent = "Cancelada";
+        if (remainingElement) remainingElement.textContent = "0 min";
+        if (powerElement) powerElement.textContent = "0,0 kW";
+        if (powerStatus) powerStatus.textContent = "Fornecimento de energia encerrado";
+        if (idleWarning) idleWarning.textContent = "A recarga foi salva.";
+        if (btnStop) btnStop.style.display = "none";
+        if (btnFinish) btnFinish.style.display = "flex";
+        if (chargeIcon) chargeIcon.setAttribute("data-lucide", "circle-stop");
+
+        if (window.lucide) {
+          lucide.createIcons();
+        }
+      });
+    }
+
+    if (btnFinish) {
+      btnFinish.addEventListener("click", function () {
+        window.location.href = "/historicos";
+      });
+    }
+
+    function iniciar() {
+      renderizar();
+      intervalo = setInterval(async function () {
+        if (encerrada) return;
+        segundosDecorridos += 1;
+        renderizar();
+
+        if (segundosDecorridos >= DURACAO_DEMO_SEGUNDOS) {
+          await concluir();
+        }
+      }, 1000);
+    }
+
+    // Inicialização da tela
+    atualizarCirculo(socInicial);
+    if (percentageElement) percentageElement.textContent = `${Math.round(socInicial)}%`;
+    if (powerElement) powerElement.textContent = `${numero(potenciaConectorKw, 1)} kW`;
+    if (remainingElement) remainingElement.textContent = "01 min";
+
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+
+    iniciar();
+  });
+</script>
 {% endblock %}

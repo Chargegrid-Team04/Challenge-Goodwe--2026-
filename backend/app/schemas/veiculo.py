@@ -1,6 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
-from pydantic import BaseModel, ConfigDict
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class VeiculoBase(BaseModel):
@@ -11,6 +12,11 @@ class VeiculoBase(BaseModel):
     tipo_conector: str
     conector_secundario: str | None = None
     principal: bool = False
+
+    soc_atual: Decimal = Field(
+        ge=0,
+        le=100,
+    )
 
 
 class VeiculoCreate(VeiculoBase):
@@ -26,6 +32,12 @@ class VeiculoUpdate(BaseModel):
     conector_secundario: str | None = None
     principal: bool | None = None
 
+    soc_atual: Decimal | None = Field(
+        default=None,
+        ge=0,
+        le=100,
+    )
+
 
 class VeiculoResponse(VeiculoBase):
     id: int
@@ -33,4 +45,6 @@ class VeiculoResponse(VeiculoBase):
     ativo: bool
     data_criacao: datetime
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True
+    )

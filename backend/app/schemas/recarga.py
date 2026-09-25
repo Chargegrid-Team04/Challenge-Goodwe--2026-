@@ -48,11 +48,11 @@ class RecargaResponse(BaseModel):
     soc_inicial: Decimal | None = None
     soc_atual: Decimal | None = None
     soc_final: Decimal | None = None
-    preco_kwh: Decimal
-    taxa_servico: Decimal
+    preco_kwh: Decimal | None = None
+    taxa_servico: Decimal | None = None
     valor_estimado: Decimal | None = None
     valor_final: Decimal | None = None
-    energia_entregue_kwh: Decimal
+    energia_entregue_kwh: Decimal | None = None
     potencia_atual_kw: Decimal | None = None
     tempo_restante_minutos: int | None = None
     agendada_para: datetime | None = None
@@ -60,11 +60,23 @@ class RecargaResponse(BaseModel):
     finalizada_em: datetime | None = None
     data_criacao: datetime
 
+    estacao_nome: str | None = None
+    estacao_endereco: str | None = None
+    veiculo_modelo: str | None = None
+    conector_tipo: str | None = None
+    conector_potencia_kw: Decimal | None = None
+
     model_config = ConfigDict(from_attributes=True)
 
 
 class ResumoRecargasResponse(BaseModel):
-    total_recargas: int
-    total_kwh: Decimal
-    total_gasto: Decimal
+    total_recargas: int = 0
+    total_kwh: Decimal = Decimal("0")
+    total_gasto: Decimal = Decimal("0")
     recarga_ativa: RecargaResponse | None = None
+
+class ConcluirRecargaSimuladaRequest(BaseModel):
+    energia_entregue_kwh: Decimal
+    soc_final: Decimal
+    valor_final: Decimal
+    status: str

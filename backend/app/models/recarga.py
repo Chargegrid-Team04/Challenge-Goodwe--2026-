@@ -47,3 +47,25 @@ class Recarga(Base):
     veiculo = relationship("Veiculo", lazy="joined")
     estacao = relationship("Estacao", lazy="joined")
     conector = relationship("Conector", lazy="joined")
+
+    @property
+    def estacao_nome(self) -> str | None:
+        return self.estacao.nome if self.estacao else None
+
+    @property
+    def estacao_endereco(self) -> str | None:
+        return self.estacao.endereco if self.estacao else None
+
+    @property
+    def veiculo_modelo(self) -> str | None:
+        if not self.veiculo:
+            return None
+        return f"{self.veiculo.marca} {self.veiculo.modelo}".strip()
+
+    @property
+    def conector_tipo(self) -> str | None:
+        return self.conector.tipo if self.conector else None
+
+    @property
+    def conector_potencia_kw(self) -> Decimal | None:
+        return self.conector.potencia_kw if self.conector else None
