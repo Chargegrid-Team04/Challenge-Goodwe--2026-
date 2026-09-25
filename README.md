@@ -75,8 +75,67 @@ DATABASE_URL=postgresql+psycopg://USUARIO:SENHA@HOST:5432/db_goodwe?sslmode=requ
 ```bash
 uvicorn main:app --reload
 ```
+<br>
 
-### 7. Acesse a API
+## Banco de Dados - Execução Local
+
+### 1. Trocar para a branch
+
+```bash
+git checkout feat/db-compose
+```
+
+### 2. Abrir o Docker Desktop
+
+Abra o **Docker Desktop** e espere a engine iniciar.
+
+### 3. Configurar o `.env`
+
+Entre no backend:
+
+```bash
+cd backend
+```
+
+Copie o `.env.example`:
+
+```bash
+cp .env.example .env
+```
+
+Preencha o `.env` com os valores do `.env.example`.
+
+### 4. Subir o banco
+
+Ainda dentro de `backend`:
+
+```bash
+docker compose up -d
+```
+
+### 5. Conectar no banco
+
+No VS Code, abra a extensão **Database Client** e crie uma conexão usando **as mesmas credenciais do `.env`**.
+
+<p italic>Senha: postgres</p>
+
+### 6. Rodar o script
+
+Copie o script do **Teams** e rode pelo Database Client.
+
+### 7. Rodar o backend
+
+Dentro de `backend`:
+
+```bash
+uvicorn main:app --reload
+```
+
+<br>
+
+## API e ChatBot
+
+### 1. Acesse a API
 
 API:
 
@@ -84,7 +143,7 @@ API:
 http://127.0.0.1:8000
 ```
 
-### 8. Interface de chat IA com Gradio
+### 2. Interface de chat IA com Gradio
 
 Para iniciar a interface textual de chat com streaming do Gemini:
 
@@ -105,7 +164,7 @@ A interface ficará disponível em:
 http://localhost:7860
 ```
 
-### 9. RAG com documentos e busca web opcional
+### 3. RAG com documentos e busca web opcional
 
 Coloque documentos autorizados (`.pdf`, `.txt`, `.md`, `.csv` ou `.json`) em:
 
@@ -138,7 +197,7 @@ GOOGLE_SEARCH_CX=seu_search_engine_id
 
 As perguntas enviadas à busca web podem sair da aplicação. Por isso, mantenha a busca desligada para consultas privadas e nunca envie segredos, tokens, senhas ou dados pessoais ao modelo.
 
-### 10. Controle de demanda e tarifação
+### 4. Controle de demanda e tarifação
 
 O endpoint `POST /api/recargas/controle-demanda` calcula a demanda agregada das recargas ativas de uma estação, compara com o limite seguro informado, distribui a potência disponível e calcula o preço dinâmico por kWh considerando pico, utilização e fator externo.
 
@@ -161,3 +220,20 @@ O limite `station_capacity_kw` deve vir da capacidade elétrica homologada da in
 O arquivo `.env` contém credenciais e configurações locais e **não deve ser enviado ao Git**.
 
 O `.env.example` deve ser versionado apenas com exemplos das variáveis necessárias.
+
+<br>
+
+## OCPP e Conexão com Carregadores
+
+O sistema implementa comunicação real entre a API e os carregadores elétricos utilizando OCPP 1.6J via WebSocket. Ao iniciar uma recarga pelo site, a API envia o comando ao carregador, acompanha o consumo em tempo real e, ao final, calcula auto maticamente o valor com base na energia efetivamente entregue.
+ 
+A integração também possui um simulador de carregador, permitindo testar todo o fluxo sem hardware físico. Os dados da recarga — status, energia consumida e valor final — são registrados no banco de dados.
+
+> [!NOTE]
+> Atualmente, a integração foi validada com o simulador; o hardware físico ainda está em desenvolvimento.
+
+<br>
+
+<p align="center">
+	<img width="650" src="https://github.com/user-attachments/assets/1aa209d3-7b31-4a84-bb21-765dfd4bc0bf" alt="fluxograma"/>
+</p>
