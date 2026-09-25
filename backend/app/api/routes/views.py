@@ -162,10 +162,19 @@ def view_recarga(request: Request):
     )
 
 
-@router.get("/historicos", response_class=HTMLResponse)
-def view_historicos(request: Request):
+@router.get("/historico", response_class=HTMLResponse)
+def view_historico(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="historicos.html",
+        context={},
+    )
+
+
+@router.get("/login", response_class=HTMLResponse)
+def view_login(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
         context={},
     )

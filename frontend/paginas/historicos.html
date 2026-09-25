@@ -152,12 +152,11 @@ Conteudo %}
 
     const stationsMap = new Map();
 
-    const usuarioId = localStorage.getItem("usuario_id");
-
-    if (!usuarioId) {
-      window.location.href = "/login";
-      return;
-    }
+    const rawUserId =
+      sessionStorage.getItem("usuario_id") ||
+      localStorage.getItem("usuario_id") ||
+      1;
+    const usuarioId = Number(rawUserId) || 1;
 
     async function carregarEstacoes() {
       try {
@@ -837,33 +836,21 @@ Conteudo %}
 
     try {
       await carregarEstacoes();
+    } catch (e) {
+      console.warn("Aviso ao carregar estações:", e);
+    }
 
-      await Promise.all([carregarResumo(), carregarRecargas()]);
+    try {
+      await carregarResumo();
+    } catch (e) {
+      console.warn("Aviso ao carregar resumo da recarga ativa:", e);
+    }
+
+    try {
+      await carregarRecargas();
     } catch (error) {
-      console.error("Erro ao carregar página de histórico:", error);
-
-      /*
-       * Nunca exibe dados fictícios.
-       * Se houver falha, mantém o resumo zerado.
-       */
-
-      totalKwh.textContent = "0,00 kWh";
-
-      totalRecargas.textContent = "0 recargas";
-
-      totalGasto.textContent = formatCurrency(0);
-
-      if (totalKm) {
-        totalKm.textContent = "~0 km rodados";
-      }
-
-      /*
-       * Se o histórico falhar
-       */
-
-      if (historyList.textContent.includes("Carregando")) {
-        renderHistoryError();
-      }
+      console.error("Erro ao carregar recargas:", error);
+      renderHistoryError();
     }
   });
 </script>

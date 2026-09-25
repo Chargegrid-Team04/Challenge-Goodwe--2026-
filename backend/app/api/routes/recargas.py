@@ -441,19 +441,17 @@ def estimar_recarga(
     response_model=ResumoRecargasResponse,
 )
 def obter_resumo_recargas(
-    usuario_id: int = Query(
-        ...,
+    usuario_id: int | None = Query(
+        None,
         description="ID do usuário logado",
     ),
     db: Session = Depends(get_db),
 ):
-    stmt = select(Recarga).where(
-        Recarga.usuario_id == usuario_id
-    )
+    stmt = select(Recarga)
+    if usuario_id is not None:
+        stmt = stmt.where(Recarga.usuario_id == usuario_id)
 
-    recargas = db.scalars(
-        stmt
-    ).all()
+    recargas = db.scalars(stmt).all()
 
     total_recargas = len(recargas)
 
@@ -477,21 +475,11 @@ def obter_resumo_recargas(
                 except Exception:
                     pass
 
-    stmt_ativa = select(
-        Recarga
-    ).where(
-        Recarga.status == "CARREGANDO"
-    )
+    stmt_ativa = select(Recarga).where(Recarga.status == "CARREGANDO")
+    if usuario_id is not None:
+        stmt_ativa = stmt_ativa.where(Recarga.usuario_id == usuario_id)
 
-    stmt_ativa = stmt_ativa.where(
-        Recarga.usuario_id == usuario_id
-    )
-
-    recarga_ativa = db.scalar(
-        stmt_ativa.order_by(
-            Recarga.id.desc()
-        )
-    )
+    recarga_ativa = db.scalar(stmt_ativa.order_by(Recarga.id.desc()))
 
     return ResumoRecargasResponse(
         total_recargas=total_recargas,
@@ -512,25 +500,18 @@ def obter_resumo_recargas(
     response_model=list[RecargaResponse],
 )
 def listar_recargas(
-    usuario_id: int = Query(
-        ...,
+    usuario_id: int | None = Query(
+        None,
         description="ID do usuário logado",
     ),
     db: Session = Depends(get_db),
 ):
-    stmt = (
-        select(Recarga)
-        .where(
-            Recarga.usuario_id == usuario_id
-        )
-        .order_by(
-            Recarga.data_criacao.desc()
-        )
-    )
+    stmt = select(Recarga)
+    if usuario_id is not None:
+        stmt = stmt.where(Recarga.usuario_id == usuario_id)
+    stmt = stmt.order_by(Recarga.data_criacao.desc())
 
-    return db.scalars(
-        stmt
-    ).all()
+    return db.scalars(stmt).all()
 
 
 @router.post(
