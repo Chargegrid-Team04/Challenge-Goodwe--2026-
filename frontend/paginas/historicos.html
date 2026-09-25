@@ -1,866 +1,766 @@
-{% extends "base.html" %}
-
-{% block Head %}
-<link rel="stylesheet" href="/frontend/static/historicos.css">
-{% endblock %}
-
-{% block Titulo %}Histórico de Carga{% endblock %}
-
-{% block Conteudo %}
+{% extends "base.html" %} {% block Head %}
+<link rel="stylesheet" href="/frontend/static/historicos.css" />
+{% endblock %} {% block Titulo %}Histórico de Carga{% endblock %} {% block
+Conteudo %}
 <div class="wrapper">
+  <!-- CABEÇALHO -->
+  <header class="main-header">
+    <div class="header-spacer" aria-hidden="true"></div>
+    <h1 class="page-title">Histórico de Carga</h1>
+    <button class="options" aria-label="Opções" type="button">
+      <i data-lucide="more-horizontal"></i>
+    </button>
+  </header>
 
-    <!-- CABEÇALHO -->
-    <header class="main-header">
-        <div class="header-spacer" aria-hidden="true"></div>
-        <h1 class="page-title">Histórico de Carga</h1>
-        <button class="options" aria-label="Opções" type="button">
-            <i data-lucide="more-horizontal"></i>
-        </button>
-    </header>
+  <!-- CARTÃO DE RESUMO (DESTAQUE) -->
+  <section class="summary-card">
+    <div class="summary-col">
+      <span class="summary-label"> Total de kWh este mês </span>
+      <div class="summary-value" id="totalKwh">0 kWh</div>
+      <span class="summary-subtext" id="totalRecargas"> 0 recargas </span>
+    </div>
 
+    <div class="summary-divider"></div>
 
-    <!-- CARTÃO DE RESUMO (DESTAQUE) -->
-    <section class="summary-card">
+    <div class="summary-col">
+      <span class="summary-label"> Total gasto (R$) </span>
+      <div class="summary-value highlight" id="totalGasto">R$ 0,00</div>
+      <span class="summary-subtext" id="totalKm"> ~0 km estimados </span>
+    </div>
+  </section>
 
-        <div class="summary-col">
-            <span class="summary-label">
-                Total de kWh este mês
-            </span>
-            <div class="summary-value" id="totalKwh">
-                184 kWh
-            </div>
-            <span class="summary-subtext" id="totalRecargas">
-                12 recargas
-            </span>
+  <!-- RECARGA ATIVA (SE HOUVER) -->
+  <section
+    class="history-section"
+    id="activeChargeSection"
+    style="display: none"
+  >
+    <div class="history-section-header">
+      <h2>Recarga em andamento</h2>
+      <span class="badge badge-active" id="activeChargeStatus"> Ativa </span>
+    </div>
+
+    <article class="charge-card active-charge-card">
+      <div class="charge-card-header">
+        <div>
+          <h3 class="charge-location" id="activeStationName">Posto GoodWe</h3>
+          <p class="charge-date" id="activeChargeDate">--</p>
         </div>
+      </div>
 
-        <div class="summary-divider"></div>
-
-        <div class="summary-col">
-            <span class="summary-label">
-                Total gasto (R$)
-            </span>
-            <div class="summary-value highlight" id="totalGasto">
-                R$ 352,40
-            </div>
-            <span class="summary-subtext" id="totalKm">
-                ~1.104 km estimados
-            </span>
+      <div class="charge-card-details">
+        <div class="detail-item">
+          <span class="detail-label">Consumido</span>
+          <span class="detail-value" id="activeEnergy">-- kWh</span>
         </div>
-
-    </section>
-
-
-    <!-- RECARGA ATIVA (SE HOUVER) -->
-    <section class="history-section" id="activeChargeSection" style="display: none;">
-
-        <div class="history-section-header">
-            <h2>Recarga em andamento</h2>
-            <span class="badge badge-active" id="activeChargeStatus">
-                Ativa
-            </span>
+        <div class="detail-item">
+          <span class="detail-label">Duração</span>
+          <span class="detail-value" id="activeRemainingTime">-- min</span>
         </div>
-
-        <article class="charge-card active-charge-card">
-            <div class="charge-card-header">
-                <div>
-                    <h3 class="charge-location" id="activeStationName">Posto GoodWe</h3>
-                    <p class="charge-date" id="activeChargeDate">--</p>
-                </div>
-            </div>
-
-            <div class="charge-card-details">
-                <div class="detail-item">
-                    <span class="detail-label">Consumido</span>
-                    <span class="detail-value" id="activeEnergy">-- kWh</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Duração</span>
-                    <span class="detail-value" id="activeRemainingTime">-- min</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Valor Pago</span>
-                    <span class="detail-value" id="activeEstimatedValue">R$ --</span>
-                </div>
-            </div>
-
-            <div class="active-charge-progress">
-                <div class="progress-header">
-                    <span>Estado da bateria</span>
-                    <strong id="activeSoc">--%</strong>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="activeSocProgress" style="width: 0%;"></div>
-                </div>
-            </div>
-
-            <a class="btn-active-track" id="activeChargeLink" href="/carregando">
-                <i data-lucide="zap" style="width: 15px; height: 15px;"></i>
-                <span>Acompanhar em tempo real</span>
-            </a>
-        </article>
-    </section>
-
-
-    <!-- LISTA DE ATIVIDADES -->
-    <section class="history-section">
-
-        <div class="history-section-header">
-            <h2>Recargas Anteriores</h2>
-
-            <button class="filter-dropdown" id="filterButton" type="button">
-                <span>Últimos 30 dias</span>
-                <i data-lucide="chevron-down" style="width: 14px; height: 14px;"></i>
-            </button>
+        <div class="detail-item">
+          <span class="detail-label">Valor Pago</span>
+          <span class="detail-value" id="activeEstimatedValue">R$ --</span>
         </div>
+      </div>
 
-
-        <div id="historyList">
-
-            <div class="history-loading">
-                Carregando recargas...
-            </div>
-
+      <div class="active-charge-progress">
+        <div class="progress-header">
+          <span>Estado da bateria</span>
+          <strong id="activeSoc">--%</strong>
         </div>
+        <div class="progress-bar">
+          <div
+            class="progress-fill"
+            id="activeSocProgress"
+            style="width: 0%"
+          ></div>
+        </div>
+      </div>
 
-    </section>
+      <a class="btn-active-track" id="activeChargeLink" href="/carregando">
+        <i data-lucide="zap" style="width: 15px; height: 15px"></i>
+        <span>Acompanhar em tempo real</span>
+      </a>
+    </article>
+  </section>
 
+  <!-- LISTA DE ATIVIDADES -->
+  <section class="history-section">
+    <div class="history-section-header">
+      <h2>Recargas Anteriores</h2>
+
+      <button class="filter-dropdown" id="filterButton" type="button">
+        <span>Últimos 30 dias</span>
+        <i data-lucide="chevron-down" style="width: 14px; height: 14px"></i>
+      </button>
+    </div>
+
+    <div id="historyList">
+      <div class="history-loading">Carregando recargas...</div>
+    </div>
+  </section>
 </div>
-{% endblock %}
-
-
-{% block Scripts %}
+{% endblock %} {% block Scripts %}
 
 <script>
+  document.addEventListener("DOMContentLoaded", async function () {
+    const currentFooterOption = document.getElementById("footer-historicos");
 
-    document.addEventListener("DOMContentLoaded", async function () {
+    if (currentFooterOption) {
+      currentFooterOption.classList.add("active");
+    }
 
-        const currentFooterOption =
-            document.getElementById("footer-historicos");
+    const totalKwh = document.getElementById("totalKwh");
 
-        if (currentFooterOption) {
-            currentFooterOption.classList.add("active");
+    const totalRecargas = document.getElementById("totalRecargas");
+
+    const totalGasto = document.getElementById("totalGasto");
+
+    const totalKm = document.getElementById("totalKm");
+
+    const activeChargeSection = document.getElementById("activeChargeSection");
+
+    const activeChargeStatus = document.getElementById("activeChargeStatus");
+
+    const activeChargeDate = document.getElementById("activeChargeDate");
+
+    const activeEnergy = document.getElementById("activeEnergy");
+
+    const activePower = document.getElementById("activePower");
+
+    const activeEstimatedValue = document.getElementById(
+      "activeEstimatedValue",
+    );
+
+    const activeSoc = document.getElementById("activeSoc");
+
+    const activeSocProgress = document.getElementById("activeSocProgress");
+
+    const activeStationName = document.getElementById("activeStationName");
+
+    const activeStationAddress = document.getElementById(
+      "activeStationAddress",
+    );
+
+    const activeChargeChips = document.getElementById("activeChargeChips");
+
+    const activeRemainingTime = document.getElementById("activeRemainingTime");
+
+    const activeChargeLink = document.getElementById("activeChargeLink");
+
+    const historyList = document.getElementById("historyList");
+
+    const stationsMap = new Map();
+
+    async function carregarEstacoes() {
+      try {
+        const response = await fetch("/api/estacoes");
+        if (response.ok) {
+          const estacoes = await response.json();
+          if (Array.isArray(estacoes)) {
+            estacoes.forEach((e) => stationsMap.set(Number(e.id), e));
+          }
+        }
+      } catch (e) {
+        console.warn("Aviso ao carregar catálogo de estações:", e);
+      }
+    }
+
+    /*
+     * ============================
+     * FORMATAÇÃO
+     * ============================
+     */
+
+    function toNumber(value) {
+      if (value === null || value === undefined || value === "") {
+        return null;
+      }
+
+      const number = Number(value);
+
+      return Number.isFinite(number) ? number : null;
+    }
+
+    function formatNumber(value, decimals = 2) {
+      const number = toNumber(value);
+
+      if (number === null) {
+        return "--";
+      }
+
+      return number.toLocaleString("pt-BR", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      });
+    }
+
+    function formatCurrency(value) {
+      const number = toNumber(value);
+
+      if (number === null) {
+        return "R$ --";
+      }
+
+      return number.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      });
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) {
+        return "--";
+      }
+
+      const date = new Date(dateString);
+
+      if (Number.isNaN(date.getTime())) {
+        return "--";
+      }
+
+      const day = String(date.getDate()).padStart(2, "0");
+      const months = [
+        "Jan",
+        "Fev",
+        "Mar",
+        "Abr",
+        "Mai",
+        "Jun",
+        "Jul",
+        "Ago",
+        "Set",
+        "Out",
+        "Nov",
+        "Dez",
+      ];
+      const month = months[date.getMonth()];
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+
+      return `${day} ${month}, ${hours}:${minutes}`;
+    }
+
+    function formatDuration(start, end) {
+      if (!start || !end) {
+        return "--";
+      }
+
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+
+      if (
+        Number.isNaN(startDate.getTime()) ||
+        Number.isNaN(endDate.getTime())
+      ) {
+        return "--";
+      }
+
+      const difference = endDate.getTime() - startDate.getTime();
+
+      if (difference < 0) {
+        return "--";
+      }
+
+      const totalMinutes = Math.round(difference / 60000);
+
+      return `${totalMinutes} min`;
+    }
+
+    function formatStatus(status) {
+      if (!status) {
+        return "Desconhecida";
+      }
+
+      const value = status.toString().toLowerCase();
+
+      const statuses = {
+        ativa: "Ativa",
+        ativo: "Ativa",
+
+        iniciada: "Iniciada",
+
+        carregando: "Carregando",
+
+        pendente: "Pendente",
+
+        concluida: "Concluída",
+        concluída: "Concluída",
+
+        finalizada: "Finalizada",
+
+        cancelada: "Cancelada",
+
+        erro: "Erro",
+      };
+
+      return statuses[value] || status;
+    }
+
+    function getStatusClass(status) {
+      if (!status) {
+        return "";
+      }
+
+      const value = status.toString().toLowerCase();
+
+      if (
+        value === "concluida" ||
+        value === "concluída" ||
+        value === "finalizada"
+      ) {
+        return "badge-success";
+      }
+
+      if (
+        value === "ativa" ||
+        value === "ativo" ||
+        value === "carregando" ||
+        value === "iniciada"
+      ) {
+        return "badge-active";
+      }
+
+      if (value === "cancelada") {
+        return "badge-cancelled";
+      }
+
+      return "";
+    }
+
+    function isActive(recarga) {
+      if (!recarga) {
+        return false;
+      }
+
+      const status = (recarga.status || "").toString().toLowerCase();
+
+      return ["ativa", "ativo", "iniciada", "carregando", "pendente"].includes(
+        status,
+      );
+    }
+
+    /*
+     * ============================
+     * RESUMO
+     * ============================
+     */
+
+    async function carregarResumo() {
+      const response = await fetch("/api/recargas/resumo", {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro ao carregar resumo: ${response.status}`);
+      }
+
+      const resumo = await response.json();
+
+      /*
+       * O endpoint de resumo fica responsável
+       * somente pela recarga que está em andamento.
+       *
+       * Os totais mensais são calculados a partir
+       * das recargas reais retornadas por /api/recargas.
+       */
+      renderActiveCharge(resumo.recarga_ativa);
+    }
+
+    /*
+     * ============================
+     * RESUMO MENSAL REAL
+     * ============================
+     */
+
+    function isCompleted(recarga) {
+      if (!recarga) {
+        return false;
+      }
+
+      const status = (recarga.status || "").toString().trim().toLowerCase();
+
+      return ["concluida", "concluída", "finalizada"].includes(status);
+    }
+
+    function getChargeReferenceDate(recarga) {
+      return (
+        recarga.finalizada_em ||
+        recarga.iniciada_em ||
+        recarga.data_criacao ||
+        null
+      );
+    }
+
+    function isCurrentMonth(dateString) {
+      if (!dateString) {
+        return false;
+      }
+
+      const date = new Date(dateString);
+
+      if (Number.isNaN(date.getTime())) {
+        return false;
+      }
+
+      const now = new Date();
+
+      return (
+        date.getFullYear() === now.getFullYear() &&
+        date.getMonth() === now.getMonth()
+      );
+    }
+
+    function calcularResumoMensal(recargas) {
+      if (!Array.isArray(recargas)) {
+        totalKwh.textContent = "0 kWh";
+        totalRecargas.textContent = "0 recargas";
+        totalGasto.textContent = formatCurrency(0);
+
+        if (totalKm) {
+          totalKm.textContent = "~0 km rodados";
         }
 
+        return;
+      }
 
-        const totalKwh =
-            document.getElementById("totalKwh");
-
-        const totalRecargas =
-            document.getElementById("totalRecargas");
-
-        const totalGasto =
-            document.getElementById("totalGasto");
-
-        const totalKm =
-            document.getElementById("totalKm");
-
-
-        const activeChargeSection =
-            document.getElementById("activeChargeSection");
-
-        const activeChargeStatus =
-            document.getElementById("activeChargeStatus");
-
-        const activeChargeDate =
-            document.getElementById("activeChargeDate");
-
-        const activeEnergy =
-            document.getElementById("activeEnergy");
-
-        const activePower =
-            document.getElementById("activePower");
-
-        const activeEstimatedValue =
-            document.getElementById("activeEstimatedValue");
-
-        const activeSoc =
-            document.getElementById("activeSoc");
-
-        const activeSocProgress =
-            document.getElementById("activeSocProgress");
-
-        const activeStationName =
-            document.getElementById("activeStationName");
-
-        const activeStationAddress =
-            document.getElementById("activeStationAddress");
-
-        const activeChargeChips =
-            document.getElementById("activeChargeChips");
-
-        const activeRemainingTime =
-            document.getElementById("activeRemainingTime");
-
-        const activeChargeLink =
-            document.getElementById("activeChargeLink");
-
-        const historyList =
-            document.getElementById("historyList");
-
-        const stationsMap = new Map();
-
-        async function carregarEstacoes() {
-            try {
-                const response = await fetch("/api/estacoes");
-                if (response.ok) {
-                    const estacoes = await response.json();
-                    if (Array.isArray(estacoes)) {
-                        estacoes.forEach(e => stationsMap.set(Number(e.id), e));
-                    }
-                }
-            } catch (e) {
-                console.warn("Aviso ao carregar catálogo de estações:", e);
-            }
+      const recargasDoMes = recargas.filter((recarga) => {
+        if (!isCompleted(recarga)) {
+          return false;
         }
 
+        const data = getChargeReferenceDate(recarga);
 
-        /*
-         * ============================
-         * FORMATAÇÃO
-         * ============================
-         */
+        return isCurrentMonth(data);
+      });
 
-        function toNumber(value) {
+      let energiaTotal = 0;
+      let gastoTotal = 0;
 
-            if (
-                value === null ||
-                value === undefined ||
-                value === ""
-            ) {
-                return null;
-            }
+      recargasDoMes.forEach((recarga) => {
+        const energia = toNumber(
+          recarga.energia_entregue_kwh ?? recarga.quantidade_kwh,
+        );
 
-            const number = Number(value);
+        const valor = toNumber(recarga.valor_final ?? recarga.valor_estimado);
 
-            return Number.isFinite(number)
-                ? number
-                : null;
+        if (energia !== null) {
+          energiaTotal += energia;
         }
 
+        if (valor !== null) {
+          gastoTotal += valor;
+        }
+      });
 
-        function formatNumber(value, decimals = 2) {
+      totalKwh.textContent = `${formatNumber(energiaTotal, 2)} kWh`;
 
-            const number = toNumber(value);
+      totalRecargas.textContent = `${recargasDoMes.length} ${
+        recargasDoMes.length === 1 ? "recarga" : "recargas"
+      }`;
 
-            if (number === null) {
-                return "--";
-            }
+      totalGasto.textContent = formatCurrency(gastoTotal);
 
-            return number.toLocaleString("pt-BR", {
-                minimumFractionDigits: decimals,
-                maximumFractionDigits: decimals
-            });
+      /*
+       * Estimativa simples:
+       * aproximadamente 6 km por kWh consumido.
+       */
+      const kmEstimado = Math.round(energiaTotal * 6);
+
+      if (totalKm) {
+        totalKm.textContent = `~${formatNumber(kmEstimado, 0)} km rodados`;
+      }
+    }
+
+    /*
+     * ============================
+     * RECARGA ATIVA
+     * ============================
+     */
+
+    function renderActiveCharge(recarga) {
+      if (!recarga || !isActive(recarga)) {
+        activeChargeSection.style.display = "none";
+
+        return;
+      }
+
+      activeChargeSection.style.display = "block";
+
+      activeChargeStatus.textContent = formatStatus(recarga.status);
+
+      activeChargeStatus.className = `badge ${getStatusClass(recarga.status)}`;
+
+      /*
+       * Localização / Estação
+       */
+
+      const estacaoInfo = stationsMap.get(Number(recarga.estacao_id));
+
+      const stationName =
+        recarga.estacao_nome ||
+        estacaoInfo?.nome ||
+        (recarga.estacao_id !== null && recarga.estacao_id !== undefined
+          ? `Posto GoodWe #${recarga.estacao_id}`
+          : "Posto GoodWe");
+
+      if (activeStationName) {
+        activeStationName.textContent = stationName;
+      }
+
+      /*
+       * Data
+       */
+
+      activeChargeDate.textContent = recarga.iniciada_em
+        ? formatDate(recarga.iniciada_em)
+        : formatDate(recarga.data_criacao);
+
+      /*
+       * Energia entregue
+       */
+
+      const energia = recarga.energia_entregue_kwh ?? recarga.quantidade_kwh;
+
+      activeEnergy.textContent = `${formatNumber(energia)} kWh`;
+
+      /*
+       * Duração / Tempo restante
+       */
+
+      if (activeRemainingTime) {
+        const mins = toNumber(recarga.tempo_restante_minutos);
+        if (mins !== null && mins > 0) {
+          activeRemainingTime.textContent = `${mins} min`;
+        } else if (mins === 0) {
+          activeRemainingTime.textContent = "Quase pronto";
+        } else {
+          activeRemainingTime.textContent = "--";
+        }
+      }
+
+      /*
+       * Valor estimado / atual
+       */
+
+      activeEstimatedValue.textContent = formatCurrency(
+        recarga.valor_estimado ?? recarga.valor_final,
+      );
+
+      /*
+       * SOC
+       */
+
+      const soc = toNumber(recarga.soc_atual ?? recarga.soc_inicial);
+
+      if (soc !== null) {
+        const safeSoc = Math.max(0, Math.min(100, soc));
+
+        if (activeSoc) {
+          activeSoc.textContent = `${formatNumber(safeSoc, 1)}%`;
         }
 
-
-        function formatCurrency(value) {
-
-            const number = toNumber(value);
-
-            if (number === null) {
-                return "R$ --";
-            }
-
-            return number.toLocaleString("pt-BR", {
-                style: "currency",
-                currency: "BRL"
-            });
+        if (activeSocProgress) {
+          activeSocProgress.style.width = `${safeSoc}%`;
+        }
+      } else {
+        if (activeSoc) {
+          activeSoc.textContent = "--%";
         }
 
-
-        function formatDate(dateString) {
-
-            if (!dateString) {
-                return "--";
-            }
-
-            const date = new Date(dateString);
-
-            if (Number.isNaN(date.getTime())) {
-                return "--";
-            }
-
-            const day = String(date.getDate()).padStart(2, "0");
-            const months = [
-                "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
-                "Jul", "Ago", "Set", "Out", "Nov", "Dez"
-            ];
-            const month = months[date.getMonth()];
-            const hours = String(date.getHours()).padStart(2, "0");
-            const minutes = String(date.getMinutes()).padStart(2, "0");
-
-            return `${day} ${month}, ${hours}:${minutes}`;
+        if (activeSocProgress) {
+          activeSocProgress.style.width = "0%";
         }
-
-
-        function formatDuration(start, end) {
-
-            if (!start || !end) {
-                return "--";
-            }
-
-            const startDate = new Date(start);
-            const endDate = new Date(end);
-
-            if (
-                Number.isNaN(startDate.getTime()) ||
-                Number.isNaN(endDate.getTime())
-            ) {
-                return "--";
-            }
-
-            const difference =
-                endDate.getTime() - startDate.getTime();
-
-            if (difference < 0) {
-                return "--";
-            }
-
-            const totalMinutes =
-                Math.round(difference / 60000);
-
-            return `${totalMinutes} min`;
-        }
-
-
-        function formatStatus(status) {
-
-            if (!status) {
-                return "Desconhecida";
-            }
-
-            const value =
-                status
-                    .toString()
-                    .toLowerCase();
-
-
-            const statuses = {
-
-                ativa: "Ativa",
-                ativo: "Ativa",
-
-                iniciada: "Iniciada",
-
-                carregando: "Carregando",
-
-                pendente: "Pendente",
-
-                concluida: "Concluída",
-                concluída: "Concluída",
-
-                finalizada: "Finalizada",
-
-                cancelada: "Cancelada",
-
-                erro: "Erro"
-
-            };
-
-
-            return statuses[value] || status;
-        }
-
-
-        function getStatusClass(status) {
-
-            if (!status) {
-                return "";
-            }
-
-            const value =
-                status
-                    .toString()
-                    .toLowerCase();
-
-
-            if (
-                value === "concluida" ||
-                value === "concluída" ||
-                value === "finalizada"
-            ) {
-                return "badge-success";
-            }
-
-
-            if (
-                value === "ativa" ||
-                value === "ativo" ||
-                value === "carregando" ||
-                value === "iniciada"
-            ) {
-                return "badge-active";
-            }
-
-
-            if (value === "cancelada") {
-                return "badge-cancelled";
-            }
-
-
-            return "";
-        }
-
-
-        function isActive(recarga) {
-
-            if (!recarga) {
-                return false;
-            }
-
-            const status =
-                (recarga.status || "")
-                    .toString()
-                    .toLowerCase();
-
-
-            return [
-                "ativa",
-                "ativo",
-                "iniciada",
-                "carregando",
-                "pendente"
-            ].includes(status);
-        }
-
-
-        /*
-         * ============================
-         * RESUMO
-         * ============================
-         */
-
-        async function carregarResumo() {
-
-            const response =
-                await fetch("/api/recargas/resumo", {
-                    method: "GET",
-                    headers: {
-                        "Accept": "application/json"
-                    }
-                });
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    `Erro ao carregar resumo: ${response.status}`
-                );
-
-            }
-
-
-            const resumo =
-                await response.json();
-
-
-            /*
-             * Total de energia, recargas e gasto
-             */
-
-            const kwh = toNumber(resumo.total_kwh);
-            const gasto = toNumber(resumo.total_gasto);
-            const qtd = toNumber(resumo.total_recargas);
-
-            const finalKwh = (kwh !== null && kwh > 0) ? kwh : 184;
-            const finalGasto = (gasto !== null && gasto > 0) ? gasto : 352.40;
-            const finalQtd = (qtd !== null && qtd > 0) ? qtd : 12;
-
-            totalKwh.textContent =
-                `${formatNumber(finalKwh, 0)} kWh`;
-
-            totalRecargas.textContent =
-                `${finalQtd} recargas`;
-
-            totalGasto.textContent =
-                formatCurrency(finalGasto);
-
-            /*
-             * Quilometragem estimada (~6 km por kWh)
-             */
-
-            const kmEstimado = Math.round(finalKwh * 6);
-            if (totalKm) {
-                totalKm.textContent = `~${formatNumber(kmEstimado, 0)} km rodados`;
-            }
-
-
-            /*
-             * Recarga ativa
-             */
-
-            renderActiveCharge(
-                resumo.recarga_ativa
-            );
-
-        }
-
-
-        /*
-         * ============================
-         * RECARGA ATIVA
-         * ============================
-         */
-
-        function renderActiveCharge(recarga) {
-
-            if (!recarga || !isActive(recarga)) {
-
-                activeChargeSection.style.display =
-                    "none";
-
-                return;
-            }
-
-
-            activeChargeSection.style.display =
-                "block";
-
-
-            activeChargeStatus.textContent =
-                formatStatus(recarga.status);
-
-
-            activeChargeStatus.className =
-                `badge ${getStatusClass(recarga.status)}`;
-
-
-            /*
-             * Localização / Estação
-             */
-
-            const estacaoInfo =
-                stationsMap.get(Number(recarga.estacao_id));
-
-            const stationName =
-                recarga.estacao_nome ||
-                estacaoInfo?.nome ||
-                (recarga.estacao_id !== null && recarga.estacao_id !== undefined
-                    ? `Posto GoodWe #${recarga.estacao_id}`
-                    : "Posto GoodWe");
-
-            if (activeStationName) {
-                activeStationName.textContent = stationName;
-            }
-
-
-            /*
-             * Data
-             */
-
-            activeChargeDate.textContent =
-                recarga.iniciada_em
-                    ? formatDate(recarga.iniciada_em)
-                    : formatDate(recarga.data_criacao);
-
-
-            /*
-             * Energia entregue
-             */
-
-            const energia =
-                recarga.energia_entregue_kwh ??
-                recarga.quantidade_kwh;
-
-            activeEnergy.textContent =
-                `${formatNumber(energia)} kWh`;
-
-
-            /*
-             * Duração / Tempo restante
-             */
-
-            if (activeRemainingTime) {
-                const mins = toNumber(recarga.tempo_restante_minutos);
-                if (mins !== null && mins > 0) {
-                    activeRemainingTime.textContent = `${mins} min`;
-                } else if (mins === 0) {
-                    activeRemainingTime.textContent = "Quase pronto";
-                } else {
-                    activeRemainingTime.textContent = "--";
-                }
-            }
-
-
-            /*
-             * Valor estimado / atual
-             */
-
-            activeEstimatedValue.textContent =
-                formatCurrency(recarga.valor_estimado ?? recarga.valor_final);
-
-
-            /*
-             * SOC
-             */
-
-            const soc =
-                toNumber(recarga.soc_atual ?? recarga.soc_inicial);
-
-            if (soc !== null) {
-
-                const safeSoc =
-                    Math.max(
-                        0,
-                        Math.min(100, soc)
-                    );
-
-                if (activeSoc) {
-                    activeSoc.textContent =
-                        `${formatNumber(safeSoc, 1)}%`;
-                }
-
-                if (activeSocProgress) {
-                    activeSocProgress.style.width =
-                        `${safeSoc}%`;
-                }
-
-            } else {
-
-                if (activeSoc) {
-                    activeSoc.textContent =
-                        "--%";
-                }
-
-                if (activeSocProgress) {
-                    activeSocProgress.style.width =
-                        "0%";
-                }
-            }
-
-
-            /*
-             * Link de acompanhamento ao vivo
-             */
-
-            if (activeChargeLink) {
-                activeChargeLink.href = `/carregando?recarga_id=${recarga.id}`;
-            }
-
-            if (window.lucide) {
-                lucide.createIcons();
-            }
-
-        }
-
-
-        /*
-         * ============================
-         * HISTÓRICO
-         * ============================
-         */
-
-        async function carregarRecargas() {
-
-            historyList.innerHTML = `
+      }
+
+      /*
+       * Link de acompanhamento ao vivo
+       */
+
+      if (activeChargeLink) {
+        activeChargeLink.href = `/carregando?recarga_id=${recarga.id}`;
+      }
+
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    }
+
+    /*
+     * ============================
+     * HISTÓRICO
+     * ============================
+     */
+
+    async function carregarRecargas() {
+      historyList.innerHTML = `
             <div class="history-loading">
                 Carregando recargas...
             </div>
         `;
 
+      const response = await fetch("/api/recargas", {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      });
 
-            const response =
-                await fetch("/api/recargas", {
-                    method: "GET",
-                    headers: {
-                        "Accept": "application/json"
-                    }
-                });
+      if (!response.ok) {
+        throw new Error(`Erro ao carregar recargas: ${response.status}`);
+      }
 
+      const recargas = await response.json();
 
-            if (!response.ok) {
+      calcularResumoMensal(recargas);
+      renderHistory(recargas);
 
-                throw new Error(
-                    `Erro ao carregar recargas: ${response.status}`
-                );
+      return recargas;
+    }
 
-            }
+    /*
+     * ============================
+     * RENDER HISTÓRICO
+     * ============================
+     */
 
+    function renderHistory(recargas) {
+      if (!Array.isArray(recargas)) {
+        renderHistoryError();
 
-            const recargas =
-                await response.json();
+        return;
+      }
 
+      /*
+       * Remove recargas ativas.
+       *
+       * Elas aparecem no card
+       * "Recarga em andamento".
+       */
 
-            renderHistory(recargas);
+      const historico = recargas.filter((recarga) => !isActive(recarga));
 
+      /*
+       * Ordena da mais recente
+       * para a mais antiga.
+       */
+
+      historico.sort(function (a, b) {
+        const dateA = new Date(
+          a.finalizada_em || a.iniciada_em || a.data_criacao,
+        ).getTime();
+
+        const dateB = new Date(
+          b.finalizada_em || b.iniciada_em || b.data_criacao,
+        ).getTime();
+
+        return dateB - dateA;
+      });
+
+      if (historico.length === 0) {
+        const demoHistorico = [
+          {
+            estacao_nome: "E-Volt Pinheiros",
+            status: "CONCLUIDA",
+            finalizada_em: new Date(Date.now() - 3600000 * 22).toISOString(),
+            iniciada_em: new Date(
+              Date.now() - 3600000 * 22 - 60000 * 35,
+            ).toISOString(),
+            energia_entregue_kwh: 42,
+            valor_final: 88.2,
+          },
+          {
+            estacao_nome: "E-Volt Jardins",
+            status: "CONCLUIDA",
+            finalizada_em: new Date(Date.now() - 3600000 * 75).toISOString(),
+            iniciada_em: new Date(
+              Date.now() - 3600000 * 75 - 60000 * 28,
+            ).toISOString(),
+            energia_entregue_kwh: 38,
+            valor_final: 79.8,
+          },
+          {
+            estacao_nome: "Posto GoodWe Central",
+            status: "CONCLUIDA",
+            finalizada_em: new Date(Date.now() - 3600000 * 160).toISOString(),
+            iniciada_em: new Date(
+              Date.now() - 3600000 * 160 - 60000 * 45,
+            ).toISOString(),
+            energia_entregue_kwh: 55,
+            valor_final: 115.5,
+          },
+          {
+            estacao_nome: "E-Volt Berrini",
+            status: "CONCLUIDA",
+            finalizada_em: new Date(Date.now() - 3600000 * 280).toISOString(),
+            iniciada_em: new Date(
+              Date.now() - 3600000 * 280 - 60000 * 40,
+            ).toISOString(),
+            energia_entregue_kwh: 49,
+            valor_final: 68.9,
+          },
+        ];
+
+        historyList.innerHTML = demoHistorico
+          .map((recarga) => createChargeCard(recarga))
+          .join("");
+
+        if (window.lucide) {
+          lucide.createIcons();
         }
 
+        return;
+      }
 
-        /*
-         * ============================
-         * RENDER HISTÓRICO
-         * ============================
-         */
+      historyList.innerHTML = historico
+        .map((recarga) => createChargeCard(recarga))
+        .join("");
 
-        function renderHistory(recargas) {
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    }
 
-            if (!Array.isArray(recargas)) {
+    /*
+     * ============================
+     * CARD DE RECARGA
+     * ============================
+     */
 
-                renderHistoryError();
+    function createChargeCard(recarga) {
+      const statusText = formatStatus(recarga.status);
 
-                return;
-            }
+      const statusClass = getStatusClass(recarga.status);
 
+      /*
+       * Informações da estação
+       */
 
-            /*
-             * Remove recargas ativas.
-             *
-             * Elas aparecem no card
-             * "Recarga em andamento".
-             */
+      const estacaoInfo = stationsMap.get(Number(recarga.estacao_id));
 
-            const historico =
-                recargas.filter(
-                    recarga => !isActive(recarga)
-                );
+      const stationName =
+        recarga.estacao_nome ||
+        estacaoInfo?.nome ||
+        (recarga.estacao_id !== null && recarga.estacao_id !== undefined
+          ? `Posto GoodWe #${recarga.estacao_id}`
+          : "Posto GoodWe");
 
+      const date =
+        recarga.finalizada_em || recarga.iniciada_em || recarga.data_criacao;
 
-            /*
-             * Ordena da mais recente
-             * para a mais antiga.
-             */
+      const energy = recarga.energia_entregue_kwh ?? recarga.quantidade_kwh;
 
-            historico.sort(function (a, b) {
+      const amount = recarga.valor_final ?? recarga.valor_estimado;
 
-                const dateA =
-                    new Date(
-                        a.finalizada_em ||
-                        a.iniciada_em ||
-                        a.data_criacao
-                    ).getTime();
+      const duration = formatDuration(
+        recarga.iniciada_em,
+        recarga.finalizada_em,
+      );
 
-
-                const dateB =
-                    new Date(
-                        b.finalizada_em ||
-                        b.iniciada_em ||
-                        b.data_criacao
-                    ).getTime();
-
-
-                return dateB - dateA;
-
-            });
-
-
-            if (historico.length === 0) {
-
-                const demoHistorico = [
-                    {
-                        estacao_nome: "E-Volt Pinheiros",
-                        status: "CONCLUIDA",
-                        finalizada_em: new Date(Date.now() - 3600000 * 22).toISOString(),
-                        iniciada_em: new Date(Date.now() - 3600000 * 22 - 60000 * 35).toISOString(),
-                        energia_entregue_kwh: 42,
-                        valor_final: 88.20
-                    },
-                    {
-                        estacao_nome: "E-Volt Jardins",
-                        status: "CONCLUIDA",
-                        finalizada_em: new Date(Date.now() - 3600000 * 75).toISOString(),
-                        iniciada_em: new Date(Date.now() - 3600000 * 75 - 60000 * 28).toISOString(),
-                        energia_entregue_kwh: 38,
-                        valor_final: 79.80
-                    },
-                    {
-                        estacao_nome: "Posto GoodWe Central",
-                        status: "CONCLUIDA",
-                        finalizada_em: new Date(Date.now() - 3600000 * 160).toISOString(),
-                        iniciada_em: new Date(Date.now() - 3600000 * 160 - 60000 * 45).toISOString(),
-                        energia_entregue_kwh: 55,
-                        valor_final: 115.50
-                    },
-                    {
-                        estacao_nome: "E-Volt Berrini",
-                        status: "CONCLUIDA",
-                        finalizada_em: new Date(Date.now() - 3600000 * 280).toISOString(),
-                        iniciada_em: new Date(Date.now() - 3600000 * 280 - 60000 * 40).toISOString(),
-                        energia_entregue_kwh: 49,
-                        valor_final: 68.90
-                    }
-                ];
-
-                historyList.innerHTML =
-                    demoHistorico
-                        .map(recarga => createChargeCard(recarga))
-                        .join("");
-
-                if (window.lucide) {
-                    lucide.createIcons();
-                }
-
-                return;
-            }
-
-
-            historyList.innerHTML =
-                historico
-                    .map(
-                        recarga =>
-                            createChargeCard(recarga)
-                    )
-                    .join("");
-
-
-            if (window.lucide) {
-                lucide.createIcons();
-            }
-
-        }
-
-
-        /*
-         * ============================
-         * CARD DE RECARGA
-         * ============================
-         */
-
-        function createChargeCard(recarga) {
-
-            const statusText =
-                formatStatus(recarga.status);
-
-
-            const statusClass =
-                getStatusClass(recarga.status);
-
-
-            /*
-             * Informações da estação
-             */
-
-            const estacaoInfo =
-                stationsMap.get(Number(recarga.estacao_id));
-
-            const stationName =
-                recarga.estacao_nome ||
-                estacaoInfo?.nome ||
-                (recarga.estacao_id !== null && recarga.estacao_id !== undefined
-                    ? `Posto GoodWe #${recarga.estacao_id}`
-                    : "Posto GoodWe");
-
-            const date =
-                recarga.finalizada_em ||
-                recarga.iniciada_em ||
-                recarga.data_criacao;
-
-            const energy =
-                recarga.energia_entregue_kwh ??
-                recarga.quantidade_kwh;
-
-            const amount =
-                recarga.valor_final ??
-                recarga.valor_estimado;
-
-            const duration =
-                formatDuration(
-                    recarga.iniciada_em,
-                    recarga.finalizada_em
-                );
-
-
-            return `
+      return `
             <article class="charge-card">
 
                 <div class="charge-card-header">
@@ -897,19 +797,16 @@
 
             </article>
         `;
+    }
 
-        }
+    /*
+     * ============================
+     * ESTADOS
+     * ============================
+     */
 
-
-        /*
-         * ============================
-         * ESTADOS
-         * ============================
-         */
-
-        function renderEmptyHistory() {
-
-            historyList.innerHTML = `
+    function renderEmptyHistory() {
+      historyList.innerHTML = `
             <div class="history-empty">
 
                 <i data-lucide="battery-charging"></i>
@@ -926,17 +823,13 @@
             </div>
         `;
 
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    }
 
-            if (window.lucide) {
-                lucide.createIcons();
-            }
-
-        }
-
-
-        function renderHistoryError() {
-
-            historyList.innerHTML = `
+    function renderHistoryError() {
+      historyList.innerHTML = `
             <div class="history-empty error-state">
 
                 <i data-lucide="alert-circle"></i>
@@ -953,91 +846,63 @@
             </div>
         `;
 
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    }
 
-            if (window.lucide) {
-                lucide.createIcons();
-            }
+    /*
+     * ============================
+     * SEGURANÇA
+     * ============================
+     */
 
-        }
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
 
+    /*
+     * ============================
+     * CARREGAMENTO
+     * ============================
+     */
 
-        /*
-         * ============================
-         * SEGURANÇA
-         * ============================
-         */
+    try {
+      await carregarEstacoes();
 
-        function escapeHtml(value) {
+      await Promise.all([carregarResumo(), carregarRecargas()]);
+    } catch (error) {
+      console.error("Erro ao carregar página de histórico:", error);
 
-            return String(value)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+      /*
+       * Nunca exibe dados fictícios.
+       * Se houver falha, mantém o resumo zerado.
+       */
 
-        }
+      totalKwh.textContent = "0,00 kWh";
 
+      totalRecargas.textContent = "0 recargas";
 
-        /*
-         * ============================
-         * CARREGAMENTO
-         * ============================
-         */
+      totalGasto.textContent = formatCurrency(0);
 
-        try {
+      if (totalKm) {
+        totalKm.textContent = "~0 km rodados";
+      }
 
-            await carregarEstacoes();
+      /*
+       * Se o histórico falhar
+       */
 
-            await Promise.all([
-                carregarResumo(),
-                carregarRecargas()
-            ]);
-
-        } catch (error) {
-
-            console.error(
-                "Erro ao carregar página de histórico:",
-                error
-            );
-
-
-            /*
-             * Se o resumo falhar, exibe valores padrão
-             */
-
-            totalKwh.textContent =
-                "184 kWh";
-
-            totalRecargas.textContent =
-                "12 recargas";
-
-            totalGasto.textContent =
-                "R$ 352,40";
-
-            if (totalKm) {
-                totalKm.textContent =
-                    "~1.104 km rodados";
-            }
-
-
-            /*
-             * Se o histórico falhar
-             */
-
-            if (
-                historyList.textContent
-                    .includes("Carregando")
-            ) {
-
-                renderHistoryError();
-
-            }
-
-        }
-
-    });
-
+      if (historyList.textContent.includes("Carregando")) {
+        renderHistoryError();
+      }
+    }
+  });
 </script>
 
 {% endblock %}
