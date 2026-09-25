@@ -27,6 +27,7 @@ app = FastAPI(
 )
 
 app.mount("/frontend", StaticFiles(directory=str(FRONTEND_DIR)), name="frontend")
+app.mount("/backend/mapa", StaticFiles(directory=str(BACKEND_DIR / "mapa")), name="backend_mapa")
 
 app.include_router(
     api_router,

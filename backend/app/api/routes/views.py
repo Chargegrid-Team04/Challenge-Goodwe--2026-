@@ -1,12 +1,13 @@
 from pathlib import Path
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 
 router = APIRouter()
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
 TEMPLATES_DIR = BASE_DIR / "frontend" / "paginas"
+MAPA_DIR = BASE_DIR / "backend" / "mapa"
 
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
@@ -27,6 +28,11 @@ def view_mapa(request: Request):
         name="mapa.html", 
         context={},
     )
+
+
+@router.get("/mapa-interativo")
+def view_mapa_interativo():
+    return FileResponse(str(MAPA_DIR / "index.html"))
 
 
 @router.get("/carregando", response_class=HTMLResponse)

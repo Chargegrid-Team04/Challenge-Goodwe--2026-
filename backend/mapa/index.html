@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ChargeGrid · Planejador de recarga GoodWe</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Modo embutido (exibição como background da tela do app) */
+        body.modo-embed, body.modo-embed .app {
+            margin: 0;
+            padding: 0;
+            width: 100% !important;
+            height: 100% !important;
+            overflow: hidden;
+        }
+        body.modo-embed .painel {
+            display: none !important;
+        }
+        body.modo-embed .mapa-wrap {
+            width: 100% !important;
+            height: 100% !important;
+            flex: 1 1 100% !important;
+        }
+        body.modo-embed .leaflet-control-zoom {
+            margin-top: 130px !important;
+        }
+    </style>
+    <script>
+        if (new URLSearchParams(window.location.search).get("embed") === "1") {
+            document.documentElement.classList.add("modo-embed");
+            window.addEventListener("DOMContentLoaded", () => {
+                document.body.classList.add("modo-embed");
+            });
+        }
+    </script>
+</head>
+<body>
+<div class="app">
+
+    <aside class="painel">
+        <header class="marca">
+            <span class="marca-logo"><i class="fas fa-bolt"></i></span>
+            <div>
+                <h1>ChargeGrid</h1>
+                <p>Recarga inteligente em parceria com GoodWe</p>
+            </div>
+        </header>
+
+        <nav class="abas" role="tablist" aria-label="Seções do painel">
+            <button type="button" role="tab" data-aba="viagem" aria-selected="true">Viagem</button>
+            <button type="button" role="tab" data-aba="carregadores" aria-selected="false">
+                Carregadores <span class="contagem" id="contagemEstacoes">0</span>
+            </button>
+        </nav>
+
+        <section class="aba" id="abaViagem" role="tabpanel">
+            <form id="formViagem" novalidate>
+                <div class="campo">
+                    <label for="origemTxt">De</label>
+                    <div class="entrada">
+                        <i class="fas fa-circle-dot marca-origem"></i>
+                        <input id="origemTxt" type="text" readonly>
+                        <button type="button" id="btnLocalizar" title="Usar minha localização" aria-label="Usar minha localização">
+                            <i class="fas fa-location-crosshairs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="campo campo-destino">
+                    <label for="destinoTxt">Para</label>
+                    <div class="entrada">
+                        <i class="fas fa-flag-checkered marca-destino"></i>
+                        <input id="destinoTxt" type="text" placeholder="Cidade, endereço ou local" autocomplete="off">
+                        <button type="button" id="btnBuscar" title="Buscar destino" aria-label="Buscar destino">
+                            <i class="fas fa-magnifying-glass"></i>
+                        </button>
+                    </div>
+                    <ul class="sugestoes" id="sugestoes" hidden></ul>
+                    <div class="chips" id="atalhos"></div>
+                    <p class="dica">Você também pode clicar no mapa ou arrastar os pinos.</p>
+                </div>
+
+                <div class="campo">
+                    <label for="veiculoSel">Veículo</label>
+                    <select id="veiculoSel"></select>
+                </div>
+
+                <div class="campo">
+                    <label for="socInput">Bateria agora <output id="socOut" for="socInput">50%</output></label>
+                    <input id="socInput" type="range" min="5" max="100" step="1" value="50">
+                </div>
+
+                <div class="campo">
+                    <label for="saidaInput">Partida</label>
+                    <div class="entrada">
+                        <i class="fas fa-calendar-day"></i>
+                        <input id="saidaInput" type="datetime-local">
+                        <button type="button" id="btnAgora" class="texto">Agora</button>
+                    </div>
+                </div>
+
+                <fieldset class="campo">
+                    <legend>Priorizar</legend>
+                    <div class="segmentado">
+                        <label><input type="radio" name="prioridade" value="tempo" checked><span>Chegar antes</span></label>
+                        <label><input type="radio" name="prioridade" value="custo"><span>Gastar menos</span></label>
+                    </div>
+                </fieldset>
+
+                <label class="check">
+                    <input type="checkbox" id="arCond" checked>
+                    <span>Ar-condicionado ligado</span>
+                </label>
+
+                <button type="submit" class="btn-principal" id="btnCalcularRota">
+                    <i class="fas fa-route"></i> Planejar viagem
+                </button>
+            </form>
+
+            <div id="resultado" class="resultado" aria-live="polite"></div>
+        </section>
+
+        <section class="aba" id="abaCarregadores" role="tabpanel" hidden>
+            <div class="filtros">
+                <label class="filtro"><input type="checkbox" id="filterAvailable"><span>Com vaga agora</span></label>
+                <label class="filtro"><input type="checkbox" id="filterFastCharge"><span>Rápidos (50 kW+)</span></label>
+                <label class="filtro"><input type="checkbox" id="filterCompat"><span>Compatíveis com meu veículo</span></label>
+            </div>
+            <ul class="lista-estacoes" id="listaEstacoes"></ul>
+        </section>
+    </aside>
+
+    <main class="mapa-wrap">
+        <div id="map"></div>
+
+        <div id="avisos" class="avisos" role="status" aria-live="polite"></div>
+    </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="config.js"></script>
+<script src="utils.js"></script>
+<script src="mochChargers.js"></script>
+<script src="batteryCalc.js"></script>
+<script src="trafficService.js"></script>
+<script src="routeService.js"></script>
+<script src="chargerService.js"></script>
+<script src="tripPlanner.js"></script>
+<script src="ui.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
