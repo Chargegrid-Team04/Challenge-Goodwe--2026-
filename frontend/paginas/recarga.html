@@ -49,6 +49,62 @@ block Head %}
   .config-inline-input[type="number"]::-webkit-outer-spin-button {
     opacity: 1;
   }
+
+  /* Seletor de veículo no cabeçalho */
+  .vehicle-selector {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .vehicle-select-display {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: rgba(0, 180, 216, 0.08);
+    border: 1px solid rgba(0, 180, 216, 0.35);
+    border-radius: 20px;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+
+  .vehicle-selector:hover .vehicle-select-display {
+    background: rgba(0, 180, 216, 0.16);
+    border-color: var(--secondary);
+    transform: translateY(-1px);
+  }
+
+  .vehicle-selector .vehicle-model {
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--secondary);
+    max-width: 170px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .vehicle-select {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 10;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .vehicle-select option {
+    color: #111827;
+    background: #ffffff;
+    font-size: 14px;
+    padding: 6px;
+  }
 </style>
 {% endblock %} {% block Conteudo %}
 
@@ -75,7 +131,16 @@ block Head %}
   <section class="battery-section">
     <div class="battery-header">
       <span class="battery-label">Estado da Bateria</span>
-      <span class="vehicle-model" id="vehicle-model">BYD Dolphin • GW22K</span>
+      <div class="vehicle-selector" id="vehicle-selector-wrap" title="Clique para trocar de veículo">
+        <select id="vehicle-select" class="vehicle-select" aria-label="Selecione o seu veículo">
+          <option value="1">BYD Dolphin (45%)</option>
+        </select>
+        <div class="vehicle-select-display">
+          <i data-lucide="car" style="width: 15px; height: 15px; stroke: var(--secondary); flex-shrink: 0;"></i>
+          <span class="vehicle-model" id="vehicle-model">BYD Dolphin</span>
+          <i data-lucide="chevron-down" style="width: 14px; height: 14px; stroke: var(--secondary); flex-shrink: 0;"></i>
+        </div>
+      </div>
     </div>
     <div class="battery-bar-container">
       <div class="battery-bar-track">
@@ -308,6 +373,11 @@ block Head %}
       currentFooterOption.classList.add("active");
     }
 
+    const elVehicleModel = document.getElementById("vehicle-model");
+    const elVehicleSelect = document.getElementById("vehicle-select");
+    const elBatteryFill = document.getElementById("battery-bar-fill");
+    const elBatteryPercentage = document.getElementById("battery-percentage");
+
     const VEICULO_MOCK = {
       id: 1,
       usuario_id: 1,
@@ -317,10 +387,32 @@ block Head %}
       capacidade_bateria_kwh: 60.0,
       tipo_conector: "TYPE2",
       soc_atual: 45, // Nível atual da bateria em porcentagem (%)
-      label_exibicao: "BYD Dolphin • GW22K",
+      label_exibicao: "BYD Dolphin GS",
     };
 
     let veiculoAtual = { ...VEICULO_MOCK };
+    let veiculosDisponiveis = [VEICULO_MOCK];
+
+    function aplicarVeiculo(v) {
+      if (!v) return;
+      veiculoAtual.id = v.id;
+      veiculoAtual.usuario_id = v.usuario_id || 1;
+      veiculoAtual.marca = v.marca || "BYD";
+      veiculoAtual.modelo = v.modelo || "Dolphin";
+      veiculoAtual.versao = v.versao || "";
+      veiculoAtual.capacidade_bateria_kwh =
+        parseFloat(v.capacidade_bateria_kwh) || 60.0;
+      if (v.soc_atual !== undefined && v.soc_atual !== null) {
+        veiculoAtual.soc_atual = parseFloat(v.soc_atual);
+      }
+      const versaoTexto = veiculoAtual.versao ? ` ${veiculoAtual.versao}` : "";
+      veiculoAtual.label_exibicao = `${veiculoAtual.marca} ${veiculoAtual.modelo}${versaoTexto}`;
+
+      if (elVehicleModel) elVehicleModel.textContent = veiculoAtual.label_exibicao;
+      const safeSoc = Math.min(100, Math.max(0, veiculoAtual.soc_atual));
+      if (elBatteryFill) elBatteryFill.style.width = `${safeSoc}%`;
+      if (elBatteryPercentage) elBatteryPercentage.textContent = `${Math.round(safeSoc)}%`;
+    }
 
     // Tenta obter os veículos cadastrados no backend caso o banco possua registros
     try {
@@ -328,38 +420,48 @@ block Head %}
       if (respVeiculos.ok) {
         const veiculosLista = await respVeiculos.json();
         if (Array.isArray(veiculosLista) && veiculosLista.length > 0) {
+          veiculosDisponiveis = veiculosLista;
           const vPrincipal =
             veiculosLista.find((v) => v.principal) || veiculosLista[0];
-          veiculoAtual.id = vPrincipal.id;
-          veiculoAtual.usuario_id = vPrincipal.usuario_id || 1;
-          veiculoAtual.marca = vPrincipal.marca || "BYD";
-          veiculoAtual.modelo = vPrincipal.modelo || "Dolphin";
-          veiculoAtual.versao = vPrincipal.versao || "GS";
-          veiculoAtual.capacidade_bateria_kwh =
-            parseFloat(vPrincipal.capacidade_bateria_kwh) || 60.0;
-          if (vPrincipal.soc_atual !== undefined && vPrincipal.soc_atual !== null) {
-            veiculoAtual.soc_atual = parseFloat(vPrincipal.soc_atual);
+          aplicarVeiculo(vPrincipal);
+
+          if (elVehicleSelect) {
+            elVehicleSelect.innerHTML = "";
+            veiculosLista.forEach((v) => {
+              const opt = document.createElement("option");
+              opt.value = v.id;
+              const versao = v.versao ? ` ${v.versao}` : "";
+              const soc = v.soc_atual != null ? ` (${Math.round(v.soc_atual)}%)` : "";
+              opt.textContent = `${v.marca} ${v.modelo}${versao}${soc}`;
+              if (v.id === veiculoAtual.id) opt.selected = true;
+              elVehicleSelect.appendChild(opt);
+            });
           }
-          veiculoAtual.label_exibicao = `${veiculoAtual.marca} ${veiculoAtual.modelo} • GW22K`;
         }
       }
     } catch (e) {
       console.warn(
-        "Utilizando veículo mockado (aguardando integração de login/veículo):",
+        "Utilizando veículo padrão (aguardando integração de login/veículo):",
         e,
       );
     }
 
-    // Atualiza na interface as informações do veículo e estado da bateria
-    const elVehicleModel = document.getElementById("vehicle-model");
-    const elBatteryFill = document.getElementById("battery-bar-fill");
-    const elBatteryPercentage = document.getElementById("battery-percentage");
+    if (elVehicleSelect) {
+      elVehicleSelect.addEventListener("change", (e) => {
+        const idEscolhido = Number(e.target.value);
+        const escolhido = veiculosDisponiveis.find((v) => Number(v.id) === idEscolhido);
+        if (escolhido) {
+          aplicarVeiculo(escolhido);
+          if (typeof atualizarEstimativa === "function") {
+            atualizarEstimativa();
+          }
+        }
+      });
+    }
 
-    if (elVehicleModel)
-      elVehicleModel.textContent = veiculoAtual.label_exibicao;
-    if (elBatteryFill) elBatteryFill.style.width = `${veiculoAtual.soc_atual}%`;
-    if (elBatteryPercentage)
-      elBatteryPercentage.textContent = `${veiculoAtual.soc_atual}%`;
+    if (window.lucide) {
+      lucide.createIcons();
+    }
 
     const urlParams = new URLSearchParams(window.location.search);
     const estacaoId = parseInt(urlParams.get("estacao_id") || "1", 10);
