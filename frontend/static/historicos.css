@@ -800,3 +800,123 @@
     transition: none;
   }
 }
+
+/* =========================================================
+   RESPONSIVIDADE - MANTER ITENS LADO A LADO
+   ========================================================= */
+
+/* RESUMO */
+.summary-card {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+  align-items: stretch !important;
+  gap: 14px !important;
+}
+
+.summary-col {
+  min-width: 0 !important;
+}
+
+.summary-divider {
+  width: 1px !important;
+  height: auto !important;
+  min-height: 65px !important;
+}
+
+/* DETALHES DOS CARDS */
+.charge-card-details {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  align-items: start !important;
+}
+
+.detail-item {
+  min-width: 0 !important;
+}
+
+.detail-label,
+.detail-value {
+  white-space: nowrap !important;
+}
+
+/* CABEÇALHO DO CARD */
+.charge-card-header {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  gap: 10px !important;
+}
+
+.charge-card-header > div {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+.badge {
+  flex-shrink: 0 !important;
+}
+
+/* TÍTULO + FILTRO */
+.history-section-header {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+  .summary-card {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+    gap: 10px !important;
+    padding: 16px 14px !important;
+  }
+
+  .summary-label {
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+  }
+
+  .summary-value {
+    font-size: 20px !important;
+  }
+
+  .summary-subtext {
+    font-size: 10px !important;
+  }
+
+  .charge-card-details {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+  }
+
+  .detail-item {
+    min-width: 0 !important;
+  }
+
+  .detail-label {
+    font-size: 10px !important;
+  }
+
+  .detail-value {
+    font-size: 12px !important;
+  }
+
+  .history-section-header {
+    flex-direction: row !important;
+  }
+
+  .history-section-header h2 {
+    font-size: 16px !important;
+  }
+
+  .filter-dropdown {
+    flex-shrink: 0 !important;
+  }
+}
