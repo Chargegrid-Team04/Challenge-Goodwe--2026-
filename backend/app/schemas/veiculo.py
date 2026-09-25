@@ -14,6 +14,7 @@ class VeiculoBase(BaseModel):
     principal: bool = False
 
     soc_atual: Decimal = Field(
+        default=Decimal("20.0"),
         ge=0,
         le=100,
     )

@@ -337,6 +337,9 @@ block Head %}
           veiculoAtual.versao = vPrincipal.versao || "GS";
           veiculoAtual.capacidade_bateria_kwh =
             parseFloat(vPrincipal.capacidade_bateria_kwh) || 60.0;
+          if (vPrincipal.soc_atual !== undefined && vPrincipal.soc_atual !== null) {
+            veiculoAtual.soc_atual = parseFloat(vPrincipal.soc_atual);
+          }
           veiculoAtual.label_exibicao = `${veiculoAtual.marca} ${veiculoAtual.modelo} • GW22K`;
         }
       }
