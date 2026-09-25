@@ -15,12 +15,12 @@ URL_API_RECARGAS = "http://127.0.0.1:8000/api/recargas"
 def criar_recarga() -> int:
     """Cria uma recarga nova via API e devolve o id dela."""
     corpo = json.dumps({
-        "usuario_id": 1,
         "veiculo_id": 1,
         "estacao_id": 1,
         "conector_id": 3,
         "modo": "RAPIDO",
-        "quantidade_kwh": 10,
+        "percentual_desejado": 80,
+        "tempo_disponivel_minutos": 45,
     }).encode("utf-8")
 
     requisicao = urllib.request.Request(

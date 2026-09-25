@@ -1,6 +1,7 @@
 from pathlib import Path
 from contextlib import asynccontextmanager
 
+import gradio as gr
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
@@ -8,6 +9,7 @@ from app.api.router import api_router
 from app.api.routes.ai import router as ai_router
 from app.api.routes import views
 from app.db.session import engine
+from chat_app import demo as ai_demo
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_DIR = BASE_DIR / "frontend"
@@ -25,6 +27,8 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+app = gr.mount_gradio_app(app, ai_demo, path="/ia")
 
 app.mount("/frontend", StaticFiles(directory=str(FRONTEND_DIR)), name="frontend")
 app.mount("/backend/mapa", StaticFiles(directory=str(BACKEND_DIR / "mapa")), name="backend_mapa")

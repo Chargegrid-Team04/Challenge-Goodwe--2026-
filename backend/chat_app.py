@@ -1,8 +1,6 @@
 import inspect
 import os
 import time
-from datetime import datetime, timezone
-from decimal import Decimal
 from typing import Any, Iterator
 
 import gradio as gr
@@ -11,7 +9,6 @@ from google import genai
 from google.genai import types
 
 from app.services.ai_service import get_charging_stations_context
-from app.services.charging_prediction_service import predict_charging
 from app.services.context_service import format_context, retrieve_document_context
 from app.services.web_search_service import format_web_context, search_web
 
@@ -218,93 +215,466 @@ def stream_ai_response(
         return
 
 
-def predict_from_gradio(
-    station_id: int | None,
-    source: str,
-    current_soc: float,
-    target_soc: float,
-    battery_capacity: float,
-) -> Iterator[tuple[str, Any]]:
-    """Run the deterministic prediction using the existing station and vehicle data."""
-    yield "", gr.Button(value="Calculando...", interactive=False)
+theme = gr.themes.Soft(
+    primary_hue=gr.themes.colors.green,
+    secondary_hue=gr.themes.colors.blue,
+    neutral_hue=gr.themes.colors.gray,
+    radius_size="md",
+    font=gr.themes.GoogleFont("Inter"),
+)
 
-    try:
-        from sqlalchemy import select
-
-        from app.db.session import SessionLocal
-        from app.models.estacao import Estacao
-        from app.models.recarga import Recarga
-
-        with SessionLocal() as db:
-            if station_id is None:
-                yield "**Erro:** selecione uma estação.", gr.Button(value="Calcular previsão", interactive=True)
-                return
-
-            station = db.get(Estacao, int(station_id))
-            if station is None:
-                yield "**Erro:** estação não encontrada.", gr.Button(value="Calcular previsão", interactive=True)
-                return
-
-            connector = next(
-                (
-                    item for item in station.conectores
-                    if item.status.upper() == "DISPONIVEL"
-                ),
-                None,
-            )
-            if connector is None:
-                yield "**Erro:** nenhum conector disponível nessa estação.", gr.Button(value="Calcular previsão", interactive=True)
-                return
-
-            station_capacity = sum(
-                (Decimal(item.potencia_kw) for item in station.conectores),
-                Decimal("0"),
-            )
-            if station_capacity <= 0:
-                yield "**Erro:** a estação não possui capacidade cadastrada.", gr.Button(value="Calcular previsão", interactive=True)
-                return
-
-            active_cars = len(db.scalars(
-                select(Recarga).where(
-                    Recarga.estacao_id == station.id,
-                    Recarga.status == "CARREGANDO",
-                )
-            ).all())
-
-            prediction = predict_charging(
-                battery_capacity_kwh=Decimal(str(battery_capacity)),
-                current_soc_percent=Decimal(str(current_soc)),
-                target_soc_percent=Decimal(str(target_soc)),
-                requested_source=source,
-                connector_power_kw=connector.potencia_kw,
-                station_capacity_kw=station_capacity,
-                base_price_per_kwh=station.preco_base_kwh,
-                active_cars=active_cars,
-                current_at=datetime.now(timezone.utc),
-                solar_available_kw=None,
-            )
-
-        solar_note = "estimada (sem telemetria solar cadastrada)" if prediction.source_is_estimated else "informada pela estação"
-        result = (
-            f"### Sugestão: {prediction.source}\n\n"
-            f"{prediction.suggestion}\n\n"
-            f"- Energia necessária: **{prediction.energy_required_kwh} kWh**\n"
-            f"- Potência aplicada: **{prediction.charging_power_kw} kW**\n"
-            f"- Tempo estimado: **{prediction.estimated_minutes} minutos**\n"
-            f"- Preço estimado: **R$ {prediction.price_per_kwh}/kWh**\n"
-            f"- Custo estimado: **R$ {prediction.estimated_cost}**\n"
-            f"- Carros carregando na estação: **{prediction.active_cars}**\n"
-            f"- Energia solar: **{solar_note}**\n\n"
-            "> Valores são estimativas e podem variar com telemetria, temperatura, veículo e rede elétrica."
-        )
-        yield result, gr.Button(value="Calcular previsão", interactive=True)
-    except Exception as exc:
-        yield f"**Não foi possível calcular a previsão:** {exc}", gr.Button(value="Calcular previsão", interactive=True)
 with gr.Blocks() as demo:
+    gr.HTML("""
+    <style>
+        :root {
+            color-scheme: light !important;
+            --goodwe-primary: #0b2b20;
+            --goodwe-primary-soft: #163c30;
+            --goodwe-secondary: #00b4d8;
+            --goodwe-secondary-hover: #015f70;
+            --goodwe-bg: #f1f8f5;
+            --goodwe-panel: #ffffff;
+            --goodwe-panel-soft: #f4f9f7;
+            --goodwe-border: rgba(11, 43, 32, 0.12);
+            --goodwe-text: #0f172a;
+            --goodwe-muted: #526074;
+            --body-background-fill: #f1f8f5;
+            --body-text-color: #0f172a;
+            --background-fill-primary: #f1f8f5;
+            --background-fill-secondary: #ffffff;
+            --panel-background-fill: #ffffff;
+            --block-background-fill: #ffffff;
+            --input-background-fill: #ffffff;
+            --input-text-fill: #0f172a;
+        }
+
+        html, body {
+            color-scheme: light !important;
+            background: #f1f8f5 !important;
+            color: var(--goodwe-text) !important;
+        }
+
+        * { box-sizing: border-box; }
+
+        .gradio-container {
+            color-scheme: light !important;
+            background: #f1f8f5 !important;
+            width: 100% !important;
+            max-width: 820px !important;
+            min-height: 100dvh !important;
+            margin: 0 auto !important;
+            padding: max(0.75rem, env(safe-area-inset-top)) 1rem max(3.5rem, calc(env(safe-area-inset-bottom) + 3rem)) !important;
+        }
+
+        .gradio-container .wrap {
+            background: transparent !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+
+        .gradio-container main,
+        .gradio-container .column,
+        .gradio-container .block,
+        .gradio-container .prose {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+        }
+
+        footer {
+            display: none !important;
+        }
+
+        #goodwe-header {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            width: 100%;
+            min-width: 0;
+            margin: 0 auto 0.75rem;
+            padding: 0.85rem 1rem;
+            border: 1px solid rgba(0, 180, 216, 0.22);
+            border-radius: 18px;
+            background: linear-gradient(112deg, #0b2b20 0%, #145543 58%, #087f9a 100%);
+            box-shadow: 0 10px 24px rgba(11, 43, 32, 0.12);
+            text-align: left;
+            overflow: hidden;
+        }
+
+        #goodwe-header .brand-mark {
+            display: grid;
+            place-items: center;
+            flex: 0 0 44px;
+            width: 44px;
+            height: 44px;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-weight: 800;
+        }
+
+        #goodwe-header .header-copy {
+            flex: 1 1 auto;
+            min-width: 0;
+            overflow-wrap: normal;
+            word-break: normal;
+        }
+
+        #goodwe-header h2 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 1.2rem;
+            font-weight: 750;
+        }
+
+        #goodwe-header .eyebrow {
+            display: block;
+            margin-bottom: 0.1rem;
+            color: #a6e8ed;
+            font-size: 0.66rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+        }
+
+        #goodwe-header .subtitle {
+            display: block;
+            margin-top: 0.15rem;
+            color: rgba(255,255,255,0.78);
+            font-size: 0.78rem;
+            line-height: 1.35;
+        }
+
+        #amper-navbar {
+            position: fixed;
+            z-index: 1001;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 1rem;
+            width: 100%;
+            height: calc(70px + env(safe-area-inset-bottom));
+            padding: 8px max(16px, calc((100vw - 820px) / 2 + 24px)) max(8px, env(safe-area-inset-bottom));
+            border-top: 1px solid #d3dbe5;
+            background: #ffffff;
+            box-shadow: 0 -8px 24px rgba(11, 43, 32, 0.07);
+        }
+
+        #amper-navbar a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            min-width: 0;
+            border-radius: 12px;
+            color: #475569;
+            font-family: Inter, system-ui, -apple-system, sans-serif !important;
+            text-decoration: none;
+            transition: color 150ms ease, background-color 150ms ease, transform 150ms ease;
+        }
+
+        #amper-navbar svg {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            color: #475569 !important;
+            stroke: #475569 !important;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transform: translateY(-1px);
+        }
+
+        #amper-navbar span {
+            overflow: hidden;
+            max-width: 100%;
+            color: inherit;
+            font-size: 11px;
+            font-weight: 500;
+            line-height: 24px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        #amper-navbar a:hover,
+        #amper-navbar a:focus-visible {
+            background: #e6f6f8;
+            color: #00809a;
+        }
+
+        #amper-navbar a:hover svg,
+        #amper-navbar a:focus-visible svg {
+            color: #00b4d8 !important;
+            stroke: #00b4d8 !important;
+        }
+
+        #amper-navbar a[aria-current="page"] {
+            color: #00b4d8;
+        }
+
+        #amper-navbar a[aria-current="page"] svg {
+            color: #00b4d8 !important;
+            stroke: #00b4d8 !important;
+            stroke-width: 2.5;
+            transform: translateY(-1px) scale(1.08);
+        }
+
+        #amper-navbar a[aria-current="page"] span {
+            font-weight: 700;
+        }
+
+        #amper-navbar a:active {
+            transform: scale(0.94);
+        }
+
+        #amper-navbar a:focus-visible {
+            outline: 2px solid #00b4d8;
+            outline-offset: 1px;
+        }
+
+        #goodwe-chatbot {
+            background: var(--goodwe-panel) !important;
+            border: 1px solid rgba(0, 180, 216, 0.24) !important;
+            border-radius: 18px !important;
+            height: clamp(360px, calc(100dvh - 400px), 680px) !important;
+            min-height: 360px !important;
+            box-shadow: 0 12px 28px rgba(11, 43, 32, 0.07) !important;
+            color: var(--goodwe-text) !important;
+        }
+
+        #goodwe-chatbot * {
+            color: #111827 !important;
+        }
+
+        #goodwe-chatbot button,
+        #goodwe-chatbot [role="button"] {
+            border: 1px solid rgba(0, 128, 154, 0.24) !important;
+            border-radius: 10px !important;
+            background: #e6f6f8 !important;
+            box-shadow: none !important;
+            color: #07586a !important;
+            transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+        }
+
+        #goodwe-chatbot button svg,
+        #goodwe-chatbot [role="button"] svg,
+        #goodwe-chatbot button svg *,
+        #goodwe-chatbot [role="button"] svg * {
+            color: currentColor !important;
+            stroke: currentColor !important;
+        }
+
+        #goodwe-chatbot button:hover,
+        #goodwe-chatbot [role="button"]:hover {
+            border-color: #087f9a !important;
+            background: #087f9a !important;
+            color: #ffffff !important;
+        }
+
+        #goodwe-chatbot button:focus-visible,
+        #goodwe-chatbot [role="button"]:focus-visible {
+            outline: 3px solid rgba(0, 180, 216, 0.38) !important;
+            outline-offset: 2px;
+        }
+
+        #goodwe-chatbot .bubble-wrap,
+        #goodwe-chatbot .wrapper,
+        #goodwe-chatbot .placeholder-content,
+        #goodwe-chatbot .placeholder {
+            background: #ffffff !important;
+            color: var(--goodwe-text) !important;
+        }
+
+        #goodwe-chatbot [data-testid="block-label"] {
+            background: #e7f4f1 !important;
+            border-color: rgba(11, 43, 32, 0.12) !important;
+            color: var(--goodwe-primary) !important;
+        }
+
+        #goodwe-chatbot .placeholder p {
+            color: #111827 !important;
+        }
+
+        #goodwe-composer {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            align-items: stretch !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            gap: 0.6rem !important;
+            margin-top: 0.65rem;
+            padding: 0.5rem;
+            border: 1px solid rgba(0, 180, 216, 0.2);
+            border-radius: 17px;
+            background: var(--goodwe-panel) !important;
+            box-shadow: 0 8px 20px rgba(11, 43, 32, 0.06);
+        }
+
+        #goodwe-composer #goodwe-textbox {
+            flex: 1 1 auto !important;
+            min-width: 0 !important;
+            width: auto !important;
+            margin: 0 !important;
+            min-height: 54px !important;
+            border: 0 !important;
+            border-radius: 12px !important;
+            color: var(--goodwe-text) !important;
+            background: #ffffff !important;
+            box-shadow: none !important;
+        }
+
+        #goodwe-composer [data-testid="block-label"] {
+            display: none !important;
+        }
+
+        #goodwe-textbox textarea,
+        #goodwe-textbox input {
+            background: transparent !important;
+            color: var(--goodwe-text) !important;
+            font-size: 1rem !important;
+        }
+
+        #goodwe-textbox textarea::placeholder {
+            color: rgba(82, 96, 116, 0.8) !important;
+        }
+
+        .gradio-container button,
+        .gradio-container .button-primary,
+        .gradio-container .primary {
+            border: none !important;
+            border-radius: 12px !important;
+            font-weight: 700 !important;
+            background: linear-gradient(135deg, var(--goodwe-primary) 0%, var(--goodwe-primary-soft) 100%) !important;
+            color: #ffffff !important;
+            box-shadow: 0 10px 20px rgba(11, 43, 32, 0.15);
+        }
+
+        .gradio-container button:hover,
+        .gradio-container .button-primary:hover,
+        .gradio-container .primary:hover {
+            background: linear-gradient(135deg, var(--goodwe-primary-soft) 0%, var(--goodwe-primary) 100%) !important;
+        }
+
+        #goodwe-composer #goodwe-send-button {
+            flex: 0 0 84px !important;
+            width: 84px !important;
+            min-width: 84px !important;
+            min-height: 54px !important;
+            margin: 0 !important;
+            border-radius: 13px !important;
+            background: linear-gradient(110deg, var(--goodwe-primary) 0%, #087f9a 100%) !important;
+        }
+
+        .gradio-container .gr-markdown,
+        .gradio-container .gradio-html,
+        .gradio-container .label,
+        .gradio-container .textbox,
+        .gradio-container .chatbot {
+            color: var(--goodwe-text) !important;
+        }
+
+        .gradio-container .bubble {
+            border-radius: 18px !important;
+        }
+
+        #goodwe-chatbot .message.user {
+            background: linear-gradient(135deg, #e6f7f1, #d7f0e8) !important;
+            color: var(--goodwe-text) !important;
+        }
+
+        #goodwe-chatbot .message.bot {
+            background: #eaf8fb !important;
+            border: 1px solid rgba(0, 180, 216, 0.13) !important;
+            color: var(--goodwe-text) !important;
+        }
+
+        @media (max-width: 600px) {
+            .main.fillable {
+                padding: 0.6rem !important; 
+            }
+
+            .gradio-container {
+                padding-left: 0.7rem !important;
+                padding-right: 0.7rem !important;
+            }
+
+            #goodwe-header {
+                gap: 0.7rem;
+                margin-bottom: 0.6rem;
+                padding: 0.75rem 0.8rem;
+                border-radius: 16px;
+            }
+
+            #goodwe-header .brand-mark {
+                flex-basis: 40px;
+                width: 40px;
+                height: 40px;
+                border-radius: 12px;
+            }
+
+            #goodwe-header h2 { font-size: 1.08rem; }
+            #goodwe-header .subtitle { font-size: 0.74rem; }
+
+            #goodwe-chatbot {
+                height: clamp(280px, calc(100dvh - 400px), 520px) !important;
+                min-height: 280px !important;
+                border-radius: 16px !important;
+            }
+
+            #goodwe-composer {
+                gap: 0.4rem !important;
+                padding: 0.4rem;
+                border-radius: 15px;
+            }
+
+            #goodwe-composer #goodwe-send-button {
+                flex-basis: 72px !important;
+                width: 72px !important;
+                min-width: 72px !important;
+                min-height: 50px !important;
+                padding: 0.5rem !important;
+                font-size: 0.88rem !important;
+            }
+        }
+    </style>
+    """)
+
+    gr.HTML("""
+        <nav id="amper-navbar" aria-label="Navegação principal">
+            <a href="/mapa" aria-label="Mapa">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
+                <span>Mapa</span>
+            </a>
+            <a href="/ia/" aria-label="Ampia, assistente de IA" aria-current="page">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+                <span>Ampia</span>
+            </a>
+            <a href="/historicos" aria-label="Histórico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+                <span>Histórico</span>
+            </a>
+            <a href="/perfil" aria-label="Perfil">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>Perfil</span>
+            </a>
+        </nav>
+    """)
+
     gr.Markdown(
         """
-        <div style="text-align:center; margin-bottom:0.75rem;"><h2>GoodWe IA Chat</h2></div>
-        <div style="text-align:center; color:#6b7280; margin-bottom:1rem;">Assistente textual para suporte de mobilidade elétrica e recarga.</div>
+        <div id="goodwe-header">
+            <div class="brand-mark" aria-hidden="true">AM</div>
+            <div class="header-copy">
+                <span class="eyebrow">Amper · MOBILIDADE ELÉTRICA</span>
+                <h2>Assistente Amper</h2>
+                <span class="subtitle">Suporte para recarga e mobilidade elétrica</span>
+            </div>
+        </div>
         """
     )
 
@@ -320,22 +690,26 @@ with gr.Blocks() as demo:
         if key in chatbot_signature.parameters:
             chatbot_kwargs[key] = value
 
-    chatbot = gr.Chatbot(**chatbot_kwargs)
+    chatbot = gr.Chatbot(**chatbot_kwargs, elem_id="goodwe-chatbot")
 
-    textbox_kwargs: dict[str, Any] = {
-        "placeholder": "Digite sua mensagem...",
-        "lines": 1,
-        "max_lines": 4,
-    }
-    textbox_signature = inspect.signature(gr.Textbox.__init__)
-    if "show_submit_button" in textbox_signature.parameters:
-        textbox_kwargs["show_submit_button"] = True
-    if "submit_btn" in textbox_signature.parameters:
-        textbox_kwargs["submit_btn"] = "Enviar"
-
-    textbox = gr.Textbox(**textbox_kwargs)
-
-    button = gr.Button("Enviar", variant="primary")
+    with gr.Row(elem_id="goodwe-composer"):
+        textbox = gr.Textbox(
+            placeholder="Digite sua mensagem...",
+            lines=1,
+            max_lines=4,
+            show_label=False,
+            elem_id="goodwe-textbox",
+            scale=1,
+            min_width=0,
+        )
+        button = gr.Button(
+            "Enviar",
+            variant="primary",
+            elem_id="goodwe-send-button",
+            elem_classes=["goodwe-primary"],
+            scale=0,
+            min_width=84,
+        )
 
     def submit_message(history, message):
         for item in stream_ai_response(history, message):
@@ -355,61 +729,12 @@ with gr.Blocks() as demo:
         queue=True,
     )
 
-    gr.Markdown("## Previsão de recarga")
-    gr.Markdown(
-        "Selecione a estação e informe os dados atuais do carro. A capacidade elétrica da estação "
-        "é calculada pelos conectores cadastrados; os resultados são estimativas."
-    )
-    station_choices = _load_station_choices()
-    with gr.Row():
-        station_input = gr.Dropdown(
-            choices=station_choices,
-            value=station_choices[0][1] if station_choices else None,
-            type="value",
-            label="Estação (nome e endereço)",
-            info="A capacidade é calculada automaticamente pelos conectores da estação.",
-        )
-        source_input = gr.Dropdown(
-            ["POSTO", "SOLAR", "HIBRIDO"],
-            value="HIBRIDO",
-            label="Fonte de energia",
-        )
-    with gr.Row():
-        current_soc_input = gr.Number(label="Bateria atual (%)", value=20, minimum=0, maximum=100)
-        target_soc_input = gr.Number(label="Bateria desejada (%)", value=80, minimum=1, maximum=100)
-        battery_capacity_input = gr.Number(
-            label="Capacidade da bateria (kWh)",
-            value=60,
-            minimum=1,
-            info="Use a capacidade do carro; ela poderá vir do veículo da conta futuramente.",
-        )
-    prediction_button = gr.Button("Calcular previsão", variant="primary")
-    prediction_output = gr.Markdown()
-
-    prediction_button.click(
-        predict_from_gradio,
-        inputs=[
-            station_input,
-            source_input,
-            current_soc_input,
-            target_soc_input,
-            battery_capacity_input,
-        ],
-        outputs=[prediction_output, prediction_button],
-    )
-
 
 if __name__ == "__main__":
     launch_kwargs = {
         "server_name": "0.0.0.0",
-        "server_port": 7860,
+        "server_port": 8000,
         "share": False,
         "debug": False,
     }
-    signature = inspect.signature(gr.Blocks.launch)
-    if "css" in signature.parameters:
-        launch_kwargs["css"] = """
-            .gradio-container { max-width: 1100px !important; }
-            .chat-wrapper { padding: 1rem; }
-        """
     demo.launch(**launch_kwargs)

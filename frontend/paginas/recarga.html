@@ -14,6 +14,79 @@ block Head %}
     box-shadow: 0 4px 12px rgba(0, 180, 216, 0.18) !important;
   }
 
+  .window-mode-fieldset {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .window-mode-selector {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    margin-bottom: var(--space-3);
+    padding: 4px;
+    border: 1px solid var(--l-surface-2);
+    border-radius: 12px;
+    background: var(--white);
+  }
+
+  .window-mode-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 6px 8px;
+    border-radius: 9px;
+    color: var(--l-text-2);
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-medium);
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .window-mode-option:has(input:checked) {
+    background: var(--primary);
+    color: var(--white);
+  }
+
+  .window-mode-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .window-mode-option:focus-within {
+    outline: 2px solid var(--secondary);
+    outline-offset: 2px;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  #window-time-field[hidden],
+  #window-departure-field[hidden] {
+    display: none !important;
+  }
+
+  #window-time-field,
+  #window-departure-field {
+    width: 100%;
+    min-height: 64px;
+    height: auto;
+    margin-top: var(--space-2);
+  }
+
   .config-input-wrapper {
     display: flex;
     align-items: center;
@@ -49,6 +122,16 @@ block Head %}
   .config-inline-input[type="number"]::-webkit-outer-spin-button {
     opacity: 1;
   }
+
+  .charging-availability {
+    margin: 6px 0 0;
+    color: var(--l-text-2);
+    font-size: var(--text-sm);
+  }
+
+  .charging-availability.error {
+    color: var(--red);
+  }
 </style>
 {% endblock %} {% block Conteudo %}
 
@@ -75,52 +158,34 @@ block Head %}
   <section class="battery-section">
     <div class="battery-header">
       <span class="battery-label">Estado da Bateria</span>
-      <span class="vehicle-model" id="vehicle-model">BYD Dolphin • GW22K</span>
+      <span class="vehicle-model" id="vehicle-model">Carregando veículo...</span>
     </div>
     <div class="battery-bar-container">
       <div class="battery-bar-track">
         <div
           class="battery-bar-fill"
           id="battery-bar-fill"
-          style="width: 45%"
+          style="width: 0%"
         ></div>
       </div>
-      <span class="battery-percentage" id="battery-percentage">45%</span>
+      <span class="battery-percentage" id="battery-percentage">--</span>
     </div>
+    <p class="charging-availability" id="charging-availability" role="status"></p>
   </section>
 
   <!-- Grade de Opções de Definição -->
   <section class="config-grid-section">
-    <h2 class="section-title">Como deseja definir a recarga?</h2>
+    <h2 class="section-title">Defina a meta da bateria</h2>
 
     <div class="config-grid">
-      <!-- Card 1: Quantidade em kWh (padrão aplicado inicialmente) -->
-      <div class="config-card active" id="card-kwh" data-mode="kwh">
-        <span class="config-card-label">Quantidade (kWh)</span>
-        <div class="config-input-wrapper">
-          <input
-            id="input-kwh"
-            class="config-inline-input"
-            type="number"
-            min="5"
-            max="150"
-            step="1"
-            value="35"
-            aria-label="Quantidade de energia em kWh"
-          />
-          <span class="config-input-unit">kWh</span>
-        </div>
-      </div>
-
-      <!-- Card 2: Percentual (%) -->
-      <div class="config-card" id="card-percent" data-mode="percent">
-        <span class="config-card-label">Percentual (%)</span>
+      <div class="config-card active" id="card-percent">
+        <span class="config-card-label">Meta de bateria</span>
         <div class="config-input-wrapper">
           <input
             id="input-percent"
             class="config-inline-input"
             type="number"
-            min="50"
+            min="1"
             max="100"
             step="1"
             value="80"
@@ -130,36 +195,49 @@ block Head %}
         </div>
       </div>
 
-      <!-- Card 3: Tempo disponível -->
-      <div class="config-card" id="card-time" data-mode="time">
-        <span class="config-card-label">Tempo disponível</span>
-        <div class="config-input-wrapper">
-          <input
-            id="input-time"
-            class="config-inline-input"
-            type="number"
-            min="10"
-            max="360"
-            step="5"
-            value="45"
-            aria-label="Tempo disponível em minutos"
-          />
-          <span class="config-input-unit">min</span>
-        </div>
-      </div>
+    </div>
 
-      <!-- Card 4: Horário de saída -->
-      <div class="config-card" id="card-departure" data-mode="departure">
-        <span class="config-card-label">Horário de saída</span>
-        <div class="config-input-wrapper">
-          <input
-            id="input-departure"
-            class="config-inline-input"
-            type="time"
-            value="18:30"
-            aria-label="Horário de saída"
-          />
-        </div>
+    <h2 class="section-title">Como deseja informar sua disponibilidade?</h2>
+    <fieldset class="window-mode-fieldset">
+      <legend class="sr-only">Escolha uma forma de definir o tempo</legend>
+      <div class="window-mode-selector" role="radiogroup" aria-label="Forma de informar disponibilidade">
+        <label class="window-mode-option">
+          <input type="radio" name="window-mode" value="time" checked />
+          <span>Tempo disponível</span>
+        </label>
+        <label class="window-mode-option">
+          <input type="radio" name="window-mode" value="departure" />
+          <span>Horário de saída</span>
+        </label>
+      </div>
+    </fieldset>
+
+    <div class="config-card" id="window-time-field">
+      <label class="config-card-label" for="input-time">Minutos disponíveis (10 a 360)</label>
+      <div class="config-input-wrapper">
+        <input
+          id="input-time"
+          class="config-inline-input"
+          type="number"
+          min="10"
+          max="360"
+          step="5"
+          value="45"
+          aria-label="Tempo disponível em minutos"
+        />
+        <span class="config-input-unit">min</span>
+      </div>
+    </div>
+
+    <div class="config-card" id="window-departure-field" hidden>
+      <label class="config-card-label" for="input-departure">Horário de saída</label>
+      <div class="config-input-wrapper">
+        <input
+          id="input-departure"
+          class="config-inline-input"
+          type="time"
+          aria-label="Horário de saída"
+        />
       </div>
     </div>
   </section>
@@ -168,21 +246,35 @@ block Head %}
   <section class="estimation-card">
     <div class="estimation-row">
       <span class="estimation-label" id="estimation-label-kwh"
-        >Estimativa de Recarga (35 kWh)</span
+        >Energia calculada</span
       >
-      <span class="estimation-value" id="estimation-energy-value"
-        >R$ 66,15</span
-      >
+      <span class="estimation-value" id="estimation-kwh-value">-- kWh</span>
+    </div>
+    <div class="estimation-row">
+      <span class="estimation-label">Potência livre estimada no posto</span>
+      <span class="estimation-value" id="estimation-power-value">-- kW</span>
+    </div>
+    <div class="estimation-row">
+      <span class="estimation-label">Potência aplicada pelo modo</span>
+      <span class="estimation-value" id="estimation-mode-power-value">-- kW</span>
+    </div>
+    <div class="estimation-row">
+      <span class="estimation-label">Bateria estimada ao final</span>
+      <span class="estimation-value" id="estimation-soc-value">--%</span>
+    </div>
+    <div class="estimation-row">
+      <span class="estimation-label">Energia</span>
+      <span class="estimation-value" id="estimation-energy-value">--</span>
     </div>
     <div class="estimation-row">
       <span class="estimation-label">Taxa de Serviço e Conveniência</span>
-      <span class="estimation-value" id="estimation-fee-value">R$ 2,50</span>
+      <span class="estimation-value" id="estimation-fee-value">--</span>
     </div>
     <div class="estimation-divider"></div>
     <div class="estimation-row total-row">
       <span class="estimation-total-label">Total Estimado</span>
       <span class="estimation-total-value" id="estimation-total-value"
-        >R$ 68,65</span
+        >--</span
       >
     </div>
   </section>
@@ -211,10 +303,10 @@ block Head %}
           <div class="mode-info">
             <div class="mode-header">
               <span class="mode-title">Modo Rápido</span>
-              <span class="mode-price" id="price-fast">R$ 2,15/kWh</span>
+              <span class="mode-price" id="price-fast">--/kWh</span>
             </div>
             <span class="mode-sub" id="sub-fast"
-              >Estimado: 25 min • Potência máxima</span
+              >Usa toda a potência livre disponível</span
             >
           </div>
         </div>
@@ -246,13 +338,12 @@ block Head %}
                 class="mode-price"
                 id="price-eco"
                 style="color: var(--primary)"
-                >R$ 1,69/kWh</span
+                >--/kWh</span
               >
             </div>
             <span class="mode-sub" id="sub-eco"
-              >Estimado: 1h 10m • Tarifa reduzida</span
+              >Usa até 50% da potência livre; pode levar mais tempo</span
             >
-            <span class="mode-note" id="note-eco">(Agendado)</span>
           </div>
         </div>
       </label>
@@ -279,11 +370,11 @@ block Head %}
           </div>
           <div class="mode-info">
             <div class="mode-header">
-              <span class="mode-title">Modo Inteligente (IA)</span>
-              <span class="mode-price" id="price-smart">R$ 1,89/kWh</span>
+              <span class="mode-title">Modo Inteligente</span>
+              <span class="mode-price" id="price-smart">--/kWh</span>
             </div>
             <span class="mode-sub" id="sub-smart"
-              >Otimiza potência para equilibrar tempo e custo</span
+              >Limita a potência a 80% para carregar de forma gradual</span
             >
           </div>
         </div>
@@ -302,334 +393,239 @@ block Head %}
 {% endblock %} {% block Scripts %}
 <script>
   document.addEventListener("DOMContentLoaded", async function () {
-    // Marca o item ativo na barra inferior de navegação
-    const currentFooterOption = document.getElementById("footer-recarga");
-    if (currentFooterOption) {
-      currentFooterOption.classList.add("active");
-    }
+    const urlParams = new URLSearchParams(window.location.search);
+    const stationIdParam = Number(urlParams.get("estacao_id"));
+    const connectorIdParam = Number(urlParams.get("conector_id"));
+    const elAvailability = document.getElementById("charging-availability");
+    const btnConfirm = document.getElementById("btn-confirm");
+    window.__recargaEstimativaValida = false;
+    btnConfirm.disabled = true;
+    let veiculoAtual = null;
+    let estacaoData = null;
+    let conectorId = null;
 
-    const VEICULO_MOCK = {
-      id: 1,
-      usuario_id: 1,
-      marca: "BYD",
-      modelo: "Dolphin",
-      versao: "GS",
-      capacidade_bateria_kwh: 60.0,
-      tipo_conector: "TYPE2",
-      soc_atual: 45, // Nível atual da bateria em porcentagem (%)
-      label_exibicao: "BYD Dolphin • GW22K",
-    };
-
-    let veiculoAtual = { ...VEICULO_MOCK };
-
-    // Tenta obter os veículos cadastrados no backend caso o banco possua registros
-    try {
-      const respVeiculos = await fetch("/api/veiculos");
-      if (respVeiculos.ok) {
-        const veiculosLista = await respVeiculos.json();
-        if (Array.isArray(veiculosLista) && veiculosLista.length > 0) {
-          const vPrincipal =
-            veiculosLista.find((v) => v.principal) || veiculosLista[0];
-          veiculoAtual.id = vPrincipal.id;
-          veiculoAtual.usuario_id = vPrincipal.usuario_id || 1;
-          veiculoAtual.marca = vPrincipal.marca || "BYD";
-          veiculoAtual.modelo = vPrincipal.modelo || "Dolphin";
-          veiculoAtual.versao = vPrincipal.versao || "GS";
-          veiculoAtual.capacidade_bateria_kwh =
-            parseFloat(vPrincipal.capacidade_bateria_kwh) || 60.0;
-          veiculoAtual.label_exibicao = `${veiculoAtual.marca} ${veiculoAtual.modelo} • GW22K`;
-        }
-      }
-    } catch (e) {
-      console.warn(
-        "Utilizando veículo mockado (aguardando integração de login/veículo):",
-        e,
-      );
-    }
-
-    // Atualiza na interface as informações do veículo e estado da bateria
     const elVehicleModel = document.getElementById("vehicle-model");
     const elBatteryFill = document.getElementById("battery-bar-fill");
     const elBatteryPercentage = document.getElementById("battery-percentage");
 
-    if (elVehicleModel)
-      elVehicleModel.textContent = veiculoAtual.label_exibicao;
-    if (elBatteryFill) elBatteryFill.style.width = `${veiculoAtual.soc_atual}%`;
-    if (elBatteryPercentage)
-      elBatteryPercentage.textContent = `${veiculoAtual.soc_atual}%`;
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const estacaoId = parseInt(urlParams.get("estacao_id") || "1", 10);
-    const conectorId = parseInt(urlParams.get("conector_id") || "1", 10);
-
-    // Objeto padrão para dados da estação (fallback)
-    let estacaoData = {
-      id: estacaoId,
-      nome: "Estação GoodWe",
-      preco_base_kwh: 1.9,
-      preco_rapido_kwh: 2.15,
-      preco_economico_kwh: 1.69,
-      preco_inteligente_kwh: 1.89,
-      taxa_servico: 2.5,
-      potencia_kw: 22.0,
-      horario_economico_inicio: "22:00:00",
-    };
-
     try {
-      const respEstacao = await fetch(`/api/estacoes/${estacaoId}`);
-      if (respEstacao.ok) {
-        const dadosApi = await respEstacao.json();
-        estacaoData.nome = dadosApi.nome || estacaoData.nome;
-        if (dadosApi.preco_base_kwh != null)
-          estacaoData.preco_base_kwh = parseFloat(dadosApi.preco_base_kwh);
-        if (dadosApi.preco_rapido_kwh != null)
-          estacaoData.preco_rapido_kwh = parseFloat(dadosApi.preco_rapido_kwh);
-        if (dadosApi.preco_economico_kwh != null)
-          estacaoData.preco_economico_kwh = parseFloat(
-            dadosApi.preco_economico_kwh,
-          );
-        if (dadosApi.preco_inteligente_kwh != null)
-          estacaoData.preco_inteligente_kwh = parseFloat(
-            dadosApi.preco_inteligente_kwh,
-          );
-        if (dadosApi.horario_economico_inicio)
-          estacaoData.horario_economico_inicio =
-            dadosApi.horario_economico_inicio;
+      const [respVeiculos, respEstacoes] = await Promise.all([
+        fetch("/api/veiculos"),
+        stationIdParam > 0
+          ? fetch(`/api/estacoes/${stationIdParam}`)
+          : fetch("/api/estacoes?disponivel=true"),
+      ]);
 
-        if (Array.isArray(dadosApi.conectores)) {
-          const conectorSelecionado =
-            dadosApi.conectores.find((c) => c.id === conectorId) ||
-            dadosApi.conectores[0];
-          if (conectorSelecionado && conectorSelecionado.potencia_kw) {
-            estacaoData.potencia_kw = parseFloat(
-              conectorSelecionado.potencia_kw,
-            );
-          }
-        }
+      if (!respVeiculos.ok) throw new Error("Não foi possível carregar seus veículos.");
+      const veiculos = await respVeiculos.json();
+      veiculoAtual = Array.isArray(veiculos)
+        ? veiculos.find((veiculo) => veiculo.principal && veiculo.ativo !== false) ||
+          veiculos.find((veiculo) => veiculo.ativo !== false)
+        : null;
+      if (!veiculoAtual) throw new Error("Cadastre um veículo ativo antes de configurar uma recarga.");
+
+      const socAtual = Number(veiculoAtual.soc_atual);
+      if (!Number.isFinite(socAtual) || !Number.isFinite(Number(veiculoAtual.capacidade_bateria_kwh))) {
+        throw new Error("O veículo não possui dados válidos de bateria.");
       }
+      elVehicleModel.textContent = `${veiculoAtual.marca} ${veiculoAtual.modelo}`;
+      elBatteryFill.style.width = `${Math.min(100, Math.max(0, socAtual))}%`;
+      elBatteryPercentage.textContent = `${socAtual}%`;
+
+      if (!respEstacoes.ok) throw new Error("Não foi possível carregar os dados do posto.");
+      const estacoesResponse = await respEstacoes.json();
+      estacaoData = Array.isArray(estacoesResponse)
+        ? estacoesResponse.find((station) => station.ativa !== false)
+        : estacoesResponse;
+      if (!estacaoData) throw new Error("Nenhum posto ativo foi encontrado.");
+
+      const conectores = Array.isArray(estacaoData.conectores) ? estacaoData.conectores : [];
+      const conectorSolicitado = connectorIdParam > 0
+        ? conectores.find((connector) => connector.id === connectorIdParam)
+        : null;
+      const conectorSelecionado = connectorIdParam > 0
+        ? conectorSolicitado
+        : conectores.find((connector) => connector.status?.toUpperCase() === "DISPONIVEL");
+      if (!conectorSelecionado) throw new Error("O posto não possui conector disponível.");
+      if (conectorSelecionado.status?.toUpperCase() !== "DISPONIVEL") {
+        throw new Error("O conector selecionado não está disponível. Volte ao posto e escolha outro.");
+      }
+      conectorId = conectorSelecionado.id;
+      estacaoData.conector_selecionado = conectorSelecionado;
+
+      elAvailability.textContent = `${estacaoData.nome} · ${conectorSelecionado.tipo} · ${conectorSelecionado.potencia_kw} kW`;
+      btnConfirm.disabled = false;
     } catch (err) {
-      console.warn(
-        "Não foi possível carregar dados da estação, usando valores padrão:",
-        err,
-      );
+      if (!veiculoAtual) {
+        elVehicleModel.textContent = "Veículo indisponível";
+        elBatteryPercentage.textContent = "--";
+      }
+      elAvailability.textContent = err.message;
+      elAvailability.classList.add("error");
+      btnConfirm.disabled = true;
     }
 
     const elPriceFast = document.getElementById("price-fast");
     const elPriceEco = document.getElementById("price-eco");
     const elPriceSmart = document.getElementById("price-smart");
+    const formatarMoeda = (valor) => `R$ ${Number(valor).toFixed(2).replace(".", ",")}`;
+    if (estacaoData) {
+      const precoBase = Number(estacaoData.preco_base_kwh);
+      if (elPriceFast) elPriceFast.textContent = `${formatarMoeda(estacaoData.preco_rapido_kwh ?? precoBase)}/kWh`;
+      if (elPriceEco) elPriceEco.textContent = `${formatarMoeda(estacaoData.preco_economico_kwh ?? precoBase)}/kWh`;
+      if (elPriceSmart) elPriceSmart.textContent = `${formatarMoeda(estacaoData.preco_inteligente_kwh ?? precoBase)}/kWh`;
+    }
 
-    if (elPriceFast)
-      elPriceFast.textContent = `R$ ${estacaoData.preco_rapido_kwh.toFixed(2).replace(".", ",")}/kWh`;
-    if (elPriceEco)
-      elPriceEco.textContent = `R$ ${estacaoData.preco_economico_kwh.toFixed(2).replace(".", ",")}/kWh`;
-    if (elPriceSmart)
-      elPriceSmart.textContent = `R$ ${estacaoData.preco_inteligente_kwh.toFixed(2).replace(".", ",")}/kWh`;
-
-    let modoDefinicaoSelecionado = "kwh";
-    let modoDefinicaoAplicado = "kwh";
-
-    let valorKwh = 35.0;
-    let percentualDesejado = 80;
     let tempoDisponivelMin = 45;
-    let horarioSaida = "18:30";
+    let modoJanelaSelecionado = "time";
 
-    const cardsDefinicao = {
-      kwh: document.getElementById("card-kwh"),
-      percent: document.getElementById("card-percent"),
-      time: document.getElementById("card-time"),
-      departure: document.getElementById("card-departure"),
-    };
-
-    const inputKwh = document.getElementById("input-kwh");
     const inputPercent = document.getElementById("input-percent");
     const inputTime = document.getElementById("input-time");
     const inputDeparture = document.getElementById("input-departure");
+    const timeField = document.getElementById("window-time-field");
+    const departureField = document.getElementById("window-departure-field");
+    const windowModeInputs = document.querySelectorAll('input[name="window-mode"]');
+    if (veiculoAtual) {
+      const menorMeta = Math.floor(Number(veiculoAtual.soc_atual)) + 1;
+      inputPercent.min = String(menorMeta);
+      inputPercent.value = String(Math.min(100, Math.max(Number(inputPercent.value), menorMeta)));
+    }
 
-    function selecionarCard(tipo, focar = false) {
-      modoDefinicaoSelecionado = tipo;
-
-      Object.entries(cardsDefinicao).forEach(([modo, card]) => {
-        if (!card) return;
-        card.classList.toggle("active", modo === tipo);
+    function selecionarModoJanela(modo, focar = false) {
+      modoJanelaSelecionado = modo === "departure" ? "departure" : "time";
+      timeField.hidden = modoJanelaSelecionado !== "time";
+      departureField.hidden = modoJanelaSelecionado !== "departure";
+      windowModeInputs.forEach((radio) => {
+        radio.checked = radio.value === modoJanelaSelecionado;
       });
-
-      if (!focar) return;
-
-      const inputs = {
-        kwh: inputKwh,
-        percent: inputPercent,
-        time: inputTime,
-        departure: inputDeparture,
-      };
-
-      const input = inputs[tipo];
-      if (input) input.focus();
-    }
-
-    // Função para calcular kWh a partir de outras definições
-    function recalcularKwhCorrespondente() {
-      if (modoDefinicaoAplicado === "kwh") {
-        return valorKwh;
-      } else if (modoDefinicaoAplicado === "percent") {
-        const deltaPerc = Math.max(
-          0,
-          percentualDesejado - veiculoAtual.soc_atual,
-        );
-        return Number(
-          ((deltaPerc / 100) * veiculoAtual.capacidade_bateria_kwh).toFixed(2),
-        );
-      } else if (modoDefinicaoAplicado === "time") {
-        const pot =
-          estacaoData.potencia_kw > 0 ? estacaoData.potencia_kw : 22.0;
-        return Number((pot * (tempoDisponivelMin / 60)).toFixed(2));
-      } else if (modoDefinicaoAplicado === "departure") {
-        // Calcula minutos até o horário de saída
-        const agora = new Date();
-        const [hStr, mStr] = horarioSaida.split(":");
-        const horaSaida = parseInt(hStr || "18", 10);
-        const minSaida = parseInt(mStr || "30", 10);
-
-        const saidaDate = new Date();
-        saidaDate.setHours(horaSaida, minSaida, 0, 0);
-        if (saidaDate <= agora) {
-          saidaDate.setDate(saidaDate.getDate() + 1);
-        }
-        const diffMinutos = Math.max(
-          15,
-          Math.round((saidaDate - agora) / 60000),
-        );
-        const pot =
-          estacaoData.potencia_kw > 0 ? estacaoData.potencia_kw : 22.0;
-        return Number((pot * (diffMinutos / 60)).toFixed(2));
+      if (focar) {
+        (modoJanelaSelecionado === "time" ? inputTime : inputDeparture).focus();
       }
-      return 35.0;
     }
 
-    // Função para obter o modo de carregamento selecionado (RAPIDO, ECONOMICO, INTELIGENTE)
     function getModoCarregamentoSelecionado() {
       const radio = document.querySelector('input[name="charge-mode"]:checked');
       return radio ? radio.value.toUpperCase() : "INTELIGENTE";
     }
 
-    // Atualiza o Resumo da Estimativa chamando a API do backend
+    function getTempoDisponivelMinutos() {
+      if (modoJanelaSelecionado === "departure") {
+        if (!inputDeparture.value) throw new Error("Informe o horário de saída.");
+        const [hora, minuto] = inputDeparture.value.split(":").map(Number);
+        const agora = new Date();
+        const saida = new Date(agora);
+        saida.setHours(hora, minuto, 0, 0);
+        if (saida <= agora) saida.setDate(saida.getDate() + 1);
+        return Math.min(360, Math.max(10, Math.ceil((saida - agora) / 60000)));
+      }
+      return Number(inputTime.value);
+    }
+
+    let requisicaoEstimativa = 0;
     async function atualizarEstimativa() {
-      const kwhCalculado = recalcularKwhCorrespondente();
+      const requisicaoAtual = ++requisicaoEstimativa;
       const modo = getModoCarregamentoSelecionado();
-
-      // Preço por kWh com base no modo
-      let precoKwh = estacaoData.preco_inteligente_kwh;
-      if (modo === "RAPIDO") precoKwh = estacaoData.preco_rapido_kwh;
-      if (modo === "ECONOMICO") precoKwh = estacaoData.preco_economico_kwh;
-
-      const taxaServico = 2.5;
-      let totalEstimado = kwhCalculado * precoKwh + taxaServico;
-      let tempoEstimadoMin = Math.round(
-        (kwhCalculado / estacaoData.potencia_kw) * 60,
-      );
-      tempoEstimadoMin = Math.max(10, tempoEstimadoMin);
-
-      // Atualização imediata na UI
+      const percentualDesejado = Number(inputPercent.value);
       const elLabelKwh = document.getElementById("estimation-label-kwh");
+      const elKwhValue = document.getElementById("estimation-kwh-value");
+      const elPowerValue = document.getElementById("estimation-power-value");
+      const elModePowerValue = document.getElementById("estimation-mode-power-value");
+      const elSocValue = document.getElementById("estimation-soc-value");
       const elEnergyValue = document.getElementById("estimation-energy-value");
       const elFeeValue = document.getElementById("estimation-fee-value");
       const elTotalValue = document.getElementById("estimation-total-value");
-
-      if (elLabelKwh)
-        elLabelKwh.textContent = `Estimativa de Recarga (${kwhCalculado.toFixed(1).replace(".", ",")} kWh)`;
-      if (elEnergyValue)
-        elEnergyValue.textContent = `R$ ${(kwhCalculado * precoKwh).toFixed(2).replace(".", ",")}`;
-      if (elFeeValue)
-        elFeeValue.textContent = `R$ ${taxaServico.toFixed(2).replace(".", ",")}`;
-      if (elTotalValue)
-        elTotalValue.textContent = `R$ ${totalEstimado.toFixed(2).replace(".", ",")}`;
-
-      // Atualiza subtítulo do modo rápido e econômico
-      const subFast = document.getElementById("sub-fast");
-      const subEco = document.getElementById("sub-eco");
-      if (subFast) {
-        const tempoFast = Math.max(15, Math.round(tempoEstimadoMin * 0.6));
-        subFast.textContent = `Estimado: ${tempoFast} min • Potência máxima`;
+      if (!veiculoAtual || !estacaoData || !conectorId) return;
+      let minutosDisponiveis;
+      try {
+        minutosDisponiveis = getTempoDisponivelMinutos();
+      } catch (error) {
+        window.__recargaEstimativaValida = false;
+        btnConfirm.disabled = true;
+        elAvailability.textContent = error.message;
+        elAvailability.classList.add("error");
+        return;
       }
-      if (subEco) {
-        const horaEco = estacaoData.horario_economico_inicio.slice(0, 5);
-        subEco.textContent = `Estimado: ${tempoEstimadoMin} min • Inicia às ${horaEco} no off-peak`;
+      if (!Number.isFinite(percentualDesejado) || !Number.isFinite(minutosDisponiveis)) {
+        window.__recargaEstimativaValida = false;
+        btnConfirm.disabled = true;
+        elAvailability.textContent = "Revise a meta de bateria e o tempo disponível.";
+        elAvailability.classList.add("error");
+        return;
       }
 
-      // Sincroniza com a API /api/recargas/estimativa do backend
+      btnConfirm.disabled = true;
+      window.__recargaEstimativaValida = false;
+      elAvailability.classList.remove("error");
+      elAvailability.textContent = "Atualizando potência disponível do posto...";
       try {
         const resp = await fetch("/api/recargas/estimativa", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            estacao_id: estacaoId,
+            estacao_id: estacaoData.id,
             conector_id: conectorId,
             veiculo_id: veiculoAtual.id,
             modo: modo,
-            quantidade_kwh: kwhCalculado,
             percentual_desejado: percentualDesejado,
-            soc_inicial: veiculoAtual.soc_atual,
+            tempo_disponivel_minutos: minutosDisponiveis,
           }),
         });
-        if (resp.ok) {
-          const estApi = await resp.json();
-          if (elTotalValue && estApi.valor_estimado) {
-            elTotalValue.textContent = `R$ ${Number(estApi.valor_estimado).toFixed(2).replace(".", ",")}`;
-          }
-          if (elEnergyValue && estApi.preco_kwh) {
-            const valorEnergia =
-              Number(estApi.quantidade_kwh) * Number(estApi.preco_kwh);
-            elEnergyValue.textContent = `R$ ${valorEnergia.toFixed(2).replace(".", ",")}`;
-          }
-        }
+        const estApi = await resp.json().catch(() => ({}));
+        if (!resp.ok) throw new Error(estApi.detail || "Não foi possível calcular a recarga.");
+        if (requisicaoAtual !== requisicaoEstimativa) return;
+
+        elLabelKwh.textContent = `Energia calculada · meta ${Number(estApi.percentual_desejado).toFixed(0)}%`;
+        elKwhValue.textContent = `${Number(estApi.quantidade_kwh).toFixed(2).replace(".", ",")} kWh`;
+        elPowerValue.textContent = `${Number(estApi.potencia_disponivel_kw).toFixed(2).replace(".", ",")} kW`;
+        elModePowerValue.textContent = `${Number(estApi.potencia_alocada_kw).toFixed(2).replace(".", ",")} kW`;
+        elSocValue.textContent = `${Number(estApi.soc_estimado).toFixed(1).replace(".", ",")}%`;
+        elEnergyValue.textContent = formatarMoeda(estApi.valor_energia);
+        elFeeValue.textContent = formatarMoeda(estApi.taxa_servico);
+        elTotalValue.textContent = formatarMoeda(estApi.valor_estimado);
+
+        const tempo = Number(estApi.tempo_estimado_minutos);
+        const potenciaAlocada = Number(estApi.potencia_alocada_kw).toFixed(2).replace(".", ",");
+        const descricaoModo = modo === "RAPIDO"
+          ? `Potência máxima · ${potenciaAlocada} kW · ${tempo} min`
+          : modo === "ECONOMICO"
+            ? `Potência reduzida · ${potenciaAlocada} kW · ${tempo} min`
+            : `Limite de 80% · ${potenciaAlocada} kW · ${tempo} min`;
+        document.getElementById("sub-fast").textContent = modo === "RAPIDO" ? descricaoModo : "Usa toda a potência livre disponível";
+          document.getElementById("sub-eco").textContent = modo === "ECONOMICO" ? descricaoModo : "Usa até 50% da potência livre; pode levar mais tempo";
+          document.getElementById("sub-smart").textContent = modo === "INTELIGENTE" ? descricaoModo : "Limita a potência a 80% para carregar de forma gradual";
+        elAvailability.textContent = `${estacaoData.nome} · ${Number(estApi.potencia_disponivel_kw).toFixed(2).replace(".", ",")} kW disponíveis · ${minutosDisponiveis} min de janela`;
+        window.__recargaEstimativaValida = true;
+        btnConfirm.disabled = false;
       } catch (errApi) {
-        console.warn("Utilizando estimativa local calculada:", errApi);
+        if (requisicaoAtual !== requisicaoEstimativa) return;
+        window.__recargaEstimativaValida = false;
+        elAvailability.textContent = errApi.message;
+        elAvailability.classList.add("error");
+        elKwhValue.textContent = "-- kWh";
+        elPowerValue.textContent = "-- kW";
+        elModePowerValue.textContent = "-- kW";
+        elSocValue.textContent = "--%";
+        elEnergyValue.textContent = "--";
+        elFeeValue.textContent = "--";
+        elTotalValue.textContent = "--";
+        btnConfirm.disabled = true;
       }
     }
 
-    /* ==========================================================================
-     * 5. EDIÇÃO DIRETA DOS CARDS DE DEFINIÇÃO
-     * --------------------------------------------------------------------------
-     * Clicar em um card apenas seleciona/foca o campo. Isso NÃO altera a estimativa.
-     * A estimativa só é recalculada quando o usuário realmente altera o valor.
-     * ========================================================================== */
-
-    Object.entries(cardsDefinicao).forEach(([tipo, card]) => {
-      if (!card) return;
-
-      card.addEventListener("click", (event) => {
-        // Se o clique já foi diretamente no input, apenas seleciona o card.
-        selecionarCard(tipo, event.target.tagName !== "INPUT");
-      });
-    });
-
-    if (inputKwh) {
-      inputKwh.addEventListener("change", () => {
-        const novoValor = Number(inputKwh.value);
-        if (!Number.isFinite(novoValor) || novoValor <= 0) {
-          inputKwh.value = valorKwh;
-          return;
-        }
-
-        valorKwh = Math.min(150, Math.max(5, novoValor));
-        inputKwh.value = valorKwh;
-        modoDefinicaoAplicado = "kwh";
-        selecionarCard("kwh");
+    // Os dois modos de janela são exclusivos; somente o campo ativo alimenta a estimativa.
+    windowModeInputs.forEach((radio) => {
+      radio.addEventListener("change", () => {
+        selecionarModoJanela(radio.value);
         atualizarEstimativa();
       });
-    }
+    });
 
     if (inputPercent) {
       inputPercent.addEventListener("change", () => {
         const novoValor = Number(inputPercent.value);
-        if (!Number.isFinite(novoValor)) {
-          inputPercent.value = percentualDesejado;
-          return;
-        }
-
-        percentualDesejado = Math.min(100, Math.max(50, Math.round(novoValor)));
-        inputPercent.value = percentualDesejado;
-        modoDefinicaoAplicado = "percent";
-        selecionarCard("percent");
+        const menorMeta = Number(inputPercent.min) || 1;
+        const valorLimitado = Number.isFinite(novoValor) ? Math.round(novoValor) : menorMeta;
+        inputPercent.value = String(Math.min(100, Math.max(menorMeta, valorLimitado)));
         atualizarEstimativa();
       });
     }
@@ -637,29 +633,18 @@ block Head %}
     if (inputTime) {
       inputTime.addEventListener("change", () => {
         const novoValor = Number(inputTime.value);
-        if (!Number.isFinite(novoValor) || novoValor <= 0) {
-          inputTime.value = tempoDisponivelMin;
-          return;
-        }
-
-        tempoDisponivelMin = Math.min(360, Math.max(10, Math.round(novoValor)));
-        inputTime.value = tempoDisponivelMin;
-        modoDefinicaoAplicado = "time";
-        selecionarCard("time");
+        const valorLimitado = Number.isFinite(novoValor) ? Math.round(novoValor / 5) * 5 : 10;
+        tempoDisponivelMin = Math.min(360, Math.max(10, valorLimitado));
+        inputTime.value = String(tempoDisponivelMin);
+        selecionarModoJanela("time");
         atualizarEstimativa();
       });
     }
 
     if (inputDeparture) {
       inputDeparture.addEventListener("change", () => {
-        if (!inputDeparture.value) {
-          inputDeparture.value = horarioSaida;
-          return;
-        }
-
-        horarioSaida = inputDeparture.value;
-        modoDefinicaoAplicado = "departure";
-        selecionarCard("departure");
+        if (!inputDeparture.value) return;
+        selecionarModoJanela("departure");
         atualizarEstimativa();
       });
     }
@@ -678,33 +663,27 @@ block Head %}
         if (window.history.length > 1) {
           window.history.back();
         } else {
-          window.location.href = `/posto?estacao_id=${estacaoId}`;
+          window.location.href = estacaoData
+            ? `/posto?estacao_id=${estacaoData.id}`
+            : "/mapa";
         }
       });
     }
-    const btnConfirm = document.getElementById("btn-confirm");
     if (btnConfirm) {
       btnConfirm.addEventListener("click", async () => {
+        if (!window.__recargaEstimativaValida) return;
         btnConfirm.disabled = true;
         const textoOriginal = btnConfirm.textContent;
         btnConfirm.textContent = "Processando Recarga...";
 
-        const kwhFinal = recalcularKwhCorrespondente();
         const modoFinal = getModoCarregamentoSelecionado();
-
-        // Montagem do payload da recarga
         const payloadRecarga = {
-          usuario_id: veiculoAtual.usuario_id || 1, // Chumbado até a rota de login ser integrada
-          veiculo_id: veiculoAtual.id, // Chumbado/Mock até a rota de login ser integrada
-          estacao_id: estacaoId,
+          veiculo_id: veiculoAtual.id,
+          estacao_id: estacaoData.id,
           conector_id: conectorId,
           modo: modoFinal,
-          quantidade_kwh: kwhFinal,
-          percentual_desejado:
-            modoDefinicaoAplicado === "percent" ? percentualDesejado : null,
-          tempo_disponivel_minutos:
-            modoDefinicaoAplicado === "time" ? tempoDisponivelMin : null,
-          soc_inicial: veiculoAtual.soc_atual,
+          percentual_desejado: Number(inputPercent.value),
+          tempo_disponivel_minutos: getTempoDisponivelMinutos(),
         };
 
         try {
@@ -761,19 +740,31 @@ block Head %}
           }
 
           // Redireciona para a tela de pagamento (ou carregando)
-          window.location.href = `/pagamento?recarga_id=${recargaCriada.id}&estacao_id=${estacaoId}&conector_id=${conectorId}`;
+          window.location.href = `/pagamento?recarga_id=${recargaCriada.id}&estacao_id=${estacaoData.id}&conector_id=${conectorId}`;
         } catch (erroGeral) {
           console.error("Falha ao configurar recarga:", erroGeral);
           alert("Não foi possível confirmar a recarga: " + erroGeral.message);
-          btnConfirm.disabled = false;
+          btnConfirm.disabled = !window.__recargaEstimativaValida;
           btnConfirm.textContent = textoOriginal;
         }
       });
     }
 
     // Inicializa renderização e cálculo da tela
-    selecionarCard("kwh");
-    await atualizarEstimativa();
+    selecionarModoJanela("time");
+    if (veiculoAtual && estacaoData && conectorId) {
+      await atualizarEstimativa();
+      window.setInterval(() => {
+        if (!document.hidden && veiculoAtual && estacaoData && conectorId) {
+          atualizarEstimativa();
+        }
+      }, 15000);
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden && veiculoAtual && estacaoData && conectorId) {
+          atualizarEstimativa();
+        }
+      });
+    }
     if (window.lucide) {
       lucide.createIcons();
     }
@@ -782,7 +773,7 @@ block Head %}
     const btnConfirm = document.getElementById("btn-confirm");
 
     if (btnConfirm) {
-      btnConfirm.disabled = false;
+      btnConfirm.disabled = !window.__recargaEstimativaValida;
       btnConfirm.textContent = "Confirmar Recarga";
     }
   });

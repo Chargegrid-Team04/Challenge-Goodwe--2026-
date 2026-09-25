@@ -32,6 +32,7 @@ from app.services.energy_management_service import (
     ChargingLoad,
     calculate_energy_management,
 )
+from app.services.charging_estimate_service import calculate_charging_estimate
 
 router = APIRouter()
 
@@ -284,6 +285,122 @@ def calcular_preco_kwh(
     )
 
 
+def _calcular_potencia_disponivel(
+    db: Session,
+    estacao: Estacao,
+    conector: Conector,
+) -> Decimal:
+    """Infer remaining site headroom from connector ratings and live/reserved ports."""
+    if conector.estacao_id != estacao.id:
+        raise HTTPException(
+            status_code=400,
+            detail="O conector selecionado não pertence a este posto.",
+        )
+
+    if conector.status.upper() != "DISPONIVEL":
+        raise HTTPException(
+            status_code=409,
+            detail="O conector selecionado não está disponível.",
+        )
+
+    conectores = list(estacao.conectores)
+    capacidade_instalada = sum(
+        (max(Decimal("0"), Decimal(item.potencia_kw)) for item in conectores),
+        Decimal("0"),
+    )
+    recargas_ativas = db.scalars(
+        select(Recarga).where(
+            Recarga.estacao_id == estacao.id,
+            Recarga.status == "CARREGANDO",
+        )
+    ).all()
+    recargas_por_conector = {recarga.conector_id: recarga for recarga in recargas_ativas}
+    if conector.id in recargas_por_conector:
+        raise HTTPException(
+            status_code=409,
+            detail="O conector selecionado já possui uma recarga em andamento.",
+        )
+
+    potencia_em_uso = sum(
+        (
+            max(
+                Decimal("0"),
+                Decimal(
+                    recarga.potencia_atual_kw
+                    or recarga.conector.potencia_kw
+                    or 0
+                ),
+            )
+            for recarga in recargas_ativas
+        ),
+        Decimal("0"),
+    )
+    potencia_reservada = sum(
+        (
+            max(Decimal("0"), Decimal(item.potencia_kw))
+            for item in conectores
+            if item.status.upper() != "DISPONIVEL"
+            and item.id not in recargas_por_conector
+        ),
+        Decimal("0"),
+    )
+    capacidade_disponivel = max(
+        Decimal("0"),
+        capacidade_instalada - potencia_em_uso - potencia_reservada,
+    )
+    return min(Decimal(conector.potencia_kw), capacidade_disponivel)
+
+
+def _estimar_recarga_com_dados(
+    db: Session,
+    *,
+    estacao_id: int,
+    conector_id: int,
+    veiculo_id: int,
+    modo: str,
+    percentual_desejado: Decimal,
+    tempo_disponivel_minutos: int,
+):
+    estacao = db.get(Estacao, estacao_id)
+    if not estacao or not estacao.ativa:
+        raise HTTPException(status_code=404, detail="Posto não encontrado ou inativo.")
+
+    conector = db.get(Conector, conector_id)
+    if not conector:
+        raise HTTPException(status_code=404, detail="Conector não encontrado.")
+
+    veiculo = db.get(Veiculo, veiculo_id)
+    if not veiculo or not veiculo.ativo:
+        raise HTTPException(status_code=404, detail="Veículo não encontrado ou inativo.")
+    if veiculo.soc_atual is None:
+        raise HTTPException(status_code=400, detail="O veículo não possui SoC atual.")
+
+    potencia_disponivel = _calcular_potencia_disponivel(db, estacao, conector)
+    if potencia_disponivel <= 0:
+        raise HTTPException(
+            status_code=409,
+            detail="O posto não tem potência disponível para uma nova recarga.",
+        )
+
+    preco_kwh = calcular_preco_kwh(estacao, modo)
+    taxa_servico = Decimal("2.50")
+    try:
+        calculo = calculate_charging_estimate(
+            battery_capacity_kwh=Decimal(veiculo.capacidade_bateria_kwh),
+            current_soc_percent=Decimal(veiculo.soc_atual),
+            target_soc_percent=percentual_desejado,
+            available_power_kw=potencia_disponivel,
+            available_minutes=tempo_disponivel_minutos,
+            mode=modo,
+            unit_price=preco_kwh,
+            service_fee=taxa_servico,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    return estacao, conector, veiculo, calculo
+
+
 @router.post(
     "/estimativa",
     response_model=EstimativaRecargaResponse,
@@ -292,125 +409,30 @@ def estimar_recarga(
     dados: EstimativaRecargaRequest,
     db: Session = Depends(get_db),
 ):
-    estacao = db.get(
-        Estacao,
-        dados.estacao_id,
-    )
-
-    if not estacao:
-        raise HTTPException(
-            status_code=404,
-            detail="Estação não encontrada.",
-        )
-
-    conector = db.get(
-        Conector,
-        dados.conector_id,
-    )
-
-    if not conector:
-        raise HTTPException(
-            status_code=404,
-            detail="Conector não encontrado.",
-        )
-
-    veiculo = db.get(
-        Veiculo,
-        dados.veiculo_id,
-    )
-
-    if not veiculo:
-        raise HTTPException(
-            status_code=404,
-            detail="Veículo não encontrado.",
-        )
-
-    soc_inicial = Decimal(
-        veiculo.soc_atual
-    )
-
-    quantidade_kwh = Decimal("0")
-
-    if (
-        dados.quantidade_kwh
-        and dados.quantidade_kwh > 0
-    ):
-        quantidade_kwh = Decimal(
-            dados.quantidade_kwh
-        )
-
-    elif dados.percentual_desejado is not None:
-        percentual_desejado = Decimal(
-            dados.percentual_desejado
-        )
-
-        delta_perc = max(
-            Decimal("0"),
-            percentual_desejado - soc_inicial,
-        )
-
-        quantidade_kwh = (
-            delta_perc
-            / Decimal("100")
-        ) * Decimal(
-            veiculo.capacidade_bateria_kwh
-        )
-
-    else:
-        raise HTTPException(
-            status_code=400,
-            detail=(
-                "Informe quantidade_kwh "
-                "ou percentual_desejado."
-            ),
-        )
-
-    preco_kwh = calcular_preco_kwh(
-        estacao,
-        dados.modo,
-    )
-
-    taxa_servico = Decimal("2.50")
-
-    valor_estimado = (
-        quantidade_kwh
-        * preco_kwh
-    ) + taxa_servico
-
-    potencia = Decimal(
-        conector.potencia_kw
-    )
-
-    if potencia <= 0:
-        raise HTTPException(
-            status_code=400,
-            detail="Potência do conector inválida.",
-        )
-
-    tempo_estimado_minutos = max(
-        1,
-        int(
-            (
-                quantidade_kwh
-                / potencia
-            )
-            * Decimal("60")
-        ),
+    _, _, _, calculo = _estimar_recarga_com_dados(
+        db,
+        estacao_id=dados.estacao_id,
+        conector_id=dados.conector_id,
+        veiculo_id=dados.veiculo_id,
+        modo=dados.modo,
+        percentual_desejado=dados.percentual_desejado,
+        tempo_disponivel_minutos=dados.tempo_disponivel_minutos,
     )
 
     return EstimativaRecargaResponse(
         modo=dados.modo.upper(),
-        preco_kwh=preco_kwh,
-        quantidade_kwh=round(
-            quantidade_kwh,
-            2,
-        ),
-        tempo_estimado_minutos=tempo_estimado_minutos,
-        taxa_servico=taxa_servico,
-        valor_estimado=round(
-            valor_estimado,
-            2,
-        ),
+        preco_kwh=calculo.unit_price,
+        quantidade_kwh=calculo.quantity_kwh,
+        tempo_estimado_minutos=calculo.estimated_minutes,
+        tempo_disponivel_minutos=dados.tempo_disponivel_minutos,
+        potencia_disponivel_kw=calculo.available_power_kw,
+        potencia_alocada_kw=calculo.charging_power_kw,
+        soc_atual=calculo.current_soc_percent,
+        soc_estimado=calculo.estimated_soc_percent,
+        percentual_desejado=calculo.target_soc_percent,
+        valor_energia=calculo.energy_cost,
+        taxa_servico=calculo.service_fee,
+        valor_estimado=calculo.estimated_cost,
     )
 
 
@@ -532,140 +554,28 @@ def criar_recarga(
     dados: RecargaCreate,
     db: Session = Depends(get_db),
 ):
-    user_id = dados.usuario_id or 1
-
-    estacao = db.get(
-        Estacao,
-        dados.estacao_id,
+    estacao, conector, veiculo, calculo = _estimar_recarga_com_dados(
+        db,
+        estacao_id=dados.estacao_id,
+        conector_id=dados.conector_id,
+        veiculo_id=dados.veiculo_id,
+        modo=dados.modo,
+        percentual_desejado=dados.percentual_desejado,
+        tempo_disponivel_minutos=dados.tempo_disponivel_minutos,
     )
 
-    if not estacao:
-        raise HTTPException(
-            status_code=404,
-            detail="Estação não encontrada.",
-        )
-
-    conector = db.get(
-        Conector,
-        dados.conector_id,
-    )
-
-    if not conector:
-        raise HTTPException(
-            status_code=404,
-            detail="Conector não encontrado.",
-        )
-
-    veiculo = db.get(
-        Veiculo,
-        dados.veiculo_id,
-    )
-
-    if not veiculo:
-        raise HTTPException(
-            status_code=404,
-            detail="Veículo não encontrado.",
-        )
-
-    if veiculo.soc_atual is None:
-        raise HTTPException(
-            status_code=400,
-            detail="O veículo não possui SoC atual.",
-        )
-
-    soc_inicial = Decimal(
-        veiculo.soc_atual
-    )
-
+    soc_inicial = calculo.current_soc_percent
     preco_kwh = calcular_preco_kwh(
         estacao,
         dados.modo,
     )
-
-    taxa_servico = Decimal("2.50")
-
-    if (
-        dados.quantidade_kwh is not None
-        and Decimal(
-            dados.quantidade_kwh
-        ) > 0
-    ):
-        quantidade = Decimal(
-            dados.quantidade_kwh
-        )
-
-    elif dados.percentual_desejado is not None:
-        percentual_desejado = Decimal(
-            dados.percentual_desejado
-        )
-
-        if percentual_desejado <= soc_inicial:
-            raise HTTPException(
-                status_code=400,
-                detail=(
-                    "O percentual desejado deve ser "
-                    "maior que o SoC atual do veículo."
-                ),
-            )
-
-        quantidade = (
-            (
-                percentual_desejado
-                - soc_inicial
-            )
-            / Decimal("100")
-        ) * Decimal(
-            veiculo.capacidade_bateria_kwh
-        )
-
-    else:
-        raise HTTPException(
-            status_code=400,
-            detail=(
-                "Informe quantidade_kwh "
-                "ou percentual_desejado."
-            ),
-        )
-
-    capacidade_restante = (
-        (
-            Decimal("100")
-            - soc_inicial
-        )
-        / Decimal("100")
-    ) * Decimal(
-        veiculo.capacidade_bateria_kwh
-    )
-
-    if quantidade > capacidade_restante:
-        raise HTTPException(
-            status_code=400,
-            detail=(
-                "A quantidade solicitada ultrapassa "
-                "a capacidade disponível da bateria."
-            ),
-        )
-
-    valor_estimado = (
-        quantidade
-        * preco_kwh
-    ) + taxa_servico
-
-    tempo_estimado_minutos = max(
-        1,
-        int(
-            (
-                quantidade
-                / Decimal(
-                    conector.potencia_kw
-                )
-            )
-            * Decimal("60")
-        ),
-    )
+    taxa_servico = calculo.service_fee
+    quantidade = calculo.quantity_kwh
+    valor_estimado = calculo.estimated_cost
+    tempo_estimado_minutos = calculo.estimated_minutes
 
     nova_recarga = Recarga(
-        usuario_id=user_id,
+        usuario_id=veiculo.usuario_id,
         veiculo_id=dados.veiculo_id,
         estacao_id=dados.estacao_id,
         conector_id=dados.conector_id,
@@ -677,8 +587,7 @@ def criar_recarga(
             2,
         ),
 
-        percentual_desejado=
-            dados.percentual_desejado,
+        percentual_desejado=dados.percentual_desejado,
 
         tempo_disponivel_minutos=
             dados.tempo_disponivel_minutos,
@@ -700,8 +609,7 @@ def criar_recarga(
         energia_entregue_kwh=
             Decimal("0.000"),
 
-        potencia_atual_kw=
-            Decimal(conector.potencia_kw),
+        potencia_atual_kw=calculo.charging_power_kw,
 
         tempo_restante_minutos=
             tempo_estimado_minutos,

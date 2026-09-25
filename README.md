@@ -1,3 +1,4 @@
+-- Active: 1790308813037@@127.0.0.1@5432
 ## Backend — Execução local
 
 O backend utiliza **Python + FastAPI + PostgreSQL**.
@@ -145,12 +146,7 @@ http://127.0.0.1:8000
 
 ### 2. Interface de chat IA com Gradio
 
-Para iniciar a interface textual de chat com streaming do Gemini:
-
-```bash
-cd backend
-python chat_app.py
-```
+A interface da IA agora roda junto com o FastAPI principal da aplicação, na mesma porta do projeto.
 
 Configure a chave da API do Gemini no ambiente:
 
@@ -158,10 +154,17 @@ Configure a chave da API do Gemini no ambiente:
 $env:GEMINI_API_KEY="sua_chave_aqui"
 ```
 
+Inicie o backend principal:
+
+```bash
+cd backend
+uvicorn main:app --reload
+```
+
 A interface ficará disponível em:
 
 ```text
-http://localhost:7860
+http://localhost:8000/ia
 ```
 
 ### 3. RAG com documentos e busca web opcional

@@ -20,7 +20,6 @@ alembic/versions/__pycache__/
 # VS Code
 .vscode/
 
-# Private RAG documents
 backend/data/documents/
 
 # Misc

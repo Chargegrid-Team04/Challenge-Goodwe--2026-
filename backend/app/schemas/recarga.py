@@ -1,16 +1,18 @@
 from datetime import datetime
 from decimal import Decimal
-from pydantic import BaseModel, ConfigDict
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class EstimativaRecargaRequest(BaseModel):
     estacao_id: int
     conector_id: int
     veiculo_id: int
-    modo: str = "ECONOMICO"
-    quantidade_kwh: Decimal | None = None
-    percentual_desejado: Decimal | None = None
-    soc_inicial: Decimal | None = None
+    modo: Literal["RAPIDO", "ECONOMICO", "INTELIGENTE"] = "INTELIGENTE"
+    percentual_desejado: Decimal = Field(default=Decimal("80"), gt=0, le=100)
+    tempo_disponivel_minutos: int = Field(default=45, ge=10, le=360)
+    model_config = ConfigDict(extra="forbid")
 
 
 class EstimativaRecargaResponse(BaseModel):
@@ -18,20 +20,25 @@ class EstimativaRecargaResponse(BaseModel):
     preco_kwh: Decimal
     quantidade_kwh: Decimal
     tempo_estimado_minutos: int
+    tempo_disponivel_minutos: int
+    potencia_disponivel_kw: Decimal
+    potencia_alocada_kw: Decimal
+    soc_atual: Decimal
+    soc_estimado: Decimal
+    percentual_desejado: Decimal
+    valor_energia: Decimal
     taxa_servico: Decimal
     valor_estimado: Decimal
 
 
 class RecargaCreate(BaseModel):
-    usuario_id: int | None = None
     veiculo_id: int
     estacao_id: int
     conector_id: int
-    modo: str = "ECONOMICO"
-    quantidade_kwh: Decimal | None = None
-    percentual_desejado: Decimal | None = None
-    tempo_disponivel_minutos: int | None = None
-    soc_inicial: Decimal | None = None
+    modo: Literal["RAPIDO", "ECONOMICO", "INTELIGENTE"] = "INTELIGENTE"
+    percentual_desejado: Decimal = Field(default=Decimal("80"), gt=0, le=100)
+    tempo_disponivel_minutos: int = Field(default=45, ge=10, le=360)
+    model_config = ConfigDict(extra="forbid")
 
 
 class RecargaResponse(BaseModel):
