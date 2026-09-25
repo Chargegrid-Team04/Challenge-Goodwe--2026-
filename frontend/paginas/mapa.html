@@ -1,29 +1,85 @@
-{% extends "base.html" %}
-{% block Head %}
+{% extends "base.html" %} {% block Head %}
 <link rel="stylesheet" href="/frontend/static/mapa.css" />
-{% endblock %}
+<style>
+  .station-card.selected-station {
+    border: 2px solid var(--secondary, #00b4d8) !important;
+    box-shadow: 0 6px 18px rgba(0, 180, 216, 0.25) !important;
+    transform: translateY(-2px);
+  }
 
-{% block Conteudo %}
+  .station-select-button {
+    border: 0;
+    background: transparent;
+    padding: 2px 0;
+    color: var(--primary, #0b63f6);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .station-select-button:hover {
+    text-decoration: underline;
+  }
+</style>
+{% endblock %} {% block Conteudo %}
 <div class="container">
   <div class="map-section">
-    <img src="/frontend/static/images/Map.png" alt="Mapa" class="map-image" />
+    <iframe
+      src="/backend/mapa/index.html?embed=1"
+      class="map-iframe"
+      allow="geolocation"
+      style="
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+        z-index: 1;
+      "
+      title="Mapa Interativo GoodWe"
+    ></iframe>
 
     <div class="map-header">
       <div class="search-container">
         <i data-lucide="search" class="search-icon"></i>
-        <input id="search" type="text" placeholder="Buscar postos de recarga..." autocomplete="off" />
+        <input
+          id="search"
+          type="text"
+          placeholder="Buscar postos de recarga..."
+          autocomplete="off"
+        />
         <button class="filter-main-button" type="button" aria-label="Filtros">
           <i data-lucide="sliders-horizontal"></i>
         </button>
       </div>
 
       <div class="filters">
-        <button class="filter-button" data-filter="DISPONIVEL" type="button">Disponível agora</button>
-        <button class="filter-button" data-filter="COMPATIVEL" type="button">Compatível</button>
-        <button class="filter-button" data-sort="PRECO" type="button">Mais barato</button>
-        <button class="filter-button" data-sort="POTENCIA" type="button">Maior potência</button>
+        <button class="filter-button" data-filter="DISPONIVEL" type="button">
+          Disponível agora
+        </button>
+        <button class="filter-button" data-filter="COMPATIVEL" type="button">
+          Compatível
+        </button>
+        <button class="filter-button" data-sort="PRECO" type="button">
+          Mais barato
+        </button>
+        <button class="filter-button" data-sort="POTENCIA" type="button">
+          Maior potência
+        </button>
       </div>
     </div>
+
+    <button
+      id="btn-recenter"
+      class="fab-location"
+      type="button"
+      aria-label="Voltar para minha posição"
+      title="Minha posição"
+    >
+      <i data-lucide="locate-fixed"></i>
+    </button>
   </div>
 
   <section class="hidden-section" id="station-section">
@@ -44,9 +100,7 @@
     <div class="station-list" id="station-list"></div>
   </section>
 </div>
-{% endblock %}
-
-{% block Scripts %}
+{% endblock %} {% block Scripts %}
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const sheet = document.getElementById("station-section");
@@ -67,13 +121,15 @@
           .filter((b) => b.classList.contains("active") && b.dataset.filter)
           .map((b) => b.dataset.filter);
         const botaoSort = filters.find(
-          (b) => b.classList.contains("active") && b.dataset.sort
+          (b) => b.classList.contains("active") && b.dataset.sort,
         );
 
         const params = new URLSearchParams();
         if (busca) params.append("busca", busca);
-        if (ativosFiltro.includes("DISPONIVEL")) params.append("disponivel", "true");
-        if (ativosFiltro.includes("COMPATIVEL")) params.append("compativel", "true");
+        if (ativosFiltro.includes("DISPONIVEL"))
+          params.append("disponivel", "true");
+        if (ativosFiltro.includes("COMPATIVEL"))
+          params.append("compativel", "true");
         if (botaoSort) params.append("ordenar_por", botaoSort.dataset.sort);
 
         const query = params.toString() ? `?${params.toString()}` : "";
@@ -85,29 +141,39 @@
 
         count.textContent = estacoes.length;
 
-        stationList.innerHTML = estacoes.map((estacao) => {
-          const conectores = estacao.conectores || [];
-          const temDisponivel = conectores.some((c) => c.status === "DISPONIVEL");
-          const statusClass = temDisponivel ? "available" : "busy";
-          const statusTexto = temDisponivel ? "Livre" : "Ocupado";
+        stationList.innerHTML = estacoes
+          .map((estacao) => {
+            const conectores = estacao.conectores || [];
+            const temDisponivel = conectores.some(
+              (c) => c.status === "DISPONIVEL",
+            );
+            const statusClass = temDisponivel ? "available" : "busy";
+            const statusTexto = temDisponivel ? "Livre" : "Ocupado";
 
-          const potenciaMaxima = conectores.length > 0
-            ? Math.max(...conectores.map((c) => Number(c.potencia_kw) || 0))
-            : 0;
+            const potenciaMaxima =
+              conectores.length > 0
+                ? Math.max(...conectores.map((c) => Number(c.potencia_kw) || 0))
+                : 0;
 
-          const preco = estacao.preco_base_kwh != null
-            ? `R$ ${Number(estacao.preco_base_kwh).toFixed(2).replace(".", ",")} / kWh`
-            : "Preço indisponível";
+            const preco =
+              estacao.preco_base_kwh != null
+                ? `R$ ${Number(estacao.preco_base_kwh).toFixed(2).replace(".", ",")} / kWh`
+                : "Preço indisponível";
 
-          const distancia = estacao.distancia_km != null
-            ? `${Number(estacao.distancia_km).toFixed(1).replace(".", ",")} km • `
-            : "";
+            const distancia =
+              estacao.distancia_km != null
+                ? `${Number(estacao.distancia_km).toFixed(1).replace(".", ",")} km • `
+                : "";
 
-          const imagem = estacao.url_imagem || "/frontend/static/images/amper/Logo.png";
-          const potenciaTexto = potenciaMaxima > 0 ? `${potenciaMaxima} kW` : "Potência indisponível";
+            const imagem =
+              estacao.url_imagem || "/frontend/static/images/amper/Logo.png";
+            const potenciaTexto =
+              potenciaMaxima > 0
+                ? `${potenciaMaxima} kW`
+                : "Potência indisponível";
 
-          return `
-            <div class="station-card" onclick="window.location.href='/posto?estacao_id=${estacao.id}'" style="cursor: pointer;">
+            return `
+            <div class="station-card ${estacaoSelecionadaId === estacao.id ? "selected-station" : ""}" data-id="${estacao.id}" onclick="selecionarPosto(${estacao.id}, ${estacao.latitude}, ${estacao.longitude})" style="cursor: pointer;">
               <img src="${imagem}" class="station-logo" alt="${estacao.nome}" />
               <div class="station-info">
                 <div class="station-title">
@@ -118,22 +184,120 @@
                 <div class="station-footer">
                   <h3>${preco}</h3>
                   <span class="station-power">${potenciaTexto}</span>
+                  <button
+                    type="button"
+                    class="station-select-button"
+                    onclick="abrirDetalhesPosto(${estacao.id}, event)"
+                  >
+                    Selecionar
+                  </button>
                 </div>
               </div>
             </div>
           `;
-        }).join("");
+          })
+          .join("");
       } catch (erro) {
         console.error(erro);
       }
     }
 
+    // Guarda qual posto está selecionado no momento.
+    let estacaoSelecionadaId = null;
+
+    function marcarPostoSelecionado(estacaoId) {
+      document.querySelectorAll(".station-card").forEach((card) => {
+        card.classList.toggle(
+          "selected-station",
+          Number(card.dataset.id) === Number(estacaoId),
+        );
+      });
+    }
+
+    function centralizarPostoNoMapa(estacaoId, lat, lng) {
+      const iframe = document.querySelector(".map-iframe");
+      if (!iframe || !iframe.contentWindow) return;
+
+      iframe.contentWindow.postMessage(
+        {
+          tipo: "SELECIONAR_POSTO",
+          estacaoId: Number(estacaoId),
+          lat: Number(lat),
+          lng: Number(lng),
+        },
+        "*",
+      );
+    }
+
+    window.abrirDetalhesPosto = function (estacaoId, event) {
+      // Impede que o clique do botão também dispare o clique do card.
+      if (event) event.stopPropagation();
+      window.location.href = `/posto?estacao_id=${estacaoId}`;
+    };
+
+    // 1º clique no card: seleciona e centraliza no mapa.
+    // 2º clique no MESMO card: abre os detalhes.
+    window.selecionarPosto = function (estacaoId, lat, lng) {
+      estacaoId = Number(estacaoId);
+
+      if (estacaoSelecionadaId === estacaoId) {
+        window.abrirDetalhesPosto(estacaoId);
+        return;
+      }
+
+      estacaoSelecionadaId = estacaoId;
+      marcarPostoSelecionado(estacaoId);
+      centralizarPostoNoMapa(estacaoId, lat, lng);
+
+      // IMPORTANTE: não fecha mais o bottom sheet aqui.
+      // Assim o usuário consegue clicar no mesmo card uma segunda vez.
+    };
+
+    // Se o usuário clicar diretamente em um ponto do mapa,
+    // mantém o card correspondente visualmente selecionado.
+    window.addEventListener("message", (ev) => {
+      if (ev.data && ev.data.tipo === "SELECAO_POSTO_MAPA") {
+        estacaoSelecionadaId = Number(ev.data.estacaoId);
+        marcarPostoSelecionado(estacaoSelecionadaId);
+      }
+    });
+
     function atualizarSheet(fechado) {
       sheet.classList.toggle("closed", fechado);
+      const fab = document.getElementById("btn-recenter");
+      if (fab) fab.classList.toggle("sheet-closed", fechado);
       toggleText.textContent = fechado ? "Ver postos" : "Ver no mapa";
-      toggleIcon.setAttribute("data-lucide", fechado ? "chevron-up" : "chevron-down");
+      toggleIcon.setAttribute(
+        "data-lucide",
+        fechado ? "chevron-up" : "chevron-down",
+      );
       if (window.lucide) lucide.createIcons();
+
+      const iframe = document.querySelector(".map-iframe");
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ tipo: "REDIMENSIONAR_MAPA" }, "*");
+      }
     }
+
+    const btnRecenter = document.getElementById("btn-recenter");
+    if (btnRecenter) {
+      btnRecenter.addEventListener("click", () => {
+        const iframe = document.querySelector(".map-iframe");
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.postMessage(
+            { tipo: "VOLTAR_MINHA_LOCALIZACAO" },
+            "*",
+          );
+        }
+      });
+    }
+
+    window.addEventListener("resize", () => {
+      const iframe = document.querySelector(".map-iframe");
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ tipo: "REDIMENSIONAR_MAPA" }, "*");
+      }
+    });
 
     toggleButton.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -141,20 +305,31 @@
     });
 
     handle.addEventListener("click", (e) => {
-      if (!e.target.closest("#view-map") && sheet.classList.contains("closed")) {
+      if (
+        !e.target.closest("#view-map") &&
+        sheet.classList.contains("closed")
+      ) {
         atualizarSheet(false);
       }
     });
 
-    handle.addEventListener("touchstart", (e) => {
-      touchStartY = e.touches[0].clientY;
-    }, { passive: true });
+    handle.addEventListener(
+      "touchstart",
+      (e) => {
+        touchStartY = e.touches[0].clientY;
+      },
+      { passive: true },
+    );
 
-    handle.addEventListener("touchend", (e) => {
-      const movimento = e.changedTouches[0].clientY - touchStartY;
-      if (movimento > 35) atualizarSheet(true);
-      if (movimento < -35) atualizarSheet(false);
-    }, { passive: true });
+    handle.addEventListener(
+      "touchend",
+      (e) => {
+        const movimento = e.changedTouches[0].clientY - touchStartY;
+        if (movimento > 35) atualizarSheet(true);
+        if (movimento < -35) atualizarSheet(false);
+      },
+      { passive: true },
+    );
 
     filters.forEach((button) => {
       button.addEventListener("click", () => {

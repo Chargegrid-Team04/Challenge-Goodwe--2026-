@@ -1,157 +1,808 @@
 {% extends "base.html" %}
 
-{% block Titulo %} {% endblock %}
+{% block Titulo %}Configurar Recarga{% endblock %}
 
 {% block Head %} 
     <link rel="stylesheet" href="/frontend/static/recarga.css">
+    <style>
+        /* Estilos adicionais para feedback interativo e edição dos cards de definição */
+        .config-card {
+            position: relative;
+            user-select: none;
+        }
+        .config-card .edit-hint {
+            font-size: 0.7rem;
+            color: var(--secondary);
+            margin-top: 2px;
+            font-weight: 500;
+        }
+        .config-card.active {
+            border-color: var(--secondary) !important;
+            box-shadow: 0 4px 12px rgba(0, 180, 216, 0.18) !important;
+        }
+        /* Modal de ajuste de valor da meta de recarga */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(11, 43, 32, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: var(--space-4);
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-box {
+            background: var(--white);
+            border-radius: var(--s-4);
+            padding: var(--space-5);
+            width: 100%;
+            max-width: 360px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: fadeInUp var(--transition-base) forwards;
+        }
+        .modal-title {
+            font-size: var(--text-md);
+            font-weight: var(--font-weight-bold);
+            color: var(--primary);
+            margin-bottom: var(--space-3);
+        }
+        .modal-input {
+            width: 100%;
+            padding: var(--space-3);
+            border: 2px solid var(--l-surface-2);
+            border-radius: var(--radius-md);
+            font-size: var(--text-lg);
+            font-weight: bold;
+            color: var(--primary);
+            box-sizing: border-box;
+            outline: none;
+            margin-bottom: var(--space-4);
+        }
+        .modal-input:focus {
+            border-color: var(--secondary);
+        }
+        .modal-buttons {
+            display: flex;
+            gap: var(--space-2);
+            justify-content: flex-end;
+        }
+        .modal-btn-cancel {
+            padding: var(--space-2) var(--space-4);
+            border: 1px solid var(--l-surface-2);
+            background: var(--white);
+            color: var(--l-text-2);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .modal-btn-confirm {
+            padding: var(--space-2) var(--space-4);
+            border: none;
+            background: var(--primary);
+            color: var(--white);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .quick-options {
+            display: flex;
+            gap: var(--space-2);
+            margin-bottom: var(--space-3);
+            flex-wrap: wrap;
+        }
+        .quick-chip {
+            padding: 4px 10px;
+            background: var(--l-surface);
+            border: 1px solid var(--l-surface-2);
+            border-radius: 12px;
+            font-size: var(--text-sm);
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .quick-chip:hover {
+            border-color: var(--secondary);
+            background: var(--blue-soft);
+        }
+    </style>
 {% endblock %}
 
 {% block Conteudo %}
 
-<div class="wrapper">
-<header class="main-header">
-        <button class="back" aria-label="Voltar">
+<div class="wrapper page-configurar">
+    <!-- Cabeçalho com botão de retorno -->
+    <header class="main-header">
+        <button class="back" id="btn-back" aria-label="Voltar" type="button">
             <i data-lucide="arrow-left" style="width : 20px; height: 20px; stroke : currentColor; stroke-width: 2.5;"></i>
         </button>
-        <h1 style="margin-right: auto; margin-left:  0;" class="page-title">Configurar Recarga</h1>
+        <h1 style="margin-right: auto; margin-left: 0;" class="page-title">Configurar Recarga</h1>
     </header>
 
+    <!-- Estado da Bateria do Veículo -->
+    <section class="battery-section">
+        <div class="battery-header">
+            <span class="battery-label">Estado da Bateria</span>
+            <span class="vehicle-model" id="vehicle-model">BYD Dolphin • GW22K</span>
+        </div>
+        <div class="battery-bar-container">
+            <div class="battery-bar-track">
+                <div class="battery-bar-fill" id="battery-bar-fill" style="width: 45%;"></div>
+            </div>
+            <span class="battery-percentage" id="battery-percentage">45%</span>
+        </div>
+    </section>
 
-<!-- Estado da Bateria -->
-<section class="battery-section">
-<div class="battery-header">
-    <span class="battery-label">Estado da Bateria</span>
-    <span class="vehicle-model">BYD Dolphin • GW22K</span>
-</div>
-<div class="battery-bar-container">
-    <div class="battery-bar-track">
-    <div class="battery-bar-fill" style="width: 45%;"></div>
+    <!-- Grade de Opções de Definição -->
+    <section class="config-grid-section">
+        <h2 class="section-title">Como deseja definir a recarga?</h2>
+
+        <div class="config-grid">
+            <!-- Card 1: Quantidade em kWh (Padrão ativo) -->
+            <div class="config-card active" id="card-kwh" data-mode="kwh">
+                <span class="config-card-label">Quantidade (kWh)</span>
+                <span class="config-card-value" id="val-kwh">35 kWh</span>
+                <span class="config-card-placeholder" id="ph-kwh" style="display:none;">Definir</span>
+                <span class="edit-hint">Toque para ajustar</span>
+            </div>
+
+            <!-- Card 2: Percentual (%) -->
+            <div class="config-card" id="card-percent" data-mode="percent">
+                <span class="config-card-label">Percentual (%)</span>
+                <span class="config-card-value" id="val-percent" style="display:none;">80%</span>
+                <span class="config-card-placeholder" id="ph-percent">Desejado</span>
+                <span class="edit-hint" style="display:none;">Toque para ajustar</span>
+            </div>
+
+            <!-- Card 3: Tempo disponível -->
+            <div class="config-card" id="card-time" data-mode="time">
+                <span class="config-card-label">Tempo disponível</span>
+                <span class="config-card-value" id="val-time" style="display:none;">45 min</span>
+                <span class="config-card-placeholder" id="ph-time">Ex: 40 min</span>
+                <span class="edit-hint" style="display:none;">Toque para ajustar</span>
+            </div>
+
+            <!-- Card 4: Horário de saída -->
+            <div class="config-card" id="card-departure" data-mode="departure">
+                <span class="config-card-label">Horário de saída</span>
+                <span class="config-card-value" id="val-departure" style="display:none;">18:30</span>
+                <span class="config-card-placeholder" id="ph-departure">Ex: 18h30</span>
+                <span class="edit-hint" style="display:none;">Toque para ajustar</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Resumo da Estimativa -->
+    <section class="estimation-card">
+        <div class="estimation-row">
+            <span class="estimation-label" id="estimation-label-kwh">Estimativa de Recarga (35 kWh)</span>
+            <span class="estimation-value" id="estimation-energy-value">R$ 66,15</span>
+        </div>
+        <div class="estimation-row">
+            <span class="estimation-label">Taxa de Serviço e Conveniência</span>
+            <span class="estimation-value" id="estimation-fee-value">R$ 2,50</span>
+        </div>
+        <div class="estimation-divider"></div>
+        <div class="estimation-row total-row">
+            <span class="estimation-total-label">Total Estimado</span>
+            <span class="estimation-total-value" id="estimation-total-value">R$ 68,65</span>
+        </div>
+    </section>
+
+    <!-- Modos de Carregamento -->
+    <section class="modes-section">
+        <h2 class="section-title">Selecione o <span class="highlight-blue">modo</span> de carregamento</h2>
+
+        <div class="modes-list">
+            <!-- Modo Rápido -->
+            <label class="mode-card" for="mode-fast">
+                <input type="radio" id="mode-fast" name="charge-mode" value="RAPIDO">
+                <div class="mode-content">
+                    <div class="mode-icon-box orange-bg">
+                        <i data-lucide="zap" class="bolt-icon" width="20" height="20" fill="none" stroke="currentColor"></i>
+                    </div>
+                    <div class="mode-info">
+                        <div class="mode-header">
+                            <span class="mode-title">Modo Rápido</span>
+                            <span class="mode-price" id="price-fast">R$ 2,15/kWh</span>
+                        </div>
+                        <span class="mode-sub" id="sub-fast">Estimado: 25 min • Potência máxima</span>
+                    </div>
+                </div>
+            </label>
+
+            <!-- Modo Econômico -->
+            <label class="mode-card" for="mode-eco">
+                <input type="radio" id="mode-eco" name="charge-mode" value="ECONOMICO">
+                <div class="mode-content">
+                    <div class="mode-icon-box green-bg">
+                        <i data-lucide="leaf" class="bolt-icon" width="20" height="20" fill="none" stroke="currentColor"></i>
+                    </div>
+                    <div class="mode-info">
+                        <div class="mode-header">
+                            <span class="mode-title">Modo Econômico</span>
+                            <span class="mode-price" id="price-eco" style="color:var(--primary)">R$ 1,69/kWh</span>
+                        </div>
+                        <span class="mode-sub" id="sub-eco">Estimado: 1h 10m • Tarifa reduzida</span>
+                        <span class="mode-note" id="note-eco">(Agendado)</span>
+                    </div>
+                </div>
+            </label>
+
+            <!-- Modo Inteligente (IA) -->
+            <label class="mode-card" for="mode-smart">
+                <input type="radio" id="mode-smart" name="charge-mode" value="INTELIGENTE" checked>
+                <div class="mode-content">
+                    <div class="mode-icon-box blue-bg">
+                        <i data-lucide="clock-4" class="bolt-icon" width="20" height="20" fill="none" stroke="currentColor"></i>
+                    </div>
+                    <div class="mode-info">
+                        <div class="mode-header">
+                            <span class="mode-title">Modo Inteligente (IA)</span>
+                            <span class="mode-price" id="price-smart">R$ 1,89/kWh</span>
+                        </div>
+                        <span class="mode-sub" id="sub-smart">Otimiza potência para equilibrar tempo e custo</span>
+                    </div>
+                </div>
+            </label>
+        </div>
+    </section>
+
+    <!-- Botão de Ação -->
+    <div class="action-footer">
+        <button class="btn-confirm" id="btn-confirm" type="button">Confirmar Recarga</button>
     </div>
-    <span class="battery-percentage">45%</span>
 </div>
-</section>
 
-<!-- Grade de Opções de Definição -->
-<section class="config-grid-section">
-<h2 class="section-title">Como deseja definir a recarga?</h2>
-
-<div class="config-grid">
-    <!-- Card Selecionado -->
-    <div class="config-card active">
-    <span class="config-card-label">Quantidade (kWh)</span>
-    <span class="config-card-value">35 kWh</span>
-    </div>
-
-    <!-- Card Percentual -->
-    <div class="config-card">
-    <span class="config-card-label">Percentual (%)</span>
-    <span class="config-card-placeholder">Desejado</span>
-    </div>
-
-    <!-- Card Tempo -->
-    <div class="config-card">
-    <span class="config-card-label">Tempo disponível</span>
-    <span class="config-card-placeholder">Ex: 40 min</span>
-    </div>
-
-    <!-- Card Horário -->
-    <div class="config-card">
-    <span class="config-card-label">Horário de saída</span>
-    <span class="config-card-placeholder">Ex: 18h30</span>
-    </div>
-</div>
-</section>
-
-<!-- Resumo do Estimativa -->
-<section class="estimation-card">
-<div class="estimation-row">
-    <span class="estimation-label">Estimativa de Recarga (45 kWh)</span>
-    <span class="estimation-value">R$ 85,50</span>
-</div>
-<div class="estimation-row">
-    <span class="estimation-label">Taxa de Serviço e Conveniência</span>
-    <span class="estimation-value">R$ 2,50</span>
-</div>
-<div class="estimation-divider"></div>
-<div class="estimation-row total-row">
-    <span class="estimation-total-label">Total Estimado</span>
-    <span class="estimation-total-value">R$ 88,00</span>
-</div>
-</section>
-
-<!-- Modos de Carregamento -->
-<section class="modes-section">
-<h2 class="section-title">Selecione o <span class="highlight-blue">modo</span> de carregamento</h2>
-
-<div class="modes-list">
-    <!-- Modo Rápido -->
-    <label class="mode-card">
-    <input type="radio" name="charge-mode" value="fast">
-    <div class="mode-content">
-        <div class="mode-icon-box orange-bg">
-        <i data-lucide="zap" class="bolt-icon" width="20" height="20" fill="none" stroke="currentColor"></i>
-        </div>
-        <div class="mode-info">
-        <div class="mode-header">
-            <span class="mode-title">Modo Rápido</span>
-            <span class="mode-price">R$ 2,15/kWh</span>
-        </div>
-        <span class="mode-sub">Estimado: 25 min • Até 80%</span>
+<!-- Modal interativo para ajuste do valor da definição selecionada -->
+<div class="modal-overlay" id="definition-modal">
+    <div class="modal-box">
+        <h3 class="modal-title" id="modal-title">Definir Quantidade de Energia</h3>
+        <div class="quick-options" id="modal-quick-options"></div>
+        <input type="number" step="any" class="modal-input" id="modal-input" placeholder="Digite o valor">
+        <div class="modal-buttons">
+            <button class="modal-btn-cancel" id="modal-btn-cancel" type="button">Cancelar</button>
+            <button class="modal-btn-confirm" id="modal-btn-save" type="button">Salvar</button>
         </div>
     </div>
-    </label>
-
-    <!-- Modo Econômico -->
-    <label class="mode-card">
-    <input type="radio" name="charge-mode" value="eco">
-    <div class="mode-content">
-        <div class="mode-icon-box green-bg">
-        <i data-lucide="leaf" class="bolt-icon" width="20" height="20" fill="none" stroke="currentColor"></i>
-        </div>
-        <div class="mode-info">
-        <div class="mode-header">
-            <span class="mode-title">Modo Econômico </span>
-            <span class="mode-price" style="color:var(--primary)">R$ 1,69/kWh</span>
-        </div>
-        <span class="mode-sub">Estimado: 1h 10m • Inicia às 22h no off-peak</span>
-        <span class="mode-note">(Agendado)</span>
-        </div>
-    </div>
-    </label>
-
-    <!-- Modo Inteligente -->
-    <label class="mode-card">
-    <input type="radio" name="charge-mode" value="smart" checked>
-    <div class="mode-content">
-        <div class="mode-icon-box blue-bg">
-        <i data-lucide="clock-4" class="bolt-icon" width="20" height="20" fill="none" stroke="currentColor"></i>
-        </div>
-        <div class="mode-info">
-        <div class="mode-header">
-            <span class="mode-title">Modo Inteligente (IA)</span>
-            <span class="mode-price">R$ 1,89/kWh</span>
-        </div>
-        <span class="mode-sub">Otimiza potência para equilibrar tempo e custo</span>
-        </div>
-    </div>
-    </label>
-</div>
-</section>
-
-<!-- Botão de Ação -->
-<div class="action-footer">
-<button class="btn-confirm">Confirmar Recarga</button>
-</div>
 </div>
 
 {% endblock %}
 
 {% block Scripts %}
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const footerOptions = document.querySelectorAll(".footer-option");
+    document.addEventListener("DOMContentLoaded", async function() {
+        // Marca o item ativo na barra inferior de navegação
         const currentFooterOption = document.getElementById("footer-recarga");
-        currentFooterOption.classList.add("active");
+        if (currentFooterOption) {
+            currentFooterOption.classList.add("active");
+        }
+
+        /* ==========================================================================
+         * 1. INTEGRAÇÃO: AUTENTICAÇÃO E VEÍCULO DO USUÁRIO (DEPENDÊNCIA DE TERCEIROS)
+         * --------------------------------------------------------------------------
+         * ATENÇÃO: Esta parte depende da rota de Login/Auth que será integrada por
+         * outro membro da equipe. Quando a rota de login estiver pronta:
+         * 
+         * // Exemplo de integração futura com login:
+         * // const token = localStorage.getItem('access_token');
+         * // const userResponse = await fetch('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } });
+         * // const user = await userResponse.json();
+         * // const veiculosResponse = await fetch(`/api/veiculos?usuario_id=${user.id}`);
+         * // const veiculos = await veiculosResponse.json();
+         * // const veiculoAtivo = veiculos.find(v => v.principal) || veiculos[0];
+         * 
+         * CÓDIGO CHUMBADO (MOCK FUNCIONAL):
+         * Mantemos abaixo os dados funcionais do veículo com fallback para a API /api/veiculos,
+         * garantindo que a tela carregue perfeitamente com valores coerentes.
+         * ========================================================================== */
+        const VEICULO_MOCK = {
+            id: 1,
+            usuario_id: 1,
+            marca: "BYD",
+            modelo: "Dolphin",
+            versao: "GS",
+            capacidade_bateria_kwh: 60.0,
+            tipo_conector: "TYPE2",
+            soc_atual: 45, // Nível atual da bateria em porcentagem (%)
+            label_exibicao: "BYD Dolphin • GW22K"
+        };
+
+        let veiculoAtual = { ...VEICULO_MOCK };
+
+        // Tenta obter os veículos cadastrados no backend caso o banco possua registros
+        try {
+            const respVeiculos = await fetch('/api/veiculos');
+            if (respVeiculos.ok) {
+                const veiculosLista = await respVeiculos.json();
+                if (Array.isArray(veiculosLista) && veiculosLista.length > 0) {
+                    const vPrincipal = veiculosLista.find(v => v.principal) || veiculosLista[0];
+                    veiculoAtual.id = vPrincipal.id;
+                    veiculoAtual.usuario_id = vPrincipal.usuario_id || 1;
+                    veiculoAtual.marca = vPrincipal.marca || "BYD";
+                    veiculoAtual.modelo = vPrincipal.modelo || "Dolphin";
+                    veiculoAtual.versao = vPrincipal.versao || "GS";
+                    veiculoAtual.capacidade_bateria_kwh = parseFloat(vPrincipal.capacidade_bateria_kwh) || 60.0;
+                    veiculoAtual.label_exibicao = `${veiculoAtual.marca} ${veiculoAtual.modelo} • GW22K`;
+                }
+            }
+        } catch (e) {
+            console.warn("Utilizando veículo mockado (aguardando integração de login/veículo):", e);
+        }
+
+        // Atualiza na interface as informações do veículo e estado da bateria
+        const elVehicleModel = document.getElementById("vehicle-model");
+        const elBatteryFill = document.getElementById("battery-bar-fill");
+        const elBatteryPercentage = document.getElementById("battery-percentage");
+
+        if (elVehicleModel) elVehicleModel.textContent = veiculoAtual.label_exibicao;
+        if (elBatteryFill) elBatteryFill.style.width = `${veiculoAtual.soc_atual}%`;
+        if (elBatteryPercentage) elBatteryPercentage.textContent = `${veiculoAtual.soc_atual}%`;
+
+        /* ==========================================================================
+         * 2. PARÂMETROS DA ROTA & DADOS DA ESTAÇÃO
+         * --------------------------------------------------------------------------
+         * Lê 'estacao_id' e 'conector_id' da URL (ou default para estação 1 e conector 1).
+         * Busca dados de preços da estação selecionada em /api/estacoes/{id}.
+         * ========================================================================== */
+        const urlParams = new URLSearchParams(window.location.search);
+        const estacaoId = parseInt(urlParams.get("estacao_id") || "1", 10);
+        const conectorId = parseInt(urlParams.get("conector_id") || "1", 10);
+
+        // Objeto padrão para dados da estação (fallback)
+        let estacaoData = {
+            id: estacaoId,
+            nome: "Estação GoodWe",
+            preco_base_kwh: 1.90,
+            preco_rapido_kwh: 2.15,
+            preco_economico_kwh: 1.69,
+            preco_inteligente_kwh: 1.89,
+            taxa_servico: 2.50,
+            potencia_kw: 22.0,
+            horario_economico_inicio: "22:00:00"
+        };
+
+        try {
+            const respEstacao = await fetch(`/api/estacoes/${estacaoId}`);
+            if (respEstacao.ok) {
+                const dadosApi = await respEstacao.json();
+                estacaoData.nome = dadosApi.nome || estacaoData.nome;
+                if (dadosApi.preco_base_kwh != null) estacaoData.preco_base_kwh = parseFloat(dadosApi.preco_base_kwh);
+                if (dadosApi.preco_rapido_kwh != null) estacaoData.preco_rapido_kwh = parseFloat(dadosApi.preco_rapido_kwh);
+                if (dadosApi.preco_economico_kwh != null) estacaoData.preco_economico_kwh = parseFloat(dadosApi.preco_economico_kwh);
+                if (dadosApi.preco_inteligente_kwh != null) estacaoData.preco_inteligente_kwh = parseFloat(dadosApi.preco_inteligente_kwh);
+                if (dadosApi.horario_economico_inicio) estacaoData.horario_economico_inicio = dadosApi.horario_economico_inicio;
+
+                if (Array.isArray(dadosApi.conectores)) {
+                    const conectorSelecionado = dadosApi.conectores.find(c => c.id === conectorId) || dadosApi.conectores[0];
+                    if (conectorSelecionado && conectorSelecionado.potencia_kw) {
+                        estacaoData.potencia_kw = parseFloat(conectorSelecionado.potencia_kw);
+                    }
+                }
+            }
+        } catch (err) {
+            console.warn("Não foi possível carregar dados da estação, usando valores padrão:", err);
+        }
+
+        // Atualiza a exibição dos preços de cada modo com base na estação
+        const elPriceFast = document.getElementById("price-fast");
+        const elPriceEco = document.getElementById("price-eco");
+        const elPriceSmart = document.getElementById("price-smart");
+
+        if (elPriceFast) elPriceFast.textContent = `R$ ${estacaoData.preco_rapido_kwh.toFixed(2).replace('.', ',')}/kWh`;
+        if (elPriceEco) elPriceEco.textContent = `R$ ${estacaoData.preco_economico_kwh.toFixed(2).replace('.', ',')}/kWh`;
+        if (elPriceSmart) elPriceSmart.textContent = `R$ ${estacaoData.preco_inteligente_kwh.toFixed(2).replace('.', ',')}/kWh`;
+
+        /* ==========================================================================
+         * 3. INTEGRAÇÃO: INTELIGÊNCIA ARTIFICIAL (IA) (DEPENDÊNCIA DE TERCEIROS)
+         * --------------------------------------------------------------------------
+         * ATENÇÃO: A integração avançada de otimização em tempo real baseada em IA
+         * (GoodWe AI Optimizer) está sendo construída por outra pessoa.
+         * 
+         * No futuro, haverá chamada dedicada:
+         * // const aiSuggestion = await fetch('/api/ia/otimizar-recarga', { ... });
+         * 
+         * CÓDIGO CHUMBADO (MOCK FUNCIONAL):
+         * O Modo Inteligente calcula a recarga balanceando o custo do kWh
+         * (preco_inteligente_kwh) com uma taxa controlada de potência para preservar
+         * a saúde da bateria e reduzir o custo final.
+         * ========================================================================== */
+
+        /* ==========================================================================
+         * 4. ESTADO DA DEFINIÇÃO DA RECARGA E INTERATIVIDADE
+         * --------------------------------------------------------------------------
+         * Permite selecionar o modo de definição:
+         * - 'kwh': quantidade direta em kWh
+         * - 'percent': percentual desejado de bateria (%)
+         * - 'time': tempo disponível em minutos
+         * - 'departure': horário previsto de saída
+         * ========================================================================== */
+        let modoDefinicao = "kwh"; // kwh | percent | time | departure
+        let valorKwh = 35.0;
+        let percentualDesejado = 80;
+        let tempoDisponivelMin = 45;
+        let horarioSaida = "18:30";
+
+        const cardsDefinicao = {
+            kwh: document.getElementById("card-kwh"),
+            percent: document.getElementById("card-percent"),
+            time: document.getElementById("card-time"),
+            departure: document.getElementById("card-departure")
+        };
+
+        const valoresElementos = {
+            kwh: { val: document.getElementById("val-kwh"), ph: document.getElementById("ph-kwh") },
+            percent: { val: document.getElementById("val-percent"), ph: document.getElementById("ph-percent") },
+            time: { val: document.getElementById("val-time"), ph: document.getElementById("ph-time") },
+            departure: { val: document.getElementById("val-departure"), ph: document.getElementById("ph-departure") }
+        };
+
+        // Função para calcular kWh a partir de outras definições
+        function recalcularKwhCorrespondente() {
+            if (modoDefinicao === "kwh") {
+                return valorKwh;
+            } else if (modoDefinicao === "percent") {
+                const deltaPerc = Math.max(0, percentualDesejado - veiculoAtual.soc_atual);
+                return Number(((deltaPerc / 100) * veiculoAtual.capacidade_bateria_kwh).toFixed(2));
+            } else if (modoDefinicao === "time") {
+                const pot = estacaoData.potencia_kw > 0 ? estacaoData.potencia_kw : 22.0;
+                return Number(((pot * (tempoDisponivelMin / 60))).toFixed(2));
+            } else if (modoDefinicao === "departure") {
+                // Calcula minutos até o horário de saída
+                const agora = new Date();
+                const [hStr, mStr] = horarioSaida.split(":");
+                const horaSaida = parseInt(hStr || "18", 10);
+                const minSaida = parseInt(mStr || "30", 10);
+                
+                const saidaDate = new Date();
+                saidaDate.setHours(horaSaida, minSaida, 0, 0);
+                if (saidaDate <= agora) {
+                    saidaDate.setDate(saidaDate.getDate() + 1);
+                }
+                const diffMinutos = Math.max(15, Math.round((saidaDate - agora) / 60000));
+                const pot = estacaoData.potencia_kw > 0 ? estacaoData.potencia_kw : 22.0;
+                return Number(((pot * (diffMinutos / 60))).toFixed(2));
+            }
+            return 35.0;
+        }
+
+        // Função para obter o modo de carregamento selecionado (RAPIDO, ECONOMICO, INTELIGENTE)
+        function getModoCarregamentoSelecionado() {
+            const radio = document.querySelector('input[name="charge-mode"]:checked');
+            return radio ? radio.value.toUpperCase() : "INTELIGENTE";
+        }
+
+        // Atualiza a visualização dos cards
+        function renderizarCardsDefinicao() {
+            Object.keys(cardsDefinicao).forEach(tipo => {
+                const card = cardsDefinicao[tipo];
+                const hint = card ? card.querySelector('.edit-hint') : null;
+                const { val, ph } = valoresElementos[tipo];
+
+                if (tipo === modoDefinicao) {
+                    card.classList.add("active");
+                    if (hint) hint.style.display = "block";
+                    if (val) val.style.display = "block";
+                    if (ph) ph.style.display = "none";
+                } else {
+                    card.classList.remove("active");
+                    if (hint) hint.style.display = "none";
+                }
+            });
+
+            // Atualiza textos dos valores
+            if (valoresElementos.kwh.val) valoresElementos.kwh.val.textContent = `${valorKwh} kWh`;
+            if (valoresElementos.percent.val) valoresElementos.percent.val.textContent = `${percentualDesejado}%`;
+            if (valoresElementos.time.val) valoresElementos.time.val.textContent = `${tempoDisponivelMin} min`;
+            if (valoresElementos.departure.val) valoresElementos.departure.val.textContent = `${horarioSaida}`;
+        }
+
+        // Atualiza o Resumo da Estimativa chamando a API do backend
+        async function atualizarEstimativa() {
+            const kwhCalculado = recalcularKwhCorrespondente();
+            const modo = getModoCarregamentoSelecionado();
+
+            // Preço por kWh com base no modo
+            let precoKwh = estacaoData.preco_inteligente_kwh;
+            if (modo === "RAPIDO") precoKwh = estacaoData.preco_rapido_kwh;
+            if (modo === "ECONOMICO") precoKwh = estacaoData.preco_economico_kwh;
+
+            const taxaServico = 2.50;
+            let totalEstimado = (kwhCalculado * precoKwh) + taxaServico;
+            let tempoEstimadoMin = Math.round((kwhCalculado / estacaoData.potencia_kw) * 60);
+            tempoEstimadoMin = Math.max(10, tempoEstimadoMin);
+
+            // Atualização imediata na UI
+            const elLabelKwh = document.getElementById("estimation-label-kwh");
+            const elEnergyValue = document.getElementById("estimation-energy-value");
+            const elFeeValue = document.getElementById("estimation-fee-value");
+            const elTotalValue = document.getElementById("estimation-total-value");
+
+            if (elLabelKwh) elLabelKwh.textContent = `Estimativa de Recarga (${kwhCalculado.toFixed(1).replace('.', ',')} kWh)`;
+            if (elEnergyValue) elEnergyValue.textContent = `R$ ${(kwhCalculado * precoKwh).toFixed(2).replace('.', ',')}`;
+            if (elFeeValue) elFeeValue.textContent = `R$ ${taxaServico.toFixed(2).replace('.', ',')}`;
+            if (elTotalValue) elTotalValue.textContent = `R$ ${totalEstimado.toFixed(2).replace('.', ',')}`;
+
+            // Atualiza subtítulo do modo rápido e econômico
+            const subFast = document.getElementById("sub-fast");
+            const subEco = document.getElementById("sub-eco");
+            if (subFast) {
+                const tempoFast = Math.max(15, Math.round(tempoEstimadoMin * 0.6));
+                subFast.textContent = `Estimado: ${tempoFast} min • Potência máxima`;
+            }
+            if (subEco) {
+                const horaEco = estacaoData.horario_economico_inicio.slice(0, 5);
+                subEco.textContent = `Estimado: ${tempoEstimadoMin} min • Inicia às ${horaEco} no off-peak`;
+            }
+
+            // Sincroniza com a API /api/recargas/estimativa do backend
+            try {
+                const resp = await fetch('/api/recargas/estimativa', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        estacao_id: estacaoId,
+                        conector_id: conectorId,
+                        veiculo_id: veiculoAtual.id,
+                        modo: modo,
+                        quantidade_kwh: kwhCalculado,
+                        percentual_desejado: percentualDesejado,
+                        soc_inicial: veiculoAtual.soc_atual
+                    })
+                });
+                if (resp.ok) {
+                    const estApi = await resp.json();
+                    if (elTotalValue && estApi.valor_estimado) {
+                        elTotalValue.textContent = `R$ ${Number(estApi.valor_estimado).toFixed(2).replace('.', ',')}`;
+                    }
+                    if (elEnergyValue && estApi.preco_kwh) {
+                        const valorEnergia = (Number(estApi.quantidade_kwh) * Number(estApi.preco_kwh));
+                        elEnergyValue.textContent = `R$ ${valorEnergia.toFixed(2).replace('.', ',')}`;
+                    }
+                }
+            } catch (errApi) {
+                console.warn("Utilizando estimativa local calculada:", errApi);
+            }
+        }
+
+        /* ==========================================================================
+         * 5. MODAL DE AJUSTE DOS VALORES DA DEFINIÇÃO
+         * ========================================================================== */
+        const modal = document.getElementById("definition-modal");
+        const modalTitle = document.getElementById("modal-title");
+        const modalInput = document.getElementById("modal-input");
+        const modalQuickOptions = document.getElementById("modal-quick-options");
+        const btnModalCancel = document.getElementById("modal-btn-cancel");
+        const btnModalSave = document.getElementById("modal-btn-save");
+
+        function abrirModal(tipo) {
+            modoDefinicao = tipo;
+            modalQuickOptions.innerHTML = "";
+            modal.classList.add("active");
+
+            if (tipo === "kwh") {
+                modalTitle.textContent = "Definir Quantidade (kWh)";
+                modalInput.type = "number";
+                modalInput.value = valorKwh;
+                modalInput.min = "5";
+                modalInput.max = "150";
+                modalInput.placeholder = "Ex: 35";
+                
+                [15, 25, 35, 50].forEach(v => {
+                    const chip = document.createElement("button");
+                    chip.type = "button";
+                    chip.className = "quick-chip";
+                    chip.textContent = `${v} kWh`;
+                    chip.onclick = () => { modalInput.value = v; };
+                    modalQuickOptions.appendChild(chip);
+                });
+            } else if (tipo === "percent") {
+                modalTitle.textContent = "Percentual Desejado (%)";
+                modalInput.type = "number";
+                modalInput.value = percentualDesejado;
+                modalInput.min = "50";
+                modalInput.max = "100";
+                modalInput.placeholder = "Ex: 80";
+
+                [60, 80, 90, 100].forEach(v => {
+                    const chip = document.createElement("button");
+                    chip.type = "button";
+                    chip.className = "quick-chip";
+                    chip.textContent = `${v}%`;
+                    chip.onclick = () => { modalInput.value = v; };
+                    modalQuickOptions.appendChild(chip);
+                });
+            } else if (tipo === "time") {
+                modalTitle.textContent = "Tempo Disponível (minutos)";
+                modalInput.type = "number";
+                modalInput.value = tempoDisponivelMin;
+                modalInput.min = "10";
+                modalInput.max = "360";
+                modalInput.placeholder = "Ex: 45";
+
+                [20, 30, 45, 60].forEach(v => {
+                    const chip = document.createElement("button");
+                    chip.type = "button";
+                    chip.className = "quick-chip";
+                    chip.textContent = `${v} min`;
+                    chip.onclick = () => { modalInput.value = v; };
+                    modalQuickOptions.appendChild(chip);
+                });
+            } else if (tipo === "departure") {
+                modalTitle.textContent = "Horário de Saída";
+                modalInput.type = "time";
+                modalInput.value = horarioSaida;
+                
+                ["18:00", "18:30", "19:00", "22:00"].forEach(v => {
+                    const chip = document.createElement("button");
+                    chip.type = "button";
+                    chip.className = "quick-chip";
+                    chip.textContent = v;
+                    chip.onclick = () => { modalInput.value = v; };
+                    modalQuickOptions.appendChild(chip);
+                });
+            }
+            modalInput.focus();
+        }
+
+        function fecharModal() {
+            modal.classList.remove("active");
+        }
+
+        btnModalCancel.addEventListener("click", fecharModal);
+
+        btnModalSave.addEventListener("click", () => {
+            const val = modalInput.value;
+            if (modoDefinicao === "kwh" && val) {
+                valorKwh = parseFloat(val) || 35.0;
+            } else if (modoDefinicao === "percent" && val) {
+                percentualDesejado = parseInt(val, 10) || 80;
+            } else if (modoDefinicao === "time" && val) {
+                tempoDisponivelMin = parseInt(val, 10) || 45;
+            } else if (modoDefinicao === "departure" && val) {
+                horarioSaida = val;
+            }
+            fecharModal();
+            renderizarCardsDefinicao();
+            atualizarEstimativa();
+        });
+
+        // Configuração de cliques nos cards de definição
+        Object.keys(cardsDefinicao).forEach(tipo => {
+            const card = cardsDefinicao[tipo];
+            if (!card) return;
+            card.addEventListener("click", () => {
+                if (modoDefinicao === tipo) {
+                    abrirModal(tipo);
+                } else {
+                    modoDefinicao = tipo;
+                    renderizarCardsDefinicao();
+                    atualizarEstimativa();
+                }
+            });
+        });
+
+        // Ouvinte de mudança dos modos de carregamento (Rápido, Econômico, Inteligente)
+        document.querySelectorAll('input[name="charge-mode"]').forEach(radio => {
+            radio.addEventListener("change", () => {
+                atualizarEstimativa();
+            });
+        });
+
+        // Botão de voltar (header)
+        const btnBack = document.getElementById("btn-back");
+        if (btnBack) {
+            btnBack.addEventListener("click", () => {
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else {
+                    window.location.href = `/posto?estacao_id=${estacaoId}`;
+                }
+            });
+        }
+
+        /* ==========================================================================
+         * 6. CONFIRMAÇÃO DA RECARGA & CONEXÃO OCPP (DEPENDÊNCIA DE TERCEIROS)
+         * --------------------------------------------------------------------------
+         * ATENÇÃO: A comunicação direta com a estação de recarga via protocolo OCPP
+         * (mensagens WebSocket RemoteStartTransaction, MeterValues, StatusNotification)
+         * está sendo integrada pela equipe responsável pelo hardware/OCPP.
+         * 
+         * No backend, o endpoint POST /api/recargas/{id}/iniciar dispara o
+         * RemoteStartTransaction OCPP para a tomada física.
+         * 
+         * CÓDIGO CHUMBADO (MOCK FUNCIONAL):
+         * 1. Criamos a recarga com sucesso no banco de dados via POST /api/recargas.
+         * 2. Tentamos acionar a rota de início OCPP.
+         * 3. Caso o carregador físico não esteja conectado (status 409) ou o WebSocket
+         *    ainda não esteja pareado pelo colega de equipe, capturamos a exceção
+         *    suavemente e avançamos o fluxo do aplicativo normalmente.
+         * ========================================================================== */
+        const btnConfirm = document.getElementById("btn-confirm");
+        if (btnConfirm) {
+            btnConfirm.addEventListener("click", async () => {
+                btnConfirm.disabled = true;
+                const textoOriginal = btnConfirm.textContent;
+                btnConfirm.textContent = "Processando Recarga...";
+
+                const kwhFinal = recalcularKwhCorrespondente();
+                const modoFinal = getModoCarregamentoSelecionado();
+
+                // Montagem do payload da recarga
+                const payloadRecarga = {
+                    usuario_id: veiculoAtual.usuario_id || 1, // Chumbado até a rota de login ser integrada
+                    veiculo_id: veiculoAtual.id,             // Chumbado/Mock até a rota de login ser integrada
+                    estacao_id: estacaoId,
+                    conector_id: conectorId,
+                    modo: modoFinal,
+                    quantidade_kwh: kwhFinal,
+                    percentual_desejado: modoDefinicao === "percent" ? percentualDesejado : null,
+                    tempo_disponivel_minutos: modoDefinicao === "time" ? tempoDisponivelMin : null,
+                    soc_inicial: veiculoAtual.soc_atual
+                };
+
+                try {
+                    // 1. Cria a recarga na API do backend
+                    const respCriacao = await fetch('/api/recargas', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payloadRecarga)
+                    });
+
+                    if (!respCriacao.ok) {
+                        const erro = await respCriacao.json().catch(() => ({}));
+                        throw new Error(erro.detail || "Erro ao registrar recarga no sistema.");
+                    }
+
+                    const recargaCriada = await respCriacao.json();
+
+                    // Salva dados na sessão para uso nas telas de pagamento e carregando
+                    sessionStorage.setItem("recarga_ativa_id", recargaCriada.id);
+                    sessionStorage.setItem("recarga_dados", JSON.stringify(recargaCriada));
+
+                    /* ==========================================================
+                     * TENTATIVA DE INICIALIZAÇÃO OCPP (DEPENDÊNCIA DE TERCEIROS)
+                     * ========================================================== */
+                    try {
+                        // Tenta acionar o início remoto OCPP no conector
+                        const respOcpp = await fetch(`/api/recargas/${recargaCriada.id}/iniciar`, {
+                            method: 'POST'
+                        });
+                        if (respOcpp.ok) {
+                            console.log("Comando OCPP RemoteStartTransaction enviado com sucesso!");
+                        } else {
+                            // 409 = Carregador físico não pareado no momento (esperado em ambiente de teste/sem hardware)
+                            console.info("Aviso OCPP: Carregador físico aguardando pareamento da equipe de hardware.");
+                        }
+                    } catch (errOcpp) {
+                        // Captura silenciosa para não travar a experiência do usuário enquanto a integração de terceiros não finaliza
+                        console.warn("Integração OCPP em desenvolvimento pela equipe de hardware:", errOcpp);
+                    }
+
+                    // Redireciona para a tela de pagamento (ou carregando)
+                    window.location.href = `/pagamento?recarga_id=${recargaCriada.id}&estacao_id=${estacaoId}&conector_id=${conectorId}`;
+
+                } catch (erroGeral) {
+                    console.error("Falha ao configurar recarga:", erroGeral);
+                    alert("Não foi possível confirmar a recarga: " + erroGeral.message);
+                    btnConfirm.disabled = false;
+                    btnConfirm.textContent = textoOriginal;
+                }
+            });
+        }
+
+        // Inicializa renderização e cálculo da tela
+        renderizarCardsDefinicao();
+        await atualizarEstimativa();
+        if (window.lucide) {
+            lucide.createIcons();
+        }
     });
 </script>
 {% endblock %}

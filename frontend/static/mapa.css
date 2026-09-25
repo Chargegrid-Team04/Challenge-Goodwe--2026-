@@ -451,3 +451,59 @@ main {
   color: #0284c7;
   letter-spacing: 0.3px;
 }
+
+/* ==========================================================================
+   5. BOTÃO FLUTUANTE PARA VOLTAR AO FOCO DO USUÁRIO (FAB)
+   ========================================================================== */
+
+.fab-location {
+  position: absolute;
+  right: 16px;
+  bottom: calc(52% + 14px);
+  z-index: 25;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1e293b;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: bottom 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              transform var(--transition-bounce, 300ms),
+              box-shadow var(--transition-fast, 150ms),
+              background-color var(--transition-fast, 150ms),
+              color var(--transition-fast, 150ms);
+}
+
+.fab-location:hover {
+  background: #f8fafc;
+  color: #0b63f6;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
+  transform: translateY(-2px);
+}
+
+.fab-location:active {
+  transform: scale(0.92);
+}
+
+.fab-location.sheet-closed {
+  bottom: 86px;
+}
+
+.fab-location i,
+.fab-location svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2.2;
+  transition: transform var(--transition-bounce, 300ms);
+}
+
+.fab-location:hover i,
+.fab-location:hover svg {
+  transform: scale(1.08);
+}
