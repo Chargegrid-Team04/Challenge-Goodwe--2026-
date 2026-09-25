@@ -152,6 +152,13 @@ Conteudo %}
 
     const stationsMap = new Map();
 
+    const usuarioId = localStorage.getItem("usuario_id");
+
+    if (!usuarioId) {
+      window.location.href = "/login";
+      return;
+    }
+
     async function carregarEstacoes() {
       try {
         const response = await fetch("/api/estacoes");
@@ -347,12 +354,14 @@ Conteudo %}
      */
 
     async function carregarResumo() {
-      const response = await fetch("/api/recargas/resumo", {
+      const response = await fetch(
+        `/api/recargas/resumo?usuario_id=${encodeURIComponent(usuarioId)}`,
+        {
         method: "GET",
         headers: {
           Accept: "application/json",
         },
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`Erro ao carregar resumo: ${response.status}`);
@@ -602,12 +611,14 @@ Conteudo %}
             </div>
         `;
 
-      const response = await fetch("/api/recargas", {
+      const response = await fetch(
+        `/api/recargas?usuario_id=${encodeURIComponent(usuarioId)}`,
+        {
         method: "GET",
         headers: {
           Accept: "application/json",
         },
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`Erro ao carregar recargas: ${response.status}`);
@@ -661,57 +672,7 @@ Conteudo %}
       });
 
       if (historico.length === 0) {
-        const demoHistorico = [
-          {
-            estacao_nome: "E-Volt Pinheiros",
-            status: "CONCLUIDA",
-            finalizada_em: new Date(Date.now() - 3600000 * 22).toISOString(),
-            iniciada_em: new Date(
-              Date.now() - 3600000 * 22 - 60000 * 35,
-            ).toISOString(),
-            energia_entregue_kwh: 42,
-            valor_final: 88.2,
-          },
-          {
-            estacao_nome: "E-Volt Jardins",
-            status: "CONCLUIDA",
-            finalizada_em: new Date(Date.now() - 3600000 * 75).toISOString(),
-            iniciada_em: new Date(
-              Date.now() - 3600000 * 75 - 60000 * 28,
-            ).toISOString(),
-            energia_entregue_kwh: 38,
-            valor_final: 79.8,
-          },
-          {
-            estacao_nome: "Posto GoodWe Central",
-            status: "CONCLUIDA",
-            finalizada_em: new Date(Date.now() - 3600000 * 160).toISOString(),
-            iniciada_em: new Date(
-              Date.now() - 3600000 * 160 - 60000 * 45,
-            ).toISOString(),
-            energia_entregue_kwh: 55,
-            valor_final: 115.5,
-          },
-          {
-            estacao_nome: "E-Volt Berrini",
-            status: "CONCLUIDA",
-            finalizada_em: new Date(Date.now() - 3600000 * 280).toISOString(),
-            iniciada_em: new Date(
-              Date.now() - 3600000 * 280 - 60000 * 40,
-            ).toISOString(),
-            energia_entregue_kwh: 49,
-            valor_final: 68.9,
-          },
-        ];
-
-        historyList.innerHTML = demoHistorico
-          .map((recarga) => createChargeCard(recarga))
-          .join("");
-
-        if (window.lucide) {
-          lucide.createIcons();
-        }
-
+        renderEmptyHistory();
         return;
       }
 

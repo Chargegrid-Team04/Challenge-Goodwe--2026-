@@ -441,18 +441,15 @@ def estimar_recarga(
     response_model=ResumoRecargasResponse,
 )
 def obter_resumo_recargas(
-    usuario_id: int | None = Query(
-        None,
-        description="Filtrar por ID do usuário",
+    usuario_id: int = Query(
+        ...,
+        description="ID do usuário logado",
     ),
     db: Session = Depends(get_db),
 ):
-    stmt = select(Recarga)
-
-    if usuario_id is not None:
-        stmt = stmt.where(
-            Recarga.usuario_id == usuario_id
-        )
+    stmt = select(Recarga).where(
+        Recarga.usuario_id == usuario_id
+    )
 
     recargas = db.scalars(
         stmt
@@ -486,21 +483,15 @@ def obter_resumo_recargas(
         Recarga.status == "CARREGANDO"
     )
 
-    if usuario_id is not None:
-        stmt_ativa = stmt_ativa.where(
-            Recarga.usuario_id == usuario_id
-        )
+    stmt_ativa = stmt_ativa.where(
+        Recarga.usuario_id == usuario_id
+    )
 
     recarga_ativa = db.scalar(
         stmt_ativa.order_by(
             Recarga.id.desc()
         )
     )
-
-    if total_recargas == 0 or (total_kwh == 0 and total_gasto == 0):
-        total_recargas = max(total_recargas, 12)
-        total_kwh = Decimal("184.00")
-        total_gasto = Decimal("352.40")
 
     return ResumoRecargasResponse(
         total_recargas=total_recargas,
@@ -521,23 +512,20 @@ def obter_resumo_recargas(
     response_model=list[RecargaResponse],
 )
 def listar_recargas(
-    usuario_id: int | None = Query(
-        None,
-        description="Filtrar por ID do usuário",
+    usuario_id: int = Query(
+        ...,
+        description="ID do usuário logado",
     ),
     db: Session = Depends(get_db),
 ):
-    stmt = select(
-        Recarga
-    )
-
-    if usuario_id is not None:
-        stmt = stmt.where(
+    stmt = (
+        select(Recarga)
+        .where(
             Recarga.usuario_id == usuario_id
         )
-
-    stmt = stmt.order_by(
-        Recarga.data_criacao.desc()
+        .order_by(
+            Recarga.data_criacao.desc()
+        )
     )
 
     return db.scalars(
