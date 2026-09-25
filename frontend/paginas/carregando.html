@@ -121,9 +121,7 @@
   </div>
 </div>
 
-{% endblock %}
-
-{% block Scripts %}
+{% endblock %} {% block Scripts %}
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const recarga = {{ recarga | tojson }};
@@ -354,7 +352,7 @@
 
     if (btnFinish) {
       btnFinish.addEventListener("click", function () {
-        window.location.href = "/historicos";
+        window.location.href = "/historico";
       });
     }
 
