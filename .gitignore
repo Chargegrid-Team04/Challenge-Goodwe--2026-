@@ -20,7 +20,5 @@ alembic/versions/__pycache__/
 # VS Code
 .vscode/
 
-backend/data/documents/
-
 # Misc
 *.sql
