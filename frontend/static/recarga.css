@@ -12,6 +12,41 @@
   font-size: var(--text-lg);
 }
 
+.config-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.config-inline-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+
+  color: var(--primary);
+  font-size: var(--text-lg);
+  font-weight: 700;
+
+  padding: 0;
+}
+
+.config-inline-input:focus {
+  color: var(--secondary);
+}
+
+.config-input-unit {
+  font-size: var(--text-sm);
+  color: var(--l-text-2);
+  font-weight: 600;
+}
+
+.config-card.active {
+  border-color: var(--secondary) !important;
+  box-shadow: 0 4px 12px rgba(0, 180, 216, 0.18) !important;
+}
+
 /* ==========================================================================
    1. ANIMAÇÕES DE ENTRADA (Page Entrance Fade & Slide)
    ========================================================================== */
@@ -150,9 +185,10 @@
   height: 64px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: transform var(--transition-bounce), 
-              border-color var(--transition-fast), 
-              box-shadow var(--transition-fast);
+  transition:
+    transform var(--transition-bounce),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .config-card:hover {
@@ -271,9 +307,10 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  transition: transform var(--transition-bounce), 
-              border-color var(--transition-fast), 
-              box-shadow var(--transition-fast);
+  transition:
+    transform var(--transition-bounce),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .mode-card:hover .mode-content {
@@ -374,9 +411,10 @@
   font-weight: var(--font-weight-bold);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: transform var(--transition-bounce), 
-              background-color var(--transition-fast), 
-              box-shadow var(--transition-fast);
+  transition:
+    transform var(--transition-bounce),
+    background-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .btn-confirm:hover {
